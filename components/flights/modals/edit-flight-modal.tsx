@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 
-import { Loader2, Pencil, X } from "lucide-react";
+import {
+  Loader2,
+  Pencil,
+  X,
+} from "lucide-react";
 
 import useFlightForm from "@/hooks/useFlightForm";
 
@@ -26,17 +30,37 @@ export default function EditFlightModal({
   onClose,
   onSuccess,
 }: Props) {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
 
-  const { form, setForm, errors, validate, isValid } = useFlightForm();
+  const {
+    form,
+    setForm,
+    errors,
+    validate,
+    isValid,
+  } = useFlightForm();
 
-  const { handleUpdate } = useEditFlight();
+  const { handleUpdate } =
+    useEditFlight();
+
+  // =====================================================
+  // SET FORM FROM DATABASE
+  // =====================================================
 
   useEffect(() => {
     if (!data) return;
 
     setForm({
-      flight_date: data.flight_date?.split("T")[0] || "",
+      // =================================================
+      // IMPORTANT
+      // =================================================
+
+      ama_id: data.ama_id || "",
+
+      flight_date:
+        data.flight_date?.split("T")[0] ||
+        "",
 
       ama: data.ama || "",
 
@@ -46,27 +70,48 @@ export default function EditFlightModal({
 
       flight_id: data.flight_id || "",
 
-      mission_name: data.mission_name || "",
+      mission_name:
+        data.mission_name || "",
 
-      battery_id: data.battery_id || "",
+      battery_id:
+        data.battery_id || "",
 
-      battery_id_2: data.battery_id_2 || "",
+      battery_id_2:
+        data.battery_id_2 || "",
 
-      battery_color: data.battery_color || "",
+      battery_color:
+        data.battery_color || "",
 
-      start_percent: data.start_percent || "",
+      start_percent:
+        data.start_percent || "",
 
-      end_percent: data.end_percent || "",
+      end_percent:
+        data.end_percent || "",
 
-      start_volt: data.start_volt || "",
+      start_volt:
+        data.start_volt || "",
 
-      end_volt: data.end_volt || "",
+      end_volt:
+        data.end_volt || "",
 
-      start_time: data.start_time || "",
+      // =================================================
+      // FORMAT DATETIME
+      // =================================================
 
-      end_time: data.end_time || "",
+      start_time: data.start_time
+        ? new Date(data.start_time)
+            .toISOString()
+            .slice(0, 16)
+        : "",
 
-      duration_min: data.duration_min || "",
+      end_time: data.end_time
+        ? new Date(data.end_time)
+            .toISOString()
+            .slice(0, 16)
+        : "",
+
+      duration_min:
+        data.duration_min || "",
 
       notes: data.notes || "",
     });
@@ -76,6 +121,7 @@ export default function EditFlightModal({
 
   return (
     <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+      {/* MODAL */}
       <div className="flex h-[90vh] w-full max-w-[1100px] flex-col overflow-hidden rounded-[32px] bg-white shadow-2xl">
         {/* HEADER */}
         <div className="flex items-start justify-between border-b px-10 py-8">
@@ -84,9 +130,13 @@ export default function EditFlightModal({
               <Pencil className="h-8 w-8 text-blue-600" />
             </div>
 
-            <h1 className="mt-5 text-5xl font-bold">Edit Flight</h1>
+            <h1 className="mt-5 text-5xl font-bold">
+              Edit Flight
+            </h1>
 
-            <p className="mt-3 text-gray-500">Update flight information</p>
+            <p className="mt-3 text-gray-500">
+              Update flight information
+            </p>
           </div>
 
           <button
@@ -109,10 +159,15 @@ export default function EditFlightModal({
 
         {/* FOOTER */}
         <div className="flex justify-end gap-4 border-t px-10 py-6">
-          <button onClick={onClose} className="rounded-2xl border px-6 py-3">
+          {/* CANCEL */}
+          <button
+            onClick={onClose}
+            className="rounded-2xl border px-6 py-3"
+          >
             Cancel
           </button>
 
+          {/* SAVE */}
           <button
             disabled={!isValid || loading}
             onClick={() =>
@@ -127,7 +182,9 @@ export default function EditFlightModal({
 
                 setLoading,
 
-                onSuccess: (updated: any) =>
+                onSuccess: (
+                  updated: any
+                ) =>
                   onSuccess({
                     ...data,
                     ...updated,

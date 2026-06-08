@@ -47,6 +47,8 @@ const initialForm: FlightForm = {
   duration_min: "",
 
   notes: "",
+
+  ama_id: "",
 };
 
 export default function useAddFlightForm(

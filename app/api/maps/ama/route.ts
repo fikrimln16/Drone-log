@@ -3,165 +3,92 @@ import { NextResponse } from "next/server";
 import pool from "@/lib/db";
 
 // =====================================================
-// STATIC AMA COORDINATE
-// =====================================================
-
-const amaCoordinates = [
-  {
-    id: 1,
-    ama: "AMA Bingin Teluk",
-    lat: -2.569967,
-    lng: 103.168351,
-  },
-
-  {
-    id: 2,
-    ama: "AMA Cengal",
-    lat: -3.553549,
-    lng: 105.470785,
-  },
-
-  {
-    id: 3,
-    ama: "AMA Jade",
-    lat: -2.850807,
-    lng: 103.52976,
-  },
-
-  {
-    id: 4,
-    ama: "AMA Kalimantan",
-    lat: -0.543643,
-    lng: 116.069133,
-  },
-
-  {
-    id: 5,
-    ama: "AMA Lahat",
-    lat: -3.595873,
-    lng: 103.420648,
-  },
-
-  {
-    id: 6,
-    ama: "AMA Lima Puluh",
-    lat: 2.706834,
-    lng: 99.577975,
-  },
-
-  {
-    id: 7,
-    ama: "AMA Muara Rupit",
-    lat: -2.851498,
-    lng: 103.147847,
-  },
-
-  {
-    id: 8,
-    ama: "AMA Muba",
-    lat: -2.168799,
-    lng: 103.999873,
-  },
-
-  {
-    id: 9,
-    ama: "AMA Serdang",
-    lat: 3.49346,
-    lng: 98.259986,
-  },
-
-  // =====================================================
-  // AMA JAWA SULAWESI
-  // =====================================================
-
-  {
-    id: 10,
-    ama: "AMA Jawa Sulawesi",
-    lat: -5.378066,
-    lng: 120.264838,
-  },
-
-  {
-    id: 11,
-    ama: "AMA Jawa Sulawesi",
-    lat: 1.314755,
-    lng: 124.518329,
-  },
-
-  {
-    id: 12,
-    ama: "AMA Jawa Sulawesi",
-    lat: -8.384731,
-    lng: 113.977272,
-  },
-
-  {
-    id: 13,
-    ama: "AMA Jawa Sulawesi",
-    lat: -7.213137,
-    lng: 107.651061,
-  },
-];
-
-// =====================================================
-// GET
+// GET AMA MAP DATA
 // =====================================================
 
 export async function GET() {
   try {
-    // DATABASE STATS
+    // =====================================================
+    // QUERY
+    // =====================================================
+
     const [rows]: any = await pool.query(`
       SELECT
-        ama,
+        a.id,
 
-        COUNT(*) as total_flights,
+        a.ama_name AS ama,
 
-        COUNT(DISTINCT mission_name) as total_missions,
+        a.latitude AS lat,
 
-        MAX(flight_date) as latest_flight,
+        a.longitude AS lng,
 
-        GROUP_CONCAT(DISTINCT mission_name) as missions
+        COUNT(f.id) AS total_flights,
 
-      FROM drone_flight_history
+        COUNT(DISTINCT f.mission_name) AS total_missions,
 
-      WHERE ama IS NOT NULL
-        AND ama != ''
+        MAX(f.flight_date) AS latest_flight,
 
-      GROUP BY ama
+        GROUP_CONCAT(
+          DISTINCT f.mission_name
+        ) AS missions
+
+      FROM amas a
+
+      -- =================================================
+      -- FLIGHT RELATION
+      -- =================================================
+
+      LEFT JOIN drone_flight_history f
+      ON f.ama_id = a.id
+
+      -- =================================================
+      -- GROUPING
+      -- =================================================
+
+      GROUP BY
+        a.id,
+        a.ama_name,
+        a.latitude,
+        a.longitude
+
+      ORDER BY
+        a.ama_name ASC
     `);
 
     // =====================================================
-    // MERGE STATIC AMA + DATABASE
+    // FORMAT RESULT
     // =====================================================
 
-    const result = amaCoordinates.map((amaItem) => {
-      const dbData = rows.find(
-        (row: any) => row.ama === amaItem.ama
-      );
+    const result = rows.map((item: any) => ({
+      id: item.id,
 
-      return {
-        id: amaItem.id,
+      ama: item.ama,
 
-        ama: amaItem.ama,
+      lat: Number(item.lat),
 
-        lat: amaItem.lat,
+      lng: Number(item.lng),
 
-        lng: amaItem.lng,
+      total_flights:
+        Number(item.total_flights || 0),
 
-        total_flights:
-          dbData?.total_flights || 0,
+      total_missions:
+        Number(item.total_missions || 0),
 
-        total_missions:
-          dbData?.total_missions || 0,
+      latest_flight:
+        item.latest_flight || null,
 
-        latest_flight:
-          dbData?.latest_flight || null,
-
-        missions: dbData?.missions
-          ? dbData.missions.split(",")
+      missions:
+        item.missions &&
+        item.missions !== null
+          ? item.missions
+              .split(",")
+              .filter(Boolean)
           : [],
-      };
-    });
+    }));
+
+    // =====================================================
+    // RESPONSE
+    // =====================================================
 
     return NextResponse.json(result);
   } catch (error) {
@@ -169,7 +96,10 @@ export async function GET() {
 
     return NextResponse.json(
       {
-        message: "Failed fetch map data",
+        success: false,
+
+        message:
+          "Failed fetch AMA map data",
       },
       {
         status: 500,

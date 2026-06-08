@@ -8,9 +8,15 @@ type Params = {
   }>;
 };
 
-export async function DELETE(req: Request, { params }: Params) {
+// =====================================================
+// DELETE
+// =====================================================
+
+export async function DELETE(
+  req: Request,
+  { params }: Params
+) {
   try {
-    // AWAIT PARAMS
     const { id } = await params;
 
     await pool.query(
@@ -23,7 +29,9 @@ export async function DELETE(req: Request, { params }: Params) {
 
     return NextResponse.json({
       success: true,
-      message: "Flight deleted successfully",
+
+      message:
+        "Flight deleted successfully",
     });
   } catch (err) {
     console.error(err);
@@ -31,6 +39,7 @@ export async function DELETE(req: Request, { params }: Params) {
     return NextResponse.json(
       {
         success: false,
+
         message: "Delete failed",
       },
       {
@@ -40,11 +49,36 @@ export async function DELETE(req: Request, { params }: Params) {
   }
 }
 
-export async function PUT(req: Request, { params }: Params) {
+// =====================================================
+// UPDATE
+// =====================================================
+
+export async function PUT(
+  req: Request,
+  { params }: Params
+) {
   try {
     const { id } = await params;
 
     const body = await req.json();
+
+    // =================================================
+    // FORMAT DATETIME
+    // =================================================
+
+    const startDateTime =
+      body.start_time
+        ? `${body.flight_date} ${body.start_time}:00`
+        : null;
+
+    const endDateTime =
+      body.end_time
+        ? `${body.flight_date} ${body.end_time}:00`
+        : null;
+
+    // =================================================
+    // UPDATE
+    // =================================================
 
     await pool.query(
       `
@@ -52,6 +86,7 @@ export async function PUT(req: Request, { params }: Params) {
       SET
         flight_date = ?,
         ama = ?,
+        ama_id = ?,
         estate = ?,
         pilot = ?,
         flight_id = ?,
@@ -71,29 +106,50 @@ export async function PUT(req: Request, { params }: Params) {
       `,
       [
         body.flight_date,
+
         body.ama,
+
+        body.ama_id,
+
         body.estate,
+
         body.pilot,
+
         body.flight_id,
+
         body.mission_name,
+
         body.battery_id,
+
         body.battery_id_2,
+
         body.battery_color,
+
         body.start_percent,
+
         body.end_percent,
+
         body.start_volt,
+
         body.end_volt,
-        body.start_time,
-        body.end_time,
+
+        startDateTime,
+
+        endDateTime,
+
         body.duration_min,
+
         body.notes,
+
         id,
       ]
     );
 
     return NextResponse.json({
       success: true,
-      message: "Flight updated successfully",
+
+      message:
+        "Flight updated successfully",
     });
   } catch (err) {
     console.error(err);
@@ -101,6 +157,7 @@ export async function PUT(req: Request, { params }: Params) {
     return NextResponse.json(
       {
         success: false,
+
         message: "Update failed",
       },
       {

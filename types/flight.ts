@@ -32,6 +32,8 @@ export type FlightForm = {
   duration_min: string;
 
   notes: string;
+
+  ama_id: string
 };
 
 export type FlightErrors = {
