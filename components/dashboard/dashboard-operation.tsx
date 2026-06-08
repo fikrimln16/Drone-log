@@ -2,6 +2,9 @@
 
 import { Activity, AlertTriangle, Plane, UploadCloud } from "lucide-react";
 
+import Link from "next/link";
+
+
 type Props = {
   stats: any;
 
@@ -133,7 +136,18 @@ export default function DashboardOperation({ stats, onOpenActive }: Props) {
       <div className="flex min-h-[220px] flex-col justify-between rounded-[28px] border bg-white p-6 shadow-sm">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm font-semibold text-gray-500">Top Pilot</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-gray-500">
+                Top Pilot
+              </p>
+
+              <Link
+                href="/pilots"
+                className="rounded-xl border bg-white px-3 py-1.5 text-xs font-semibold transition hover:bg-gray-100"
+              >
+                View All
+              </Link>
+            </div>
 
             <h1 className="mt-3 text-4xl font-bold text-cyan-600">
               {stats.top_pilot?.pilot || "-"}
