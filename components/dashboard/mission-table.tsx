@@ -106,26 +106,6 @@ export default function MissionTable() {
 
                 {/* RIGHT ACTION */}
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                  {/* ADD FLIGHT */}
-                  <button
-                    onClick={() => setOpenAddFlight(true)}
-                    className="flex h-[54px] items-center gap-3 rounded-2xl bg-black px-5 text-white shadow-sm transition hover:scale-[1.02]"
-                  >
-                    {/* ICON */}
-                    <div className="rounded-xl bg-white/10 p-2">
-                      <Plus className="h-4 w-4" />
-                    </div>
-
-                    {/* TEXT */}
-                    <div className="text-left">
-                      <p className="text-sm font-semibold">Add Flight</p>
-
-                      <p className="text-xs text-white/70">
-                        Create new flight log
-                      </p>
-                    </div>
-                  </button>
-
                   {/* ALL FLIGHTS */}
                   <Link
                     href="/flights"
@@ -145,6 +125,28 @@ export default function MissionTable() {
                       </p>
                     </div>
                   </Link>
+
+                  {/* ADD FLIGHT */}
+                  <button
+                    onClick={() => setOpenAddFlight(true)}
+                    className="flex h-[54px] items-center gap-3 rounded-2xl border bg-white px-5 shadow-sm transition hover:bg-gray-100"
+                  >
+                    {/* ICON */}
+                    <div className="rounded-xl bg-purple-100 p-2">
+                      <Plus className="h-4 w-4 text-purple-600" />
+                    </div>
+
+                    {/* TEXT */}
+                    <div className="text-left">
+                      <p className="text-sm font-semibold text-black">
+                        Add Flight
+                      </p>
+
+                      <p className="text-xs text-gray-500">
+                        Create new flight log
+                      </p>
+                    </div>
+                  </button>
 
                   {/* UPLOAD */}
                   <UploadCSV />
