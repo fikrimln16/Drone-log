@@ -33,6 +33,10 @@ import DashboardPageSkeleton from "../skeleton/dashboard-page-skeleton";
 
 import Footer from "../layout/footer";
 
+import { Plus } from "lucide-react";
+
+import AddFlightModal from "../flights/modals/add-flight-model"
+
 export default function MissionTable() {
   // SEARCH
   const [search, setSearch] = useState("");
@@ -57,6 +61,8 @@ export default function MissionTable() {
   // PAGINATION
   const { paginatedData, currentPage, setCurrentPage, totalPages } =
     usePagination(filteredMissions, 5);
+
+  const [openAddFlight, setOpenAddFlight] = useState(false);
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-[#f5f7fb]">
@@ -100,6 +106,26 @@ export default function MissionTable() {
 
                 {/* RIGHT ACTION */}
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  {/* ADD FLIGHT */}
+                  <button
+                    onClick={() => setOpenAddFlight(true)}
+                    className="flex h-[54px] items-center gap-3 rounded-2xl bg-black px-5 text-white shadow-sm transition hover:scale-[1.02]"
+                  >
+                    {/* ICON */}
+                    <div className="rounded-xl bg-white/10 p-2">
+                      <Plus className="h-4 w-4" />
+                    </div>
+
+                    {/* TEXT */}
+                    <div className="text-left">
+                      <p className="text-sm font-semibold">Add Flight</p>
+
+                      <p className="text-xs text-white/70">
+                        Create new flight log
+                      </p>
+                    </div>
+                  </button>
+
                   {/* ALL FLIGHTS */}
                   <Link
                     href="/flights"
@@ -194,6 +220,12 @@ export default function MissionTable() {
         flights={stats.active_flight_list || []}
       />
 
+      {/* ADD FLIGHT MODAL */}
+      <AddFlightModal
+        mission=""
+        open={openAddFlight}
+        onClose={() => setOpenAddFlight(false)}
+      />
       <Footer />
     </div>
   );

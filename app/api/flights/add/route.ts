@@ -8,69 +8,23 @@ export async function POST(req: Request) {
 
     const {
       flight_date,
-
       ama,
-
       estate,
-
       pilot,
-
       flight_id,
-
       mission_name,
-
       battery_id,
-
       battery_id_2,
-
       battery_color,
-
       start_percent,
-
       end_percent,
-
       start_volt,
-
       end_volt,
-
       start_time,
-
       end_time,
-
       duration_min,
-
       notes,
     } = body;
-
-    // VALIDASI
-    if (
-      !flight_date ||
-      !ama ||
-      !estate ||
-      !pilot ||
-      !flight_id ||
-      !mission_name ||
-      !battery_id ||
-      !battery_id_2 ||
-      !battery_color ||
-      start_percent === undefined ||
-      end_percent === undefined ||
-      !start_volt ||
-      !end_volt ||
-      !start_time ||
-      !end_time ||
-      !duration_min
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Semua field wajib diisi",
-        },
-        {
-          status: 400,
-        }
-      );
-    }
 
     await pool.query(
       `
@@ -94,49 +48,32 @@ export async function POST(req: Request) {
         duration_min,
         notes
       )
-      VALUES
-      (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       [
         flight_date,
-
         ama,
-
         estate,
-
         pilot,
-
         flight_id,
-
         mission_name,
-
         battery_id,
-
         battery_id_2,
-
         battery_color,
-
-        start_percent,
-
-        end_percent,
-
-        start_volt,
-
-        end_volt,
-
+        Number(start_percent),
+        Number(end_percent),
+        Number(start_volt),
+        Number(end_volt),
         start_time,
-
         end_time,
-
-        duration_min,
-
+        Number(duration_min),
         notes || "",
       ]
     );
 
     return NextResponse.json({
       success: true,
-      message: "Flight berhasil ditambahkan",
+      message: "Flight created successfully",
     });
   } catch (error) {
     console.error(error);
@@ -144,7 +81,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         success: false,
-        message: "Internal server error",
+        message: "Failed create flight",
       },
       {
         status: 500,

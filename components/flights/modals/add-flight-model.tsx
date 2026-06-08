@@ -47,11 +47,27 @@ export default function AddFlightModal({ mission, open, onClose }: Props) {
                   New Flight Log
                 </h1>
 
+                {mission ? (
                 <div className="mt-3 inline-flex rounded-full bg-blue-50 px-4 py-2">
                   <span className="text-sm font-semibold text-blue-700">
                     {mission}
                   </span>
                 </div>
+              ) : (
+                <div className="mt-4">
+                  <FlightInput
+                    label="Mission Name"
+                    value={form.mission_name || ""}
+                    error={errors.mission_name}
+                    onChange={(value) =>
+                      setForm({
+                        ...form,
+                        mission_name: value,
+                      })
+                    }
+                  />
+                </div>
+              )}
               </div>
             </div>
 

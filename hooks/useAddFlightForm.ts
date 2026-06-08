@@ -8,7 +8,10 @@ import { createFlight } from "@/services/flight.service";
 
 import { validateFlight } from "@/utils/flight-validation";
 
-import { FlightErrors, FlightForm } from "@/types/flight";
+import {
+  FlightErrors,
+  FlightForm,
+} from "@/types/flight";
 
 const initialForm: FlightForm = {
   flight_date: "",
@@ -20,6 +23,8 @@ const initialForm: FlightForm = {
   pilot: "",
 
   flight_id: "",
+
+  mission_name: "",
 
   battery_id: "",
 
@@ -44,67 +49,118 @@ const initialForm: FlightForm = {
   notes: "",
 };
 
-export default function useAddFlightForm(mission: string, onClose: () => void) {
-  const [loading, setLoading] = useState(false);
+export default function useAddFlightForm(
+  mission: string,
+  onClose: () => void
+) {
+  const [loading, setLoading] =
+    useState(false);
 
-  const [form, setForm] = useState<FlightForm>(initialForm);
+  const [form, setForm] =
+    useState<FlightForm>({
+      ...initialForm,
 
-  const [errors, setErrors] = useState<FlightErrors>({});
+      mission_name: mission || "",
+    });
+
+  const [errors, setErrors] =
+    useState<FlightErrors>({});
+
+  // =====================================================
+  // VALID FORM
+  // =====================================================
 
   const isValid = useMemo(() => {
     return (
-      form.flight_date &&
-      form.ama &&
-      form.estate &&
-      form.pilot &&
-      form.flight_id &&
-      form.battery_id &&
-      form.battery_id_2 &&
-      form.battery_color &&
-      form.start_percent &&
-      form.end_percent &&
-      form.start_volt &&
-      form.end_volt &&
-      form.start_time &&
-      form.end_time &&
-      form.duration_min
+      !!form.flight_date &&
+      !!form.ama &&
+      !!form.estate &&
+      !!form.pilot &&
+      !!form.flight_id &&
+      !!form.mission_name &&
+      !!form.battery_id &&
+      !!form.battery_id_2 &&
+      !!form.battery_color &&
+      !!form.start_percent &&
+      !!form.end_percent &&
+      !!form.start_volt &&
+      !!form.end_volt &&
+      !!form.start_time &&
+      !!form.end_time &&
+      !!form.duration_min
     );
   }, [form]);
 
+  // =====================================================
+  // SUBMIT
+  // =====================================================
+
   async function handleSubmit() {
-    const validation = validateFlight(form);
+    const validation =
+      validateFlight(form);
 
     setErrors(validation);
 
-    if (Object.keys(validation).length > 0) return;
+    if (
+      Object.keys(validation).length > 0
+    ) {
+      return;
+    }
 
     try {
       setLoading(true);
 
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      // UX DELAY
+      await new Promise((resolve) =>
+        setTimeout(resolve, 800)
+      );
 
-      const result = await createFlight({
-        ...form,
-        mission_name: mission,
-      });
+      // CREATE FLIGHT
+      const result =
+        await createFlight({
+          ...form,
 
+          // IMPORTANT
+          mission_name:
+            form.mission_name,
+        });
+
+      // FAILED
       if (!result.ok) {
-        toast.error(result.data.message || "Failed add flight");
+        toast.error(
+          result.data.message ||
+            "Failed add flight"
+        );
 
         return;
       }
 
-      toast.success("Flight added successfully");
+      // SUCCESS
+      toast.success(
+        "Flight added successfully"
+      );
 
+      // RESET FORM
+      setForm({
+        ...initialForm,
+
+        mission_name:
+          mission || "",
+      });
+
+      // CLOSE MODAL
       onClose();
 
+      // REFRESH
       setTimeout(() => {
         window.location.reload();
       }, 1200);
     } catch (error) {
       console.error(error);
 
-      toast.error("Internal server error");
+      toast.error(
+        "Internal server error"
+      );
     } finally {
       setLoading(false);
     }
