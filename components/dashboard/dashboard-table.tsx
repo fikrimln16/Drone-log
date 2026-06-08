@@ -30,11 +30,45 @@ export default function DashboardTable({ missions }: Props) {
 
       const valueB = b[sortBy];
 
-      if (sortDirection === "asc") {
-        return valueA > valueB ? 1 : -1;
+      // ============================================
+      // DATE SORT
+      // ============================================
+
+      if (sortBy === "last_flight") {
+        const dateA = new Date(valueA).getTime();
+
+        const dateB = new Date(valueB).getTime();
+
+        return sortDirection === "asc"
+          ? dateA - dateB
+          : dateB - dateA;
       }
 
-      return valueA < valueB ? 1 : -1;
+      // ============================================
+      // NUMBER SORT
+      // ============================================
+
+      if (
+        sortBy === "total_flights" ||
+        sortBy === "total_duration" ||
+        sortBy === "avg_duration"
+      ) {
+        return sortDirection === "asc"
+          ? Number(valueA) - Number(valueB)
+          : Number(valueB) - Number(valueA);
+      }
+
+      // ============================================
+      // STRING SORT
+      // ============================================
+
+      return sortDirection === "asc"
+        ? String(valueA).localeCompare(
+            String(valueB)
+          )
+        : String(valueB).localeCompare(
+            String(valueA)
+          );
     });
   }, [missions, sortBy, sortDirection]);
 
