@@ -12,16 +12,18 @@ import {
 import L from "leaflet";
 
 import {
-  CheckCircle2,
   MapPinned,
   RadioTower,
 } from "lucide-react";
 
+import "leaflet/dist/leaflet.css";
+
 // =====================================================
-// FIX LEAFLET MARKER
+// FIX LEAFLET
 // =====================================================
 
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+delete (L.Icon.Default.prototype as any)
+  ._getIconUrl;
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -47,45 +49,124 @@ type AmaPoint = {
 
   lng: number;
 
+  status: "SUCCESS" | "ONGOING" | "PENDING";
+
   total_flights: number;
 
   total_missions: number;
 
-  latest_flight: string;
+  latest_flight: string | null;
 
   missions: string[];
 };
+
+// =====================================================
+// MARKER COLOR
+// =====================================================
+
+function getMarkerColor(status: string) {
+  switch (status) {
+    case "SUCCESS":
+      return "#22c55e";
+
+    case "ONGOING":
+      return "#f59e0b";
+
+    case "PENDING":
+      return "#ef4444";
+
+    default:
+      return "#94a3b8";
+  }
+}
+
+// =====================================================
+// CUSTOM MARKER
+// =====================================================
+
+function createCustomMarker(color: string) {
+  return L.divIcon({
+    html: `
+      <div
+        style="
+          width:20px;
+          height:20px;
+          background:${color};
+          border-radius:999px;
+          border:4px solid white;
+          box-shadow:0 0 15px rgba(0,0,0,.35);
+        "
+      ></div>
+    `,
+
+    className: "",
+
+    iconSize: [20, 20],
+  });
+}
 
 // =====================================================
 // COMPONENT
 // =====================================================
 
 export default function AmaMonitorMap() {
-  const [amaPoints, setAmaPoints] = useState<AmaPoint[]>([]);
+  const [amaPoints, setAmaPoints] =
+    useState<AmaPoint[]>([]);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
 
   // =====================================================
   // FETCH DATA
   // =====================================================
 
   useEffect(() => {
-    fetchAmaData();
+    async function fetchMapData() {
+      try {
+        const res = await fetch("/api/maps/ama");
+
+        if (!res.ok) {
+          throw new Error(
+            "Failed fetch map data"
+          );
+        }
+
+        const data = await res.json();
+
+        console.log("MAP DATA:", data);
+
+        if (Array.isArray(data)) {
+          setAmaPoints(data);
+        } else {
+          setAmaPoints([]);
+        }
+      } catch (error) {
+        console.error(error);
+
+        setAmaPoints([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchMapData();
   }, []);
 
-  async function fetchAmaData() {
-    try {
-      const res = await fetch("/api/maps/ama");
+  // =====================================================
+  // STATS
+  // =====================================================
 
-      const data = await res.json();
+  const successCount = amaPoints.filter(
+    (item) => item.status === "SUCCESS"
+  ).length;
 
-      setAmaPoints(data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const ongoingCount = amaPoints.filter(
+    (item) => item.status === "ONGOING"
+  ).length;
+
+  const pendingCount = amaPoints.filter(
+    (item) => item.status === "PENDING"
+  ).length;
 
   // =====================================================
   // LOADING
@@ -93,25 +174,19 @@ export default function AmaMonitorMap() {
 
   if (loading) {
     return (
-      <div className="rounded-[32px] border bg-white p-10 shadow-sm">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 w-[250px] rounded-xl bg-gray-200" />
-
-          <div className="h-[500px] rounded-3xl bg-gray-100" />
-        </div>
+      <div className="flex h-[650px] items-center justify-center rounded-[32px] border bg-white">
+        <p className="text-gray-500">
+          Loading map...
+        </p>
       </div>
     );
   }
 
-  // =====================================================
-  // RENDER
-  // =====================================================
-
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-4">
-      {/* ===================================================== */}
+      {/* ================================================= */}
       {/* MAP */}
-      {/* ===================================================== */}
+      {/* ================================================= */}
 
       <div className="overflow-hidden rounded-[32px] border bg-white shadow-sm xl:col-span-3">
         {/* HEADER */}
@@ -122,7 +197,8 @@ export default function AmaMonitorMap() {
             </h1>
 
             <p className="mt-1 text-sm text-gray-500">
-              Real-time Indonesia drone operation map
+              Real-time Indonesia drone
+              operation map
             </p>
           </div>
 
@@ -132,27 +208,35 @@ export default function AmaMonitorMap() {
         </div>
 
         {/* MAP */}
-        <div className="h-[520px] w-full">
+        <div className="h-[560px] w-full">
           <MapContainer
             center={[-2.5, 118]}
             zoom={5}
             scrollWheelZoom={true}
             className="h-full w-full"
           >
-            {/* GOOGLE SATELLITE */}
+            {/* SATELLITE */}
             <TileLayer
               url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
               attribution="Google Satellite"
             />
 
-            {/* MARKER */}
+            {/* MARKERS */}
             {amaPoints.map((item) => (
               <Marker
                 key={item.id}
-                position={[item.lat, item.lng]}
+                position={[
+                  Number(item.lat),
+                  Number(item.lng),
+                ]}
+                icon={createCustomMarker(
+                  getMarkerColor(
+                    item.status
+                  )
+                )}
               >
                 <Popup>
-                  <div className="min-w-[260px]">
+                  <div className="min-w-[240px]">
                     {/* TITLE */}
                     <div>
                       <h1 className="text-lg font-bold">
@@ -160,86 +244,110 @@ export default function AmaMonitorMap() {
                       </h1>
 
                       <p className="text-xs text-gray-500">
-                        AMA drone monitoring area
+                        Drone monitoring
+                        point
                       </p>
                     </div>
 
-                    {/* STATS */}
-                    <div className="mt-4 grid grid-cols-2 gap-3">
-                      {/* FLIGHT */}
-                      <div className="rounded-xl bg-gray-50 p-3">
-                        <p className="text-xs text-gray-400">
-                          Flights
-                        </p>
-
-                        <h1 className="mt-1 text-lg font-bold">
-                          {item.total_flights}
-                        </h1>
-                      </div>
-
-                      {/* MISSION */}
-                      <div className="rounded-xl bg-gray-50 p-3">
-                        <p className="text-xs text-gray-400">
-                          Missions
-                        </p>
-
-                        <h1 className="mt-1 text-lg font-bold">
-                          {item.total_missions}
-                        </h1>
-                      </div>
-                    </div>
-
-                    {/* LAST FLIGHT */}
-                    <div className="mt-4 rounded-xl bg-blue-50 p-3">
-                      <p className="text-xs text-blue-500">
-                        Latest Flight
-                      </p>
-
-                      <h1 className="mt-1 font-semibold text-blue-700">
-                        {item.latest_flight
-                          ? new Date(
-                              item.latest_flight
-                            ).toLocaleDateString("id-ID")
-                          : "-"}
-                      </h1>
-                    </div>
-
-                    {/* MISSION LIST */}
+                    {/* STATUS */}
                     <div className="mt-4">
-                      <p className="mb-2 text-xs font-semibold text-gray-400 uppercase">
-                        Mission List
+                      <p className="text-xs text-gray-400">
+                        Status
                       </p>
 
-                      <div className="flex flex-wrap gap-2">
-                        {item.missions?.map(
-                          (mission: string) => (
-                            <span
-                              key={mission}
-                              className="rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700"
-                            >
-                              {mission}
-                            </span>
-                          )
-                        )}
+                      <div
+                        className={`mt-1 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                          item.status ===
+                          "SUCCESS"
+                            ? "bg-green-100 text-green-700"
+                            : item.status ===
+                                "ONGOING"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {item.status}
                       </div>
                     </div>
 
-                    {/* COORDINATE */}
-                    <div className="mt-4 border-t pt-3 text-xs text-gray-400">
+                    {/* INFO */}
+                    <div className="mt-5 space-y-3 text-sm">
                       <div className="flex items-center justify-between">
-                        <span>Latitude</span>
+                        <span className="text-gray-400">
+                          Flights
+                        </span>
 
-                        <span className="font-medium text-gray-600">
+                        <span className="font-semibold">
+                          {
+                            item.total_flights
+                          }
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-400">
+                          Missions
+                        </span>
+
+                        <span className="font-semibold">
+                          {
+                            item.total_missions
+                          }
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-400">
+                          Latitude
+                        </span>
+
+                        <span className="font-semibold">
                           {item.lat}
                         </span>
                       </div>
 
-                      <div className="mt-1 flex items-center justify-between">
-                        <span>Longitude</span>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-400">
+                          Longitude
+                        </span>
 
-                        <span className="font-medium text-gray-600">
+                        <span className="font-semibold">
                           {item.lng}
                         </span>
+                      </div>
+                    </div>
+
+                    {/* MISSION LIST */}
+                    <div className="mt-5">
+                      <p className="mb-2 text-xs text-gray-400">
+                        Mission List
+                      </p>
+
+                      <div className="flex flex-wrap gap-2">
+                        {item.missions
+                          ?.length > 0 ? (
+                          item.missions.map(
+                            (
+                              mission,
+                              index
+                            ) => (
+                              <div
+                                key={
+                                  index
+                                }
+                                className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700"
+                              >
+                                {
+                                  mission
+                                }
+                              </div>
+                            )
+                          )
+                        ) : (
+                          <div className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-500">
+                            No mission
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -250,9 +358,9 @@ export default function AmaMonitorMap() {
         </div>
       </div>
 
-      {/* ===================================================== */}
+      {/* ================================================= */}
       {/* RIGHT PANEL */}
-      {/* ===================================================== */}
+      {/* ================================================= */}
 
       <div className="xl:col-span-1">
         <div className="rounded-[32px] border bg-white p-6 shadow-sm">
@@ -264,7 +372,8 @@ export default function AmaMonitorMap() {
               </h1>
 
               <p className="mt-1 text-sm text-gray-500">
-                Indonesia AMA monitoring overview
+                Indonesia AMA monitoring
+                overview
               </p>
             </div>
 
@@ -273,9 +382,9 @@ export default function AmaMonitorMap() {
             </div>
           </div>
 
-          {/* STATS */}
+          {/* CONTENT */}
           <div className="mt-6 space-y-4">
-            {/* TOTAL AMA */}
+            {/* TOTAL */}
             <div className="rounded-2xl border bg-gray-50 p-5">
               <p className="text-sm text-gray-500">
                 Total AMA Point
@@ -290,81 +399,57 @@ export default function AmaMonitorMap() {
                   <MapPinned className="h-5 w-5 text-blue-600" />
                 </div>
               </div>
-
-              <p className="mt-2 text-xs text-gray-400">
-                Registered drone monitoring area
-              </p>
             </div>
 
-            {/* TOTAL FLIGHT */}
-            <div className="rounded-2xl border bg-gray-50 p-5">
-              <p className="text-sm text-gray-500">
-                Total Flights
-              </p>
+            {/* SUCCESS */}
+            <div className="flex items-center justify-between rounded-2xl bg-green-50 px-5 py-4">
+              <div>
+                <p className="font-semibold text-green-700">
+                  Success
+                </p>
 
-              <div className="mt-3 flex items-center justify-between">
-                <h1 className="text-4xl font-bold">
-                  {amaPoints.reduce(
-                    (acc, item) =>
-                      acc + item.total_flights,
-                    0
-                  )}
-                </h1>
-
-                <div className="rounded-xl bg-green-100 p-3">
-                  <RadioTower className="h-5 w-5 text-green-600" />
-                </div>
+                <p className="text-xs text-green-600">
+                  Finished mission
+                </p>
               </div>
 
-              <p className="mt-2 text-xs text-gray-400">
-                Total drone flight operation
-              </p>
+              <h1 className="text-3xl font-bold text-green-700">
+                {successCount}
+              </h1>
             </div>
 
-            {/* TOTAL MISSION */}
-            <div className="rounded-2xl border bg-gray-50 p-5">
-              <p className="text-sm text-gray-500">
-                Total Missions
-              </p>
+            {/* ONGOING */}
+            <div className="flex items-center justify-between rounded-2xl bg-yellow-50 px-5 py-4">
+              <div>
+                <p className="font-semibold text-yellow-700">
+                  Ongoing
+                </p>
 
-              <div className="mt-3 flex items-center justify-between">
-                <h1 className="text-4xl font-bold">
-                  {amaPoints.reduce(
-                    (acc, item) =>
-                      acc + item.total_missions,
-                    0
-                  )}
-                </h1>
-
-                <div className="rounded-xl bg-yellow-100 p-3">
-                  <CheckCircle2 className="h-5 w-5 text-yellow-600" />
-                </div>
+                <p className="text-xs text-yellow-600">
+                  Active monitoring
+                </p>
               </div>
 
-              <p className="mt-2 text-xs text-gray-400">
-                Registered drone mission
-              </p>
+              <h1 className="text-3xl font-bold text-yellow-700">
+                {ongoingCount}
+              </h1>
             </div>
 
-            {/* LAST UPDATE */}
-            <div className="rounded-2xl border bg-gray-50 p-5">
-              <p className="text-sm text-gray-500">
-                Last Sync
-              </p>
+            {/* PENDING */}
+            <div className="flex items-center justify-between rounded-2xl bg-red-50 px-5 py-4">
+              <div>
+                <p className="font-semibold text-red-700">
+                  Pending
+                </p>
 
-              <div className="mt-3">
-                <h1 className="text-2xl font-bold">
-                  {new Date().toLocaleDateString(
-                    "id-ID"
-                  )}
-                </h1>
-
-                <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">
-                  <div className="h-2 w-2 rounded-full bg-green-500" />
-
-                  Synced Successfully
-                </div>
+                <p className="text-xs text-red-600">
+                  Waiting operation
+                </p>
               </div>
+
+              <h1 className="text-3xl font-bold text-red-700">
+                {pendingCount}
+              </h1>
             </div>
           </div>
         </div>

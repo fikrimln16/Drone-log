@@ -8,98 +8,135 @@ import pool from "@/lib/db";
 
 export async function GET() {
   try {
-    // =====================================================
+    // =================================================
     // QUERY
-    // =====================================================
+    // =================================================
 
     const [rows]: any = await pool.query(`
       SELECT
         a.id,
 
-        a.ama_name AS ama,
+        a.ama_name,
 
-        a.latitude AS lat,
+        a.latitude,
 
-        a.longitude AS lng,
+        a.longitude,
+
+        a.status,
+
+        -- =============================================
+        -- FLIGHT STATS
+        -- =============================================
 
         COUNT(f.id) AS total_flights,
 
-        COUNT(DISTINCT f.mission_name) AS total_missions,
+        COUNT(
+          DISTINCT f.mission_name
+        ) AS total_missions,
 
         MAX(f.flight_date) AS latest_flight,
 
         GROUP_CONCAT(
           DISTINCT f.mission_name
+          SEPARATOR ','
         ) AS missions
 
       FROM amas a
 
-      -- =================================================
+      -- =============================================
       -- FLIGHT RELATION
-      -- =================================================
+      -- =============================================
 
       LEFT JOIN drone_flight_history f
       ON f.ama_id = a.id
 
-      -- =================================================
-      -- GROUPING
-      -- =================================================
+      -- =============================================
+      -- GROUP
+      -- =============================================
 
       GROUP BY
         a.id,
         a.ama_name,
         a.latitude,
-        a.longitude
+        a.longitude,
+        a.status
 
-      ORDER BY
-        a.ama_name ASC
+      ORDER BY a.id ASC
     `);
 
-    // =====================================================
-    // FORMAT RESULT
-    // =====================================================
+    // =================================================
+    // FORMAT RESPONSE
+    // =================================================
 
-    const result = rows.map((item: any) => ({
-      id: item.id,
+    const formatted = rows.map(
+      (item: any) => ({
+        id: Number(item.id),
 
-      ama: item.ama,
+        ama: item.ama_name || "-",
 
-      lat: Number(item.lat),
+        lat: Number(item.latitude),
 
-      lng: Number(item.lng),
+        lng: Number(item.longitude),
 
-      total_flights:
-        Number(item.total_flights || 0),
+        // =============================================
+        // STATUS
+        // =============================================
 
-      total_missions:
-        Number(item.total_missions || 0),
+        status:
+          item.status || "pending",
 
-      latest_flight:
-        item.latest_flight || null,
+        // =============================================
+        // STATS
+        // =============================================
 
-      missions:
-        item.missions &&
-        item.missions !== null
-          ? item.missions
-              .split(",")
-              .filter(Boolean)
-          : [],
-    }));
+        total_flights: Number(
+          item.total_flights || 0
+        ),
 
-    // =====================================================
+        total_missions: Number(
+          item.total_missions || 0
+        ),
+
+        // =============================================
+        // DATE
+        // =============================================
+
+        latest_flight:
+          item.latest_flight || null,
+
+        // =============================================
+        // MISSION ARRAY
+        // =============================================
+
+        missions:
+          item.missions &&
+          item.missions !== null
+            ? item.missions
+                .split(",")
+                .filter(Boolean)
+            : [],
+      })
+    );
+
+    // =================================================
     // RESPONSE
-    // =====================================================
+    // =================================================
 
-    return NextResponse.json(result);
+    return NextResponse.json(formatted);
   } catch (error) {
-    console.error(error);
+    console.error(
+      "MAP API ERROR:",
+      error
+    );
 
     return NextResponse.json(
       {
         success: false,
 
         message:
-          "Failed fetch AMA map data",
+          "Failed fetch map data",
+
+        data: [],
       },
       {
         status: 500,
