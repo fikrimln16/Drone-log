@@ -10,6 +10,8 @@ import FlightInput from "../flight-input";
 
 import BatterySelect from "../forms/battery-select";
 
+import useAmaOptions from "@/hooks/useAmaOptions";
+
 type Props = {
   mission: string;
 
@@ -19,10 +21,12 @@ type Props = {
 };
 
 export default function AddFlightModal({ mission, open, onClose }: Props) {
+  const { amas } = useAmaOptions();
   const { form, setForm, errors, loading, isValid, handleSubmit } =
     useAddFlightForm(mission, onClose);
 
   if (!open) return null;
+
 
   return (
     <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
@@ -112,18 +116,58 @@ export default function AddFlightModal({ mission, open, onClose }: Props) {
                   }
                 />
 
-                <FlightInput
-                  label="AMA"
-                  value={form.ama}
-                  error={errors.ama}
-                  onChange={(value) =>
+                <div>
+                {/* LABEL */}
+                <label className="mb-2 block text-sm font-bold tracking-wide text-gray-600 uppercase">
+                  AMA
+                </label>
+
+                {/* SELECT */}
+                <select
+                  value={form.ama_id || ""}
+                  onChange={(e) => {
+                    const selectedAma = amas.find(
+                      (item: any) =>
+                        item.id === Number(e.target.value)
+                    );
+
                     setForm({
                       ...form,
-                      ama: value,
-                    })
-                  }
-                />
 
+                      // FOREIGN KEY
+                      ama_id: Number(e.target.value),
+
+                      // AMA NAME
+                      ama: selectedAma?.ama_name || "",
+                    });
+                  }}
+                  className={`h-[64px] w-full rounded-2xl border bg-gray-50 px-5 text-lg outline-none ${
+                    errors.ama
+                      ? "border-red-500"
+                      : "border-gray-200"
+                  }`}
+                >
+                  <option value="">
+                    Select AMA
+                  </option>
+
+                  {amas.map((item: any) => (
+                    <option
+                      key={item.id}
+                      value={item.id}
+                    >
+                      {item.ama_name}
+                    </option>
+                  ))}
+                </select>
+
+                {/* ERROR */}
+                {errors.ama && (
+                  <p className="mt-2 text-sm text-red-500">
+                    {errors.ama}
+                  </p>
+                )}
+              </div>
                 <FlightInput
                   label="Estate"
                   value={form.estate}

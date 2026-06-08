@@ -52,17 +52,13 @@ export default function EditFlightModal({
     if (!data) return;
 
     setForm({
-      // =================================================
-      // IMPORTANT
-      // =================================================
-
-      ama_id: data.ama_id || "",
-
-      flight_date:
-        data.flight_date?.split("T")[0] ||
-        "",
+      flight_date: data.flight_date
+        ? data.flight_date.split("T")[0]
+        : "",
 
       ama: data.ama || "",
+
+      ama_id: data.ama_id || "",
 
       estate: data.estate || "",
 
@@ -70,48 +66,31 @@ export default function EditFlightModal({
 
       flight_id: data.flight_id || "",
 
-      mission_name:
-        data.mission_name || "",
+      mission_name: data.mission_name || "",
 
-      battery_id:
-        data.battery_id || "",
+      battery_id: data.battery_id || "",
 
-      battery_id_2:
-        data.battery_id_2 || "",
+      battery_id_2: data.battery_id_2 || "",
 
-      battery_color:
-        data.battery_color || "",
+      battery_color: data.battery_color || "",
 
-      start_percent:
-        data.start_percent || "",
+      start_percent: data.start_percent || "",
 
-      end_percent:
-        data.end_percent || "",
+      end_percent: data.end_percent || "",
 
-      start_volt:
-        data.start_volt || "",
+      start_volt: data.start_volt || "",
 
-      end_volt:
-        data.end_volt || "",
-
-      // =================================================
-      // FORMAT DATETIME
-      // =================================================
+      end_volt: data.end_volt || "",
 
       start_time: data.start_time
-        ? new Date(data.start_time)
-            .toISOString()
-            .slice(0, 16)
+        ? data.start_time.slice(0, 5)
         : "",
 
       end_time: data.end_time
-        ? new Date(data.end_time)
-            .toISOString()
-            .slice(0, 16)
+        ? data.end_time.slice(0, 5)
         : "",
 
-      duration_min:
-        data.duration_min || "",
+      duration_min: data.duration_min || "",
 
       notes: data.notes || "",
     });

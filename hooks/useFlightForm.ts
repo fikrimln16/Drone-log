@@ -38,6 +38,8 @@ const defaultForm: FlightForm = {
   duration_min: "",
 
   notes: "",
+
+  ama_id: 0,
 };
 
 export default function useFlightForm(initial?: Partial<FlightForm>) {

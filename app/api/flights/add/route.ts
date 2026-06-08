@@ -9,6 +9,7 @@ export async function POST(req: Request) {
     const {
       flight_date,
       ama,
+      ama_id,
       estate,
       pilot,
       flight_id,
@@ -46,9 +47,10 @@ export async function POST(req: Request) {
         start_time,
         end_time,
         duration_min,
-        notes
+        notes,
+        ama_id
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       [
         flight_date,
@@ -68,6 +70,7 @@ export async function POST(req: Request) {
         end_time,
         Number(duration_min),
         notes || "",
+        Number(ama_id),
       ]
     );
 

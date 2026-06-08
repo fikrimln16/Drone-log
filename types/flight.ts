@@ -3,13 +3,15 @@ export type FlightForm = {
 
   ama: string;
 
+  ama_id: number;
+
   estate: string;
 
   pilot: string;
 
   flight_id: string;
 
-  mission_name?: string;
+  mission_name: string;
 
   battery_id: string;
 
@@ -32,8 +34,6 @@ export type FlightForm = {
   duration_min: string;
 
   notes: string;
-
-  ama_id: string
 };
 
 export type FlightErrors = {
