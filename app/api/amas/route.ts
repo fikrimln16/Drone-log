@@ -2,34 +2,54 @@ import { NextResponse } from "next/server";
 
 import pool from "@/lib/db";
 
+// =====================================================
+// GET
+// =====================================================
+
 export async function GET() {
   try {
-    const [rows]: any = await pool.query(`
+    const [rows] = await pool.query(`
       SELECT
-        id,
-        ama_name,
-        latitude,
-        longitude
-      FROM amas
-      ORDER BY ama_name ASC
+        a.id,
+        a.ama_name,
+        a.status,
+        a.latitude,
+        a.longitude,
+
+        COUNT(f.id) AS total_flights,
+
+        COUNT(DISTINCT f.mission_name) AS total_missions,
+
+        COUNT(DISTINCT f.estate) AS total_estates,
+
+        COUNT(DISTINCT f.pilot) AS total_pilots
+
+      FROM amas a
+
+      LEFT JOIN drone_flight_history f
+        ON f.ama = a.ama_name
+
+      GROUP BY
+        a.id,
+        a.ama_name,
+        a.status,
+        a.latitude,
+        a.longitude
+
+      ORDER BY a.id DESC
     `);
 
     return NextResponse.json(rows);
   } catch (error) {
     console.error(error);
 
-    return NextResponse.json(
-      {
-        success: false,
-
-        message: "Failed fetch AMA",
-      },
-      {
-        status: 500,
-      }
-    );
+    return NextResponse.json([]);
   }
 }
+
+// =====================================================
+// POST
+// =====================================================
 
 export async function POST(req: Request) {
   try {

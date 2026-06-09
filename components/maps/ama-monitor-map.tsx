@@ -232,7 +232,7 @@ export default function AmaMonitorMap() {
         {/* MAP */}
         {/* ================================================= */}
 
-        <div className="overflow-hidden rounded-[32px] border bg-white shadow-sm xl:col-span-3">
+        <div className="overflow-scroll rounded-[32px] border bg-white shadow-sm xl:col-span-3">
           {/* HEADER */}
           <div className="flex items-center justify-between border-b px-6 py-5">
             <div>

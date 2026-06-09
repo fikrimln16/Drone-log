@@ -11,11 +11,9 @@ import PilotCard from "@/components/pilots/pilot-card";
 import PilotTable from "@/components/pilots/pilot-table";
 
 export default function PilotsPage() {
-  const [pilots, setPilots] =
-    useState<any[]>([]);
+  const [pilots, setPilots] = useState<any[]>([]);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchPilots();
@@ -23,12 +21,9 @@ export default function PilotsPage() {
 
   async function fetchPilots() {
     try {
-      const res = await fetch(
-        "/api/pilots"
-      );
+      const res = await fetch("/api/pilots");
 
-      const data =
-        await res.json();
+      const data = await res.json();
 
       setPilots(data);
     } catch (error) {
@@ -38,22 +33,15 @@ export default function PilotsPage() {
     }
   }
 
-  const totalPilots =
-    pilots.length;
+  const totalPilots = pilots.length;
 
-  const totalDuration =
-  pilots.reduce(
-    (acc, item) =>
-      acc +
-      Number(item.total_duration || 0),
+  const totalDuration = pilots.reduce(
+    (acc, item) => acc + Number(item.total_duration || 0),
     0
   );
 
-  const totalFlights =
-  pilots.reduce(
-    (acc, item) =>
-      acc +
-      Number(item.total_flights || 0),
+  const totalFlights = pilots.reduce(
+    (acc, item) => acc + Number(item.total_flights || 0),
     0
   );
 
@@ -77,11 +65,7 @@ export default function PilotsPage() {
 
         {/* SUMMARY */}
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-          <PilotCard
-            title="Total Pilots"
-            value={totalPilots}
-            color="blue"
-          />
+          <PilotCard title="Total Pilots" value={totalPilots} color="blue" />
 
           <PilotCard
             title="Total Flights"
@@ -98,22 +82,14 @@ export default function PilotsPage() {
           <PilotCard
             title="Average Duration"
             value={`${
-            totalFlights > 0
-               ? Math.round(
-                  totalDuration /
-                     totalFlights
-                  )
-               : 0
+              totalFlights > 0 ? Math.round(totalDuration / totalFlights) : 0
             } min`}
             color="green"
           />
         </div>
 
         {/* TABLE */}
-        <PilotTable
-          pilots={pilots}
-          loading={loading}
-        />
+        <PilotTable pilots={pilots} loading={loading} />
       </div>
     </div>
   );

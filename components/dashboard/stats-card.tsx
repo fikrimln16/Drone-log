@@ -1,52 +1,49 @@
+"use client";
+
 type Props = {
   title: string;
 
-  value: string | number;
+  value: number | string;
 
-  trend: string;
-
-  subtitle: string;
-
-  icon: React.ReactNode;
-
-  iconBg: string;
+  color?: "blue" | "green" | "yellow" | "red";
 };
 
-export default function StatsCard({
-  title,
-  value,
-  trend,
-  subtitle,
-  icon,
-  iconBg,
-}: Props) {
-  const positive = Number(trend.replace("%", "")) >= 0;
+export default function StatsCard({ title, value, color = "blue" }: Props) {
+  const styles = {
+    blue: {
+      card: "border-blue-200 bg-blue-50",
+      text: "text-blue-700",
+    },
+
+    green: {
+      card: "border-green-200 bg-green-50",
+      text: "text-green-700",
+    },
+
+    yellow: {
+      card: "border-yellow-200 bg-yellow-50",
+      text: "text-yellow-700",
+    },
+
+    red: {
+      card: "border-red-200 bg-red-50",
+      text: "text-red-700",
+    },
+  };
 
   return (
-    <div className="rounded-[28px] border bg-white p-6 shadow-sm">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase">
-            {title}
-          </p>
+    <div
+      className={`rounded-[28px] border p-6 shadow-sm ${styles[color].card}`}
+    >
+      {/* TITLE */}
+      <p
+        className={`text-xs font-bold tracking-[0.25em] uppercase ${styles[color].text}`}
+      >
+        {title}
+      </p>
 
-          <h1 className="mt-4 text-5xl font-bold">{value}</h1>
-
-          <div className="mt-4 flex items-center gap-2">
-            <span
-              className={`text-sm font-semibold ${
-                positive ? "text-green-600" : "text-red-600"
-              }`}
-            >
-              {trend}
-            </span>
-
-            <span className="text-sm text-gray-500">{subtitle}</span>
-          </div>
-        </div>
-
-        <div className={`rounded-2xl p-5 ${iconBg}`}>{icon}</div>
-      </div>
+      {/* VALUE */}
+      <h1 className="mt-4 text-5xl font-bold text-black">{value}</h1>
     </div>
   );
 }
