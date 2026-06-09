@@ -8,26 +8,17 @@ export async function GET() {
     // GROWTH CALCULATION
     // =====================================================
 
-    function calculateGrowth(
-      current: number,
-      previous: number
-    ) {
+    function calculateGrowth(current: number, previous: number) {
       if (previous === 0) return 0;
 
-      return Number(
-        (
-          ((current - previous) / previous) *
-          100
-        ).toFixed(1)
-      );
+      return Number((((current - previous) / previous) * 100).toFixed(1));
     }
 
     // =====================================================
     // MAIN STATS
     // =====================================================
 
-    const [statsRows]: any =
-      await pool.query(`
+    const [statsRows]: any = await pool.query(`
         SELECT
           COUNT(DISTINCT mission_name) AS total_missions,
           COUNT(*) AS total_flights,
@@ -40,8 +31,7 @@ export async function GET() {
     // ACTIVE FLIGHTS TODAY
     // =====================================================
 
-    const [activeRows]: any =
-      await pool.query(`
+    const [activeRows]: any = await pool.query(`
         SELECT COUNT(*) AS active_flights
         FROM drone_flight_history
         WHERE DATE(flight_date)=CURDATE()
@@ -51,28 +41,31 @@ export async function GET() {
     // ACTIVE FLIGHT LIST
     // =====================================================
 
-    const [activeFlightRows]: any =
-      await pool.query(`
+    const [activeFlightRows]: any = await pool.query(`
         SELECT
-          id,
-          flight_id,
-          mission_name,
-          battery_id,
-          start_time,
-          end_time,
-          duration_min,
-          end_percent
-        FROM drone_flight_history
-        WHERE DATE(flight_date)=CURDATE()
-        ORDER BY start_time DESC
+          f.*,
+
+          a.ama_name AS ama,
+
+          a.latitude,
+
+          a.longitude,
+
+          a.status AS ama_status
+
+        FROM drone_flight_history f
+
+        LEFT JOIN amas a
+        ON a.id = f.ama_id
+
+        ORDER BY f.id DESC
       `);
 
     // =====================================================
     // LOW BATTERY ALERT
     // =====================================================
 
-    const [batteryRows]: any =
-      await pool.query(`
+    const [batteryRows]: any = await pool.query(`
         SELECT COUNT(*) AS battery_alerts
         FROM drone_flight_history
         WHERE
@@ -84,8 +77,7 @@ export async function GET() {
     // LOW BATTERY LIST
     // =====================================================
 
-    const [lowBatteryToday]: any =
-      await pool.query(`
+    const [lowBatteryToday]: any = await pool.query(`
         SELECT
           flight_id,
           battery_id,
@@ -102,8 +94,7 @@ export async function GET() {
     // MOST ACTIVE MISSION
     // =====================================================
 
-    const [missionRows]: any =
-      await pool.query(`
+    const [missionRows]: any = await pool.query(`
         SELECT
           mission_name,
           COUNT(*) AS total
@@ -117,8 +108,7 @@ export async function GET() {
     // LATEST UPLOAD
     // =====================================================
 
-    const [uploadRows]: any =
-      await pool.query(`
+    const [uploadRows]: any = await pool.query(`
         SELECT
           MAX(created_at) AS latest_upload
         FROM drone_flight_history
@@ -128,32 +118,28 @@ export async function GET() {
     // CURRENT MONTH
     // =====================================================
 
-    const [currentFlights]: any =
-      await pool.query(`
+    const [currentFlights]: any = await pool.query(`
         SELECT COUNT(*) AS total
         FROM drone_flight_history
         WHERE MONTH(flight_date) = MONTH(CURDATE())
           AND YEAR(flight_date) = YEAR(CURDATE())
       `);
 
-    const [currentDuration]: any =
-      await pool.query(`
+    const [currentDuration]: any = await pool.query(`
         SELECT SUM(duration_min) AS total
         FROM drone_flight_history
         WHERE MONTH(flight_date) = MONTH(CURDATE())
           AND YEAR(flight_date) = YEAR(CURDATE())
       `);
 
-    const [currentMission]: any =
-      await pool.query(`
+    const [currentMission]: any = await pool.query(`
         SELECT COUNT(DISTINCT mission_name) AS total
         FROM drone_flight_history
         WHERE MONTH(flight_date) = MONTH(CURDATE())
           AND YEAR(flight_date) = YEAR(CURDATE())
       `);
 
-    const [currentAvg]: any =
-      await pool.query(`
+    const [currentAvg]: any = await pool.query(`
         SELECT AVG(duration_min) AS total
         FROM drone_flight_history
         WHERE MONTH(flight_date) = MONTH(CURDATE())
@@ -164,8 +150,7 @@ export async function GET() {
     // PREVIOUS MONTH
     // =====================================================
 
-    const [previousFlights]: any =
-      await pool.query(`
+    const [previousFlights]: any = await pool.query(`
         SELECT COUNT(*) AS total
         FROM drone_flight_history
         WHERE MONTH(flight_date) =
@@ -174,8 +159,7 @@ export async function GET() {
           YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
       `);
 
-    const [previousDuration]: any =
-      await pool.query(`
+    const [previousDuration]: any = await pool.query(`
         SELECT SUM(duration_min) AS total
         FROM drone_flight_history
         WHERE MONTH(flight_date) =
@@ -184,8 +168,7 @@ export async function GET() {
           YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
       `);
 
-    const [previousMission]: any =
-      await pool.query(`
+    const [previousMission]: any = await pool.query(`
         SELECT COUNT(DISTINCT mission_name) AS total
         FROM drone_flight_history
         WHERE MONTH(flight_date) =
@@ -194,8 +177,7 @@ export async function GET() {
           YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
       `);
 
-    const [previousAvg]: any =
-      await pool.query(`
+    const [previousAvg]: any = await pool.query(`
         SELECT AVG(duration_min) AS total
         FROM drone_flight_history
         WHERE MONTH(flight_date) =
@@ -208,8 +190,7 @@ export async function GET() {
     // TOP PILOT
     // =====================================================
 
-    const [topPilotRows]: any =
-      await pool.query(`
+    const [topPilotRows]: any = await pool.query(`
         SELECT
           pilot,
           COUNT(*) AS flights,
@@ -229,42 +210,31 @@ export async function GET() {
 
     return NextResponse.json({
       // MAIN STATS
-      total_missions:
-        statsRows[0]?.total_missions || 0,
+      total_missions: statsRows[0]?.total_missions || 0,
 
-      total_flights:
-        statsRows[0]?.total_flights || 0,
+      total_flights: statsRows[0]?.total_flights || 0,
 
-      total_duration:
-        statsRows[0]?.total_duration || 0,
+      total_duration: statsRows[0]?.total_duration || 0,
 
       avg_duration: Number(
-        parseFloat(
-          statsRows[0]?.avg_duration || 0
-        ).toFixed(1)
+        parseFloat(statsRows[0]?.avg_duration || 0).toFixed(1)
       ),
 
       // ACTIVE
-      active_flights:
-        activeRows[0]?.active_flights || 0,
+      active_flights: activeRows[0]?.active_flights || 0,
 
-      active_flight_list:
-        activeFlightRows || [],
+      active_flight_list: activeFlightRows || [],
 
       // BATTERY
-      battery_alerts:
-        batteryRows[0]?.battery_alerts || 0,
+      battery_alerts: batteryRows[0]?.battery_alerts || 0,
 
-      low_battery_flights:
-        lowBatteryToday || [],
+      low_battery_flights: lowBatteryToday || [],
 
       // MOST ACTIVE
-      most_active_mission:
-        missionRows[0]?.mission_name || "-",
+      most_active_mission: missionRows[0]?.mission_name || "-",
 
       // UPLOAD
-      latest_upload:
-        uploadRows[0]?.latest_upload || null,
+      latest_upload: uploadRows[0]?.latest_upload || null,
 
       // GROWTH
       mission_growth: calculateGrowth(
@@ -288,8 +258,7 @@ export async function GET() {
       ),
 
       // TOP PILOT
-      top_pilot:
-        topPilotRows[0] || null,
+      top_pilot: topPilotRows[0] || null,
     });
   } catch (error) {
     console.error(error);
