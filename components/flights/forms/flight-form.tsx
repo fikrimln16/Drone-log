@@ -61,12 +61,8 @@ export default function FlightForm({
             label="AMA"
             value={form.ama}
             error={errors.ama}
-            onChange={(value) =>
-              setForm({
-                ...form,
-                ama: value,
-              })
-            }
+            disabled
+            onChange={() => {}}
           />
 
           <FlightInput
