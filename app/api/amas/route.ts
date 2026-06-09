@@ -30,3 +30,40 @@ export async function GET() {
     );
   }
 }
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+
+    const { ama_name, status, latitude, longitude } = body;
+
+    await pool.query(
+      `
+      INSERT INTO amas
+      (
+        ama_name,
+        status,
+        latitude,
+        longitude
+      )
+      VALUES (?, ?, ?, ?)
+      `,
+      [ama_name, status, Number(latitude), Number(longitude)]
+    );
+
+    return NextResponse.json({
+      success: true,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      {
+        success: false,
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+}

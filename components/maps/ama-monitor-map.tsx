@@ -1,6 +1,12 @@
 "use client";
 
-import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import {
+  MapContainer,
+  Marker,
+  Popup,
+  TileLayer,
+  useMapEvents,
+} from "react-leaflet";
 
 import { useEffect, useMemo, useState } from "react";
 
@@ -9,6 +15,10 @@ import L from "leaflet";
 import { MapPinned, RadioTower, X } from "lucide-react";
 
 import Link from "next/link";
+
+import AddAmaModal from "@/components/flights/modals/add-ama-modal";
+
+import EditAmaStatusModal from "@/components/flights/modals/edit-ama-status-modal";
 
 // =====================================================
 // FIX MARKER
@@ -91,34 +101,84 @@ function createCustomMarker(color: string) {
   });
 }
 
+// =====================================================
+// MAP PICKER
+// =====================================================
+
+function MapClickHandler({
+  onPick,
+}: {
+  onPick: (lat: number, lng: number) => void;
+}) {
+  useMapEvents({
+    click(e) {
+      onPick(e.latlng.lat, e.latlng.lng);
+    },
+  });
+
+  return null;
+}
+
+// =====================================================
+// COMPONENT
+// =====================================================
+
 export default function AmaMonitorMap() {
   const [amaPoints, setAmaPoints] = useState<AmaPoint[]>([]);
 
   const [loading, setLoading] = useState(true);
 
+  // STATUS MODAL
   const [openStatusModal, setOpenStatusModal] = useState(false);
 
   const [selectedStatus, setSelectedStatus] = useState("");
+
+  // ADD AMA MODAL
+  const [openAddAma, setOpenAddAma] = useState(false);
+
+  // EDIT STATUS MODAL
+  const [openEditStatus, setOpenEditStatus] = useState(false);
+
+  // NEW AMA
+  const [newAma, setNewAma] = useState({
+    ama_name: "",
+
+    status: "PENDING",
+
+    latitude: "",
+
+    longitude: "",
+  });
 
   // =====================================================
   // FETCH MAP DATA
   // =====================================================
 
-  useEffect(() => {
-    async function fetchMapData() {
-      try {
-        const response = await fetch("/api/maps/ama");
+  // =====================================================
+  // FETCH MAP DATA
+  // =====================================================
 
-        const data = await response.json();
+  async function fetchMapData() {
+    try {
+      setLoading(true);
 
-        setAmaPoints(data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
+      const response = await fetch("/api/maps/ama");
+
+      const data = await response.json();
+
+      setAmaPoints(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
+  }
 
+  // =====================================================
+  // INITIAL FETCH
+  // =====================================================
+
+  useEffect(() => {
     fetchMapData();
   }, []);
 
@@ -142,7 +202,7 @@ export default function AmaMonitorMap() {
   }, [amaPoints]);
 
   // =====================================================
-  // FILTER MODAL DATA
+  // FILTER DATA
   // =====================================================
 
   const filteredStatusData = amaPoints.filter(
@@ -163,6 +223,10 @@ export default function AmaMonitorMap() {
 
   return (
     <>
+      {/* ================================================= */}
+      {/* MAIN LAYOUT */}
+      {/* ================================================= */}
+
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-4">
         {/* ================================================= */}
         {/* MAP */}
@@ -207,6 +271,7 @@ export default function AmaMonitorMap() {
                 >
                   <Popup>
                     <div className="min-w-[230px] space-y-3">
+                      {/* TITLE */}
                       <div>
                         <h1 className="text-lg font-bold">{item.ama}</h1>
 
@@ -263,8 +328,7 @@ export default function AmaMonitorMap() {
                         </div>
                       </div>
 
-                      {/* MISSION LIST */}
-                      {/* MISSION LIST */}
+                      {/* MISSIONS */}
                       <div>
                         <p className="mb-2 text-xs text-gray-400">
                           Mission List
@@ -353,10 +417,6 @@ export default function AmaMonitorMap() {
                   <p className="mt-1 text-xs text-green-600">
                     Finished mission
                   </p>
-
-                  <p className="mt-3 text-xs font-medium text-green-700 opacity-70">
-                    Click to view AMA list
-                  </p>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -389,10 +449,6 @@ export default function AmaMonitorMap() {
                   <p className="mt-1 text-xs text-yellow-600">
                     Active monitoring
                   </p>
-
-                  <p className="mt-3 text-xs font-medium text-yellow-700 opacity-70">
-                    Click to view AMA list
-                  </p>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -423,10 +479,6 @@ export default function AmaMonitorMap() {
                   </div>
 
                   <p className="mt-1 text-xs text-red-600">Waiting operation</p>
-
-                  <p className="mt-3 text-xs font-medium text-red-700 opacity-70">
-                    Click to view AMA list
-                  </p>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -438,20 +490,47 @@ export default function AmaMonitorMap() {
                 </div>
               </button>
 
-              {/* LAST SYNC */}
-              <div className="mt-auto rounded-2xl border bg-gray-50 p-5">
-                <p className="text-sm text-gray-500">Last Sync</p>
+              {/* QUICK ACTION */}
+              <div className="mt-auto grid grid-cols-2 gap-3">
+                {/* ADD AMA */}
+                <button
+                  onClick={() => setOpenAddAma(true)}
+                  className="group flex items-center justify-between rounded-2xl border bg-white px-4 py-4 transition hover:border-blue-300 hover:bg-blue-50 hover:shadow-md"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-2xl bg-blue-100 p-3 transition group-hover:bg-blue-200">
+                      <MapPinned className="h-5 w-5 text-blue-600" />
+                    </div>
 
-                <div className="mt-3">
-                  <h1 className="text-2xl font-bold">
-                    {new Date().toLocaleDateString()}
-                  </h1>
+                    <div className="text-left">
+                      <h1 className="text-sm font-bold">Add AMA</h1>
 
-                  <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">
-                    <div className="h-2 w-2 rounded-full bg-green-500" />
-                    Synced Successfully
+                      <p className="mt-1 text-[11px] text-gray-500">
+                        New location
+                      </p>
+                    </div>
                   </div>
-                </div>
+                </button>
+
+                {/* EDIT STATUS */}
+                <button
+                  onClick={() => setOpenEditStatus(true)}
+                  className="group flex items-center justify-between rounded-2xl border bg-white px-4 py-4 transition hover:border-purple-300 hover:bg-purple-50 hover:shadow-md"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-2xl bg-purple-100 p-3 transition group-hover:bg-purple-200">
+                      <RadioTower className="h-5 w-5 text-purple-600" />
+                    </div>
+
+                    <div className="text-left">
+                      <h1 className="text-sm font-bold">Edit Status</h1>
+
+                      <p className="mt-1 text-[11px] text-gray-500">
+                        AMA condition
+                      </p>
+                    </div>
+                  </div>
+                </button>
               </div>
             </div>
           </div>
@@ -538,6 +617,19 @@ export default function AmaMonitorMap() {
           </div>
         </div>
       )}
+
+      <AddAmaModal
+        open={openAddAma}
+        onClose={() => setOpenAddAma(false)}
+        onSuccess={fetchMapData}
+      />
+
+      <EditAmaStatusModal
+        open={openEditStatus}
+        onClose={() => setOpenEditStatus(false)}
+        amaPoints={amaPoints}
+        onSuccess={fetchMapData}
+      />
     </>
   );
 }
