@@ -30,6 +30,8 @@ type Props = {
   open: boolean;
 
   onClose: () => void;
+
+  onSuccess?: (flight: any) => void;
 };
 
 export default function AddFlightModal({ mission, open, onClose }: Props) {

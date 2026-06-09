@@ -46,12 +46,9 @@ import useMissionFilter from "@/hooks/useMissionFilter";
 import usePagination from "@/hooks/usePagination";
 
 // MAP
-const AmaMonitorMap = dynamic(
-  () => import("../maps/ama-monitor-map"),
-  {
-    ssr: false,
-  }
-);
+const AmaMonitorMap = dynamic(() => import("../maps/ama-monitor-map"), {
+  ssr: false,
+});
 
 export default function MissionTable() {
   // SEARCH
@@ -78,20 +75,13 @@ export default function MissionTable() {
   });
 
   // PAGINATION
-  const {
-    paginatedData,
-    currentPage,
-    setCurrentPage,
-    totalPages,
-  } = usePagination(filteredMissions, 5);
+  const { paginatedData, currentPage, setCurrentPage, totalPages } =
+    usePagination(filteredMissions, 5);
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-[#f5f7fb]">
       {/* NAVBAR */}
-      <Navbar
-        title="Mission Dashboard"
-        subtitle="Drone Flight Management"
-      />
+      <Navbar title="Mission Dashboard" subtitle="Drone Flight Management" />
 
       {/* CONTENT */}
       <div className="w-full px-5 pt-[120px] pb-6 md:px-6 xl:px-7">
@@ -106,9 +96,7 @@ export default function MissionTable() {
               {/* OPERATION */}
               <DashboardOperation
                 stats={stats}
-                onOpenActive={() =>
-                  setOpenActiveModal(true)
-                }
+                onOpenActive={() => setOpenActiveModal(true)}
               />
 
               <AmaMonitorMap />
@@ -143,9 +131,7 @@ export default function MissionTable() {
 
                     {/* TEXT */}
                     <div className="text-left">
-                      <p className="text-sm font-semibold">
-                        All Flights
-                      </p>
+                      <p className="text-sm font-semibold">All Flights</p>
 
                       <p className="text-xs text-gray-500">
                         View all flight logs
@@ -181,9 +167,7 @@ export default function MissionTable() {
               </div>
 
               {/* TABLE */}
-              <DashboardTable
-                missions={paginatedData}
-              />
+              <DashboardTable missions={paginatedData} />
 
               {/* PAGINATION */}
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -194,9 +178,7 @@ export default function MissionTable() {
                     {currentPage}
                   </span>{" "}
                   of{" "}
-                  <span className="font-semibold text-black">
-                    {totalPages}
-                  </span>
+                  <span className="font-semibold text-black">{totalPages}</span>
                 </p>
 
                 {/* BUTTON */}
@@ -204,11 +186,7 @@ export default function MissionTable() {
                   {/* PREVIOUS */}
                   <button
                     disabled={currentPage === 1}
-                    onClick={() =>
-                      setCurrentPage(
-                        (prev) => prev - 1
-                      )
-                    }
+                    onClick={() => setCurrentPage((prev) => prev - 1)}
                     className="rounded-xl border bg-white px-4 py-2 text-sm transition hover:bg-gray-100 disabled:opacity-40"
                   >
                     Previous
@@ -223,9 +201,7 @@ export default function MissionTable() {
                     return (
                       <button
                         key={page}
-                        onClick={() =>
-                          setCurrentPage(page)
-                        }
+                        onClick={() => setCurrentPage(page)}
                         className={`h-10 w-10 rounded-xl border text-sm font-medium transition ${
                           currentPage === page
                             ? "bg-black text-white"
@@ -239,14 +215,8 @@ export default function MissionTable() {
 
                   {/* NEXT */}
                   <button
-                    disabled={
-                      currentPage === totalPages
-                    }
-                    onClick={() =>
-                      setCurrentPage(
-                        (prev) => prev + 1
-                      )
-                    }
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((prev) => prev + 1)}
                     className="rounded-xl border bg-white px-4 py-2 text-sm transition hover:bg-gray-100 disabled:opacity-40"
                   >
                     Next
@@ -261,21 +231,15 @@ export default function MissionTable() {
       {/* ACTIVE MODAL */}
       <ActiveFlightsModal
         open={openActiveModal}
-        onClose={() =>
-          setOpenActiveModal(false)
-        }
-        flights={
-          stats.active_flight_list || []
-        }
+        onClose={() => setOpenActiveModal(false)}
+        flights={stats.active_flight_list || []}
       />
 
       {/* ADD FLIGHT MODAL */}
       <AddFlightModal
         mission=""
         open={openAddFlight}
-        onClose={() =>
-          setOpenAddFlight(false)
-        }
+        onClose={() => setOpenAddFlight(false)}
       />
 
       <Footer />
