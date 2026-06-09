@@ -28,10 +28,11 @@ export async function POST(req: Request) {
           start_time,
           end_time,
           duration_min,
-          notes
+          notes,
+          ama_id
         )
         VALUES (
-          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
         )
         `,
         [
@@ -68,6 +69,8 @@ export async function POST(req: Request) {
           item.duration_min,
 
           item.notes || "",
+
+          item.ama_id,
         ]
       );
     }
