@@ -1,5 +1,7 @@
 "use client";
 
+import dynamic from "next/dynamic";
+
 import { Loader2, Plus, X } from "lucide-react";
 
 import useAddFlightForm from "@/hooks/useAddFlightForm";
@@ -12,6 +14,14 @@ import BatterySelect from "../forms/battery-select";
 
 import useAmaOptions from "@/hooks/useAmaOptions";
 
+// =====================================================
+// DYNAMIC MAP
+// =====================================================
+
+const AmaPickerMap = dynamic(() => import("../../maps/ama-picker-map"), {
+  ssr: false,
+});
+
 type Props = {
   mission: string;
 
@@ -21,20 +31,35 @@ type Props = {
 };
 
 export default function AddFlightModal({ mission, open, onClose }: Props) {
+  // =====================================================
+  // AMA OPTIONS
+  // =====================================================
+
   const { amas } = useAmaOptions();
+
+  // =====================================================
+  // FORM
+  // =====================================================
+
   const { form, setForm, errors, loading, isValid, handleSubmit } =
     useAddFlightForm(mission, onClose);
 
   if (!open) return null;
 
-
   return (
     <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+      {/* ================================================= */}
       {/* MODAL */}
-      <div className="flex h-[92vh] w-full max-w-[1100px] flex-col overflow-hidden rounded-[32px] bg-white shadow-2xl">
+      {/* ================================================= */}
+
+      <div className="flex h-[92vh] w-full max-w-[1200px] flex-col overflow-hidden rounded-[32px] bg-white shadow-2xl">
+        {/* ================================================= */}
         {/* HEADER */}
+        {/* ================================================= */}
+
         <div className="border-b px-8 py-6">
           <div className="flex items-start justify-between">
+            {/* LEFT */}
             <div className="flex items-start gap-5">
               {/* ICON */}
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100">
@@ -51,27 +76,28 @@ export default function AddFlightModal({ mission, open, onClose }: Props) {
                   New Flight Log
                 </h1>
 
+                {/* MISSION */}
                 {mission ? (
-                <div className="mt-3 inline-flex rounded-full bg-blue-50 px-4 py-2">
-                  <span className="text-sm font-semibold text-blue-700">
-                    {mission}
-                  </span>
-                </div>
-              ) : (
-                <div className="mt-4">
-                  <FlightInput
-                    label="Mission Name"
-                    value={form.mission_name || ""}
-                    error={errors.mission_name}
-                    onChange={(value) =>
-                      setForm({
-                        ...form,
-                        mission_name: value,
-                      })
-                    }
-                  />
-                </div>
-              )}
+                  <div className="mt-3 inline-flex rounded-full bg-blue-50 px-4 py-2">
+                    <span className="text-sm font-semibold text-blue-700">
+                      {mission}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="mt-4 w-[320px]">
+                    <FlightInput
+                      label="Mission Name"
+                      value={form.mission_name || ""}
+                      error={errors.mission_name}
+                      onChange={(value) =>
+                        setForm({
+                          ...form,
+                          mission_name: value,
+                        })
+                      }
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
@@ -85,12 +111,19 @@ export default function AddFlightModal({ mission, open, onClose }: Props) {
           </div>
         </div>
 
+        {/* ================================================= */}
         {/* BODY */}
+        {/* ================================================= */}
+
         <div className="flex-1 overflow-y-auto px-8 py-6">
           <div className="space-y-7">
-            {/* FLIGHT */}
+            {/* ================================================= */}
+            {/* FLIGHT INFORMATION */}
+            {/* ================================================= */}
+
             <FlightFormSection title="Flight Information">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {/* DATE */}
                 <FlightInput
                   label="Flight Date"
                   type="date"
@@ -104,6 +137,7 @@ export default function AddFlightModal({ mission, open, onClose }: Props) {
                   }
                 />
 
+                {/* FLIGHT ID */}
                 <FlightInput
                   label="Flight ID"
                   value={form.flight_id}
@@ -116,58 +150,50 @@ export default function AddFlightModal({ mission, open, onClose }: Props) {
                   }
                 />
 
+                {/* ================================================= */}
+                {/* AMA DROPDOWN */}
+                {/* ================================================= */}
+
                 <div>
-                {/* LABEL */}
-                <label className="mb-2 block text-sm font-bold tracking-wide text-gray-600 uppercase">
-                  AMA
-                </label>
+                  <label className="mb-2 block text-sm font-bold tracking-wide text-gray-600 uppercase">
+                    AMA
+                  </label>
 
-                {/* SELECT */}
-                <select
-                  value={form.ama_id || ""}
-                  onChange={(e) => {
-                    const selectedAma = amas.find(
-                      (item: any) =>
-                        item.id === Number(e.target.value)
-                    );
+                  <select
+                    value={form.ama_id || ""}
+                    onChange={(e) => {
+                      const selectedAma = amas.find(
+                        (item: any) => item.id === Number(e.target.value)
+                      );
 
-                    setForm({
-                      ...form,
+                      setForm({
+                        ...form,
 
-                      // FOREIGN KEY
-                      ama_id: Number(e.target.value),
+                        ama_id: Number(e.target.value),
 
-                      // AMA NAME
-                      ama: selectedAma?.ama_name || "",
-                    });
-                  }}
-                  className={`h-[64px] w-full rounded-2xl border bg-gray-50 px-5 text-lg outline-none ${
-                    errors.ama
-                      ? "border-red-500"
-                      : "border-gray-200"
-                  }`}
-                >
-                  <option value="">
-                    Select AMA
-                  </option>
+                        ama: selectedAma?.ama_name || "",
+                      });
+                    }}
+                    className={`h-[64px] w-full rounded-2xl border bg-gray-50 px-5 text-lg outline-none ${
+                      errors.ama ? "border-red-500" : "border-gray-200"
+                    }`}
+                  >
+                    <option value="">Select AMA</option>
 
-                  {amas.map((item: any) => (
-                    <option
-                      key={item.id}
-                      value={item.id}
-                    >
-                      {item.ama_name}
-                    </option>
-                  ))}
-                </select>
+                    {amas.map((item: any) => (
+                      <option key={item.id} value={item.id}>
+                        {item.ama_name}
+                      </option>
+                    ))}
+                  </select>
 
-                {/* ERROR */}
-                {errors.ama && (
-                  <p className="mt-2 text-sm text-red-500">
-                    {errors.ama}
-                  </p>
-                )}
-              </div>
+                  {/* ERROR */}
+                  {errors.ama && (
+                    <p className="mt-2 text-sm text-red-500">{errors.ama}</p>
+                  )}
+                </div>
+
+                {/* ESTATE */}
                 <FlightInput
                   label="Estate"
                   value={form.estate}
@@ -180,6 +206,26 @@ export default function AddFlightModal({ mission, open, onClose }: Props) {
                   }
                 />
 
+                {/* ================================================= */}
+                {/* MAP PICKER */}
+                {/* ================================================= */}
+
+                <div className="md:col-span-2">
+                  <AmaPickerMap
+                    selectedAmaId={form.ama_id}
+                    onSelect={(ama: any) => {
+                      setForm({
+                        ...form,
+
+                        ama_id: ama.id,
+
+                        ama: ama.ama_name,
+                      });
+                    }}
+                  />
+                </div>
+
+                {/* PILOT */}
                 <FlightInput
                   label="Pilot"
                   value={form.pilot}
@@ -194,7 +240,10 @@ export default function AddFlightModal({ mission, open, onClose }: Props) {
               </div>
             </FlightFormSection>
 
+            {/* ================================================= */}
             {/* BATTERY */}
+            {/* ================================================= */}
+
             <FlightFormSection title="Battery Information">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FlightInput
@@ -287,7 +336,10 @@ export default function AddFlightModal({ mission, open, onClose }: Props) {
               </div>
             </FlightFormSection>
 
+            {/* ================================================= */}
             {/* TIME */}
+            {/* ================================================= */}
+
             <FlightFormSection title="Flight Time">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <FlightInput
@@ -331,7 +383,10 @@ export default function AddFlightModal({ mission, open, onClose }: Props) {
               </div>
             </FlightFormSection>
 
+            {/* ================================================= */}
             {/* NOTES */}
+            {/* ================================================= */}
+
             <FlightFormSection title="Additional Notes">
               <textarea
                 value={form.notes}
@@ -348,7 +403,10 @@ export default function AddFlightModal({ mission, open, onClose }: Props) {
           </div>
         </div>
 
+        {/* ================================================= */}
         {/* FOOTER */}
+        {/* ================================================= */}
+
         <div className="sticky bottom-0 flex items-center justify-between border-t bg-white px-8 py-5">
           {/* INFO */}
           <div>
