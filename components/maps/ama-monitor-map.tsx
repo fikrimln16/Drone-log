@@ -264,6 +264,7 @@ export default function AmaMonitorMap() {
                       </div>
 
                       {/* MISSION LIST */}
+                      {/* MISSION LIST */}
                       <div>
                         <p className="mb-2 text-xs text-gray-400">
                           Mission List
@@ -272,12 +273,13 @@ export default function AmaMonitorMap() {
                         <div className="flex flex-wrap gap-2">
                           {item.missions?.length > 0 ? (
                             item.missions.map((mission, index) => (
-                              <div
+                              <Link
                                 key={index}
-                                className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700"
+                                href={`/missions/${mission}`}
+                                className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 transition hover:bg-blue-600 hover:text-white"
                               >
                                 {mission}
-                              </div>
+                              </Link>
                             ))
                           ) : (
                             <div className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-500">
