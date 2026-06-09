@@ -14,6 +14,8 @@ import BatterySelect from "../forms/battery-select";
 
 import useAmaOptions from "@/hooks/useAmaOptions";
 
+import { useEffect, useState } from "react";
+
 // =====================================================
 // DYNAMIC MAP
 // =====================================================
@@ -37,12 +39,32 @@ export default function AddFlightModal({ mission, open, onClose }: Props) {
 
   const { amas } = useAmaOptions();
 
+  const [missions, setMissions] = useState<any[]>([]);
+
+  const [isNewMission, setIsNewMission] = useState(false);
+
   // =====================================================
   // FORM
   // =====================================================
 
   const { form, setForm, errors, loading, isValid, handleSubmit } =
     useAddFlightForm(mission, onClose);
+
+  useEffect(() => {
+    async function fetchMissions() {
+      try {
+        const response = await fetch("/api/missions");
+
+        const data = await response.json();
+
+        setMissions(data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    fetchMissions();
+  }, []);
 
   if (!open) return null;
 
@@ -84,18 +106,89 @@ export default function AddFlightModal({ mission, open, onClose }: Props) {
                     </span>
                   </div>
                 ) : (
-                  <div className="mt-4 w-[320px]">
-                    <FlightInput
-                      label="Mission Name"
-                      value={form.mission_name || ""}
-                      error={errors.mission_name}
-                      onChange={(value) =>
-                        setForm({
-                          ...form,
-                          mission_name: value,
-                        })
-                      }
-                    />
+                  <div className="mt-4 w-[340px]">
+                    {/* LABEL */}
+                    <label className="mb-2 block text-sm font-bold tracking-wide text-gray-600 uppercase">
+                      Mission Name
+                    </label>
+
+                    {/* SELECT */}
+                    {!isNewMission ? (
+                      <select
+                        value={form.mission_name || ""}
+                        onChange={(e) => {
+                          if (e.target.value === "__new__") {
+                            setIsNewMission(true);
+
+                            setForm({
+                              ...form,
+
+                              mission_name: "",
+                            });
+
+                            return;
+                          }
+
+                          setForm({
+                            ...form,
+
+                            mission_name: e.target.value,
+                          });
+                        }}
+                        className="h-[58px] w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 text-base transition outline-none focus:border-blue-500"
+                      >
+                        <option value="">Select Mission</option>
+
+                        {missions.map((item: any, index: number) => (
+                          <option key={index} value={item.mission_name}>
+                            {item.mission_name}
+                          </option>
+                        ))}
+
+                        {/* NEW */}
+                        <option value="__new__">+ Create New Mission</option>
+                      </select>
+                    ) : (
+                      <div className="space-y-3">
+                        {/* INPUT */}
+                        <input
+                          value={form.mission_name}
+                          onChange={(e) =>
+                            setForm({
+                              ...form,
+
+                              mission_name: e.target.value.toUpperCase(),
+                            })
+                          }
+                          placeholder="Input new mission..."
+                          className="h-[58px] w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 text-base transition outline-none focus:border-blue-500"
+                        />
+
+                        {/* BACK */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsNewMission(false);
+
+                            setForm({
+                              ...form,
+
+                              mission_name: "",
+                            });
+                          }}
+                          className="text-sm font-semibold text-blue-600 hover:text-blue-700"
+                        >
+                          ← Back to existing mission
+                        </button>
+                      </div>
+                    )}
+
+                    {/* ERROR */}
+                    {errors.mission_name && (
+                      <p className="mt-2 text-sm text-red-500">
+                        {errors.mission_name}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
