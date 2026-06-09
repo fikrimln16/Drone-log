@@ -23,9 +23,6 @@ export async function GET() {
       LEFT JOIN drone_flight_history f
         ON f.ama_id = a.id
 
-      WHERE
-         a.latitude IS NOT NULL
-         AND a.longitude IS NOT NULL
 
       GROUP BY
         a.id,
