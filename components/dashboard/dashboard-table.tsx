@@ -39,9 +39,7 @@ export default function DashboardTable({ missions }: Props) {
 
         const dateB = new Date(valueB).getTime();
 
-        return sortDirection === "asc"
-          ? dateA - dateB
-          : dateB - dateA;
+        return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
       }
 
       // ============================================
@@ -63,12 +61,8 @@ export default function DashboardTable({ missions }: Props) {
       // ============================================
 
       return sortDirection === "asc"
-        ? String(valueA).localeCompare(
-            String(valueB)
-          )
-        : String(valueB).localeCompare(
-            String(valueA)
-          );
+        ? String(valueA).localeCompare(String(valueB))
+        : String(valueB).localeCompare(String(valueA));
     });
   }, [missions, sortBy, sortDirection]);
 
@@ -97,7 +91,7 @@ export default function DashboardTable({ missions }: Props) {
   }
 
   return (
-    <div className="overflow-hidden rounded-[32px] border bg-white shadow-sm">
+    <div className="mt-4 overflow-hidden rounded-[32px] border bg-white shadow-sm">
       {/* RESPONSIVE WRAPPER */}
       <div className="w-full overflow-x-auto">
         <table className="w-full min-w-[850px]">

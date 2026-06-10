@@ -27,6 +27,8 @@ import Footer from "../layout/footer";
 
 import AddFlightModal from "../flights/modals/add-flight-model";
 
+import PilotSummaryTable from "./pilot-summary-table";
+
 // ICONS
 import { List, Plus } from "lucide-react";
 
@@ -70,7 +72,7 @@ export default function MissionTable() {
     usePagination(filteredMissions, 5);
 
   return (
-    <div className="h-screen snap-y snap-mandatory overflow-x-hidden overflow-y-auto bg-[#f5f7fb]">
+    <div className="h-screen snap-y snap-mandatory overflow-x-hidden overflow-y-auto scroll-smooth bg-[#f5f7fb]">
       {/* NAVBAR */}
       <Navbar title="Mission Dashboard" subtitle="Drone Flight Management" />
 
@@ -81,10 +83,11 @@ export default function MissionTable() {
       ) : (
         <>
           {/* ================================================= */}
-          {/* SECTION 1 */}
+          {/* SECTION 1 - KPI */}
           {/* ================================================= */}
-          <section className="min-h-screen snap-start px-5 pt-[120px] pb-8 md:px-6 xl:px-7">
-            <div className="space-y-4">
+
+          <section className="snap-start px-5 py-[110px] pt-[110px] pb-8 md:px-6 xl:px-7">
+            <div className="flex min-h-[calc(100vh-130px)] flex-col justify-center space-y-4">
               {/* KPI */}
               <DashboardKPI stats={stats} />
 
@@ -100,38 +103,64 @@ export default function MissionTable() {
           </section>
 
           {/* ================================================= */}
-          {/* SECTION 2 */}
+          {/* SECTION 2 - AMA MAP */}
           {/* ================================================= */}
-          <section className="min-h-screen snap-start px-5 pt-[120px] pb-8 md:px-6 xl:px-7">
-            <div className="overflow-hidden rounded-[32px] border border-gray-200 bg-white shadow-sm">
-              {/* HEADER */}
-              <div className="flex items-center justify-between border-b border-gray-100 px-7 py-6">
-                <div>
-                  <h1 className="text-3xl font-bold">AMA Drone Monitoring</h1>
 
-                  <p className="mt-1 text-sm text-gray-500">
-                    Real-time Indonesia drone operation map
-                  </p>
+          <section className="min-h-screen snap-start px-5 pt-[110px] pb-8 md:px-6 xl:px-7">
+            <div className="flex min-h-[calc(100vh-130px)] flex-col">
+              <div className="overflow-hidden rounded-[32px] border border-gray-200 bg-white shadow-sm">
+                {/* HEADER */}
+                <div className="flex items-center justify-between border-b border-gray-100 px-7 py-6">
+                  <div>
+                    <h1 className="text-3xl font-bold">AMA Drone Monitoring</h1>
+
+                    <p className="mt-1 text-sm text-gray-500">
+                      Real-time Indonesia drone operation map
+                    </p>
+                  </div>
+
+                  <div className="rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-700">
+                    • Live Monitor
+                  </div>
                 </div>
 
-                <div className="rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-700">
-                  • Live Monitor
+                {/* MAP */}
+                <div className="h-[calc(100vh-240px)]">
+                  <AmaMonitorMap />
                 </div>
-              </div>
-
-              {/* MAP */}
-              <div className="h-[calc(100vh-240px)]">
-                <AmaMonitorMap />
               </div>
             </div>
           </section>
 
           {/* ================================================= */}
-          {/* SECTION 3 */}
+          {/* SECTION 3 - MISSION TABLE */}
           {/* ================================================= */}
-          <section className="min-h-screen snap-start px-5 pt-[120px] pb-8 md:px-6 xl:px-7">
-            <div className="space-y-6">
+
+          <section className="min-h-screen snap-start px-5 pt-[110px] pb-8 md:px-6 xl:px-7">
+            <div className="flex min-h-[calc(100vh-130px)] flex-col">
+              {/* ================================================= */}
+              {/* HEADER */}
+              {/* ================================================= */}
+
+              <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+                {/* LEFT */}
+                <div>
+                  <h1 className="mt-2 text-4xl font-bold tracking-tight text-black">
+                    Mission Summary
+                  </h1>
+
+                  <p className="mt-2 max-w-2xl text-base text-gray-500">
+                    Overview of drone missions, operational flights, duration
+                    tracking, and mission performance across all operational
+                    areas.
+                  </p>
+                </div>
+              </div>
+
+              {/* ================================================= */}
               {/* ACTION */}
+              {/* ================================================= */}
+
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 {/* SEARCH */}
                 <div className="relative w-full md:w-[420px]">
@@ -154,12 +183,10 @@ export default function MissionTable() {
                     href="/flights"
                     className="flex h-[54px] items-center gap-3 rounded-2xl border border-gray-200 bg-white px-5 shadow-sm transition hover:bg-gray-100"
                   >
-                    {/* ICON */}
                     <div className="rounded-xl bg-blue-100 p-2">
                       <List className="h-4 w-4 text-blue-600" />
                     </div>
 
-                    {/* TEXT */}
                     <div className="text-left">
                       <p className="text-sm font-semibold">All Flights</p>
 
@@ -174,12 +201,10 @@ export default function MissionTable() {
                     onClick={() => setOpenAddFlight(true)}
                     className="flex h-[54px] items-center gap-3 rounded-2xl border border-gray-200 bg-white px-5 shadow-sm transition hover:bg-gray-100"
                   >
-                    {/* ICON */}
                     <div className="rounded-xl bg-purple-100 p-2">
                       <Plus className="h-4 w-4 text-purple-600" />
                     </div>
 
-                    {/* TEXT */}
                     <div className="text-left">
                       <p className="text-sm font-semibold text-black">
                         Add Flight
@@ -196,12 +221,17 @@ export default function MissionTable() {
                 </div>
               </div>
 
+              {/* ================================================= */}
               {/* TABLE */}
+              {/* ================================================= */}
+
               <DashboardTable missions={paginatedData} />
 
+              {/* ================================================= */}
               {/* PAGINATION */}
+              {/* ================================================= */}
+
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                {/* INFO */}
                 <p className="text-sm text-gray-500">
                   Page{" "}
                   <span className="font-semibold text-black">
@@ -211,7 +241,6 @@ export default function MissionTable() {
                   <span className="font-semibold text-black">{totalPages}</span>
                 </p>
 
-                {/* BUTTONS */}
                 <div className="flex flex-wrap items-center gap-2">
                   {/* PREVIOUS */}
                   <button
@@ -253,6 +282,16 @@ export default function MissionTable() {
                   </button>
                 </div>
               </div>
+            </div>
+          </section>
+
+          {/* ================================================= */}
+          {/* SECTION 4 - PILOT SUMMARY */}
+          {/* ================================================= */}
+
+          <section className="min-h-screen snap-start px-5 pt-[110px] pb-10 md:px-6 xl:px-7">
+            <div className="flex min-h-[calc(100vh-130px)] flex-col justify-center">
+              <PilotSummaryTable />
             </div>
           </section>
         </>
