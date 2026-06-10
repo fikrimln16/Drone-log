@@ -1,6 +1,13 @@
 "use client";
 
-import { Check, Loader2, RadioTower, Save, X } from "lucide-react";
+import {
+  CalendarDays,
+  Check,
+  Loader2,
+  RadioTower,
+  Save,
+  X,
+} from "lucide-react";
 
 import { useState } from "react";
 
@@ -24,15 +31,43 @@ export default function EditAmaStatusModal({
 }: Props) {
   const [loadingId, setLoadingId] = useState<number | null>(null);
 
+  const [formData, setFormData] = useState<any>({});
+
   if (!open) return null;
 
   // =====================================================
-  // UPDATE STATUS
+  // HANDLE CHANGE
   // =====================================================
 
-  async function handleUpdate(item: any, status: string) {
+  function handleChange(id: number, field: string, value: string) {
+    setFormData((prev: any) => ({
+      ...prev,
+
+      [id]: {
+        ...prev[id],
+
+        [field]: value,
+      },
+    }));
+  }
+
+  // =====================================================
+  // UPDATE
+  // =====================================================
+
+  async function handleUpdate(item: any) {
     try {
       setLoadingId(item.id);
+
+      const current = formData[item.id] || {};
+
+      const payload = {
+        status: current.status || item.status,
+
+        planning_date: current.planning_date || item.planning_date,
+
+        actual_date: current.actual_date || item.actual_date,
+      };
 
       const response = await fetch(`/api/amas/${item.id}`, {
         method: "PUT",
@@ -41,21 +76,18 @@ export default function EditAmaStatusModal({
           "Content-Type": "application/json",
         },
 
-        body: JSON.stringify({
-          status,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        toast.error(result.message || "Failed update status");
+        toast.error(result.message || "Failed update AMA");
 
         return;
       }
 
-      // SUCCESS
-      toast.success(`${item.ama} updated to ${status}`);
+      toast.success(`${item.ama} updated`);
 
       onSuccess();
     } catch (error) {
@@ -68,7 +100,7 @@ export default function EditAmaStatusModal({
   }
 
   // =====================================================
-  // COLOR
+  // STYLE
   // =====================================================
 
   function getStatusStyle(status: string) {
@@ -93,11 +125,11 @@ export default function EditAmaStatusModal({
 
       default:
         return {
-          badge: "bg-red-100 text-red-700",
+          badge: "bg-orange-100 text-orange-700",
 
-          border: "border-red-200",
+          border: "border-orange-200",
 
-          button: "bg-red-600 hover:bg-red-700",
+          button: "bg-orange-600 hover:bg-orange-700",
         };
     }
   }
@@ -105,9 +137,9 @@ export default function EditAmaStatusModal({
   return (
     <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
       {/* MODAL */}
-      <div className="w-full max-w-[760px] overflow-hidden rounded-[32px] bg-white shadow-2xl">
+      <div className="w-full max-w-[900px] overflow-hidden rounded-[32px] bg-white shadow-2xl">
         {/* HEADER */}
-        <div className="flex items-center justify-between border-b px-7 py-6">
+        <div className="flex items-center justify-between border-b px-8 py-6">
           <div className="flex items-start gap-4">
             <div className="rounded-2xl bg-purple-100 p-4">
               <RadioTower className="h-6 w-6 text-purple-600" />
@@ -121,7 +153,7 @@ export default function EditAmaStatusModal({
               <h1 className="mt-2 text-3xl font-bold">Edit AMA Status</h1>
 
               <p className="mt-1 text-sm text-gray-500">
-                Update monitoring condition
+                Update monitoring & scheduling information
               </p>
             </div>
           </div>
@@ -135,79 +167,137 @@ export default function EditAmaStatusModal({
         </div>
 
         {/* BODY */}
-        <div className="max-h-[560px] overflow-y-auto p-6">
-          <div className="space-y-4">
+        <div className="max-h-[70vh] overflow-y-auto p-6">
+          <div className="space-y-5">
             {amaPoints.map((item: any) => {
-              const style = getStatusStyle(item.status);
+              const current = formData[item.id] || {};
+
+              const selectedStatus = current.status || item.status;
+
+              const style = getStatusStyle(selectedStatus);
 
               return (
                 <div
                   key={item.id}
-                  className={`rounded-3xl border bg-white p-5 transition hover:shadow-md ${style.border}`}
+                  className={`rounded-[28px] border bg-white p-6 transition hover:shadow-md ${style.border}`}
                 >
                   {/* TOP */}
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start justify-between gap-6">
                     {/* LEFT */}
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
-                        <h1 className="text-lg font-bold">{item.ama}</h1>
+                        <h1 className="text-2xl font-bold">{item.ama}</h1>
 
                         <div
-                          className={`rounded-full px-3 py-1 text-xs font-bold ${style.badge}`}
+                          className={`rounded-full px-4 py-1 text-xs font-bold ${style.badge}`}
                         >
-                          {item.status}
+                          {selectedStatus}
                         </div>
                       </div>
 
-                      <div className="mt-3 flex flex-wrap gap-3 text-sm text-gray-500">
+                      <div className="mt-3 flex flex-wrap gap-5 text-sm text-gray-500">
                         <span>{item.total_flights} Flights</span>
 
-                        <span>{item.total_missions} Missions</span>
+                        <span>
+                          {item.latitude}, {item.longitude}
+                        </span>
+                      </div>
+
+                      {/* DATE */}
+                      <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+                        {/* PLANNING */}
+                        <div className="rounded-2xl border bg-slate-50 p-4">
+                          <div className="flex items-center gap-2">
+                            <CalendarDays className="h-4 w-4 text-blue-500" />
+
+                            <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                              Planning Date
+                            </p>
+                          </div>
+
+                          <input
+                            type="date"
+                            defaultValue={item.planning_date?.split("T")[0]}
+                            onChange={(e) =>
+                              handleChange(
+                                item.id,
+                                "planning_date",
+                                e.target.value
+                              )
+                            }
+                            className="mt-3 h-[52px] w-full rounded-2xl border bg-white px-4 outline-none focus:border-blue-500"
+                          />
+                        </div>
+
+                        {/* ACTUAL */}
+                        <div className="rounded-2xl border bg-slate-50 p-4">
+                          <div className="flex items-center gap-2">
+                            <CalendarDays className="h-4 w-4 text-purple-500" />
+
+                            <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                              Actual Date
+                            </p>
+                          </div>
+
+                          <input
+                            type="date"
+                            disabled={selectedStatus === "WAITING"}
+                            defaultValue={item.actual_date?.split("T")[0]}
+                            onChange={(e) =>
+                              handleChange(
+                                item.id,
+                                "actual_date",
+                                e.target.value
+                              )
+                            }
+                            className="mt-3 h-[52px] w-full rounded-2xl border bg-white px-4 outline-none focus:border-purple-500 disabled:cursor-not-allowed disabled:bg-gray-100"
+                          />
+                        </div>
                       </div>
                     </div>
 
                     {/* RIGHT */}
-                    <div className="flex items-center gap-3">
-                      {/* SELECT */}
-                      <select
-                        defaultValue={item.status}
-                        onChange={(e) => handleUpdate(item, e.target.value)}
-                        className="h-[52px] rounded-2xl border border-gray-200 bg-gray-50 px-5 text-sm font-semibold transition outline-none focus:border-blue-500"
-                      >
-                        <option value="PENDING">PENDING</option>
+                    <div className="w-[220px] space-y-4">
+                      {/* STATUS */}
+                      <div>
+                        <p className="mb-2 text-xs font-semibold tracking-wide text-gray-400 uppercase">
+                          Monitoring Status
+                        </p>
 
-                        <option value="ONGOING">ONGOING</option>
+                        <select
+                          defaultValue={item.status}
+                          onChange={(e) =>
+                            handleChange(item.id, "status", e.target.value)
+                          }
+                          className="h-[54px] w-full rounded-2xl border bg-gray-50 px-5 font-semibold outline-none focus:border-blue-500"
+                        >
+                          <option value="WAITING">WAITING</option>
 
-                        <option value="SUCCESS">SUCCESS</option>
-                      </select>
+                          <option value="ONGOING">ONGOING</option>
+
+                          <option value="SUCCESS">SUCCESS</option>
+                        </select>
+                      </div>
 
                       {/* SAVE */}
                       <button
-                        onClick={() => handleUpdate(item, item.status)}
-                        className={`flex h-[52px] w-[52px] items-center justify-center rounded-2xl text-white transition ${style.button}`}
+                        onClick={() => handleUpdate(item)}
+                        className={`flex h-[56px] w-full items-center justify-center gap-3 rounded-2xl font-semibold text-white transition ${style.button}`}
                       >
                         {loadingId === item.id ? (
-                          <Loader2 className="h-5 w-5 animate-spin" />
+                          <>
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                            Saving...
+                          </>
                         ) : (
-                          <Save className="h-5 w-5" />
+                          <>
+                            <Save className="h-5 w-5" />
+                            Save Update
+                          </>
                         )}
                       </button>
                     </div>
                   </div>
-
-                  {/* MISSIONS */}
-                  {item.missions?.length > 0 && (
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      {item.missions.map((mission: string, index: number) => (
-                        <div
-                          key={index}
-                          className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700"
-                        >
-                          {mission}
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
               );
             })}
@@ -215,14 +305,14 @@ export default function EditAmaStatusModal({
         </div>
 
         {/* FOOTER */}
-        <div className="flex items-center justify-between border-t px-7 py-5">
+        <div className="flex items-center justify-between border-t px-8 py-5">
           <p className="text-sm text-gray-500">
-            Click dropdown to change AMA monitoring status
+            Update AMA operational scheduling and monitoring status
           </p>
 
           <button
             onClick={onClose}
-            className="flex items-center gap-2 rounded-2xl bg-black px-5 py-3 font-semibold text-white transition hover:bg-gray-800"
+            className="flex items-center gap-2 rounded-2xl bg-black px-6 py-3 font-semibold text-white transition hover:bg-gray-800"
           >
             <Check className="h-4 w-4" />
             Done
