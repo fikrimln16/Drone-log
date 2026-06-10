@@ -25,6 +25,14 @@ export async function GET() {
         a.status,
 
         -- =============================================
+        -- NEW DATE COLUMN
+        -- =============================================
+
+        a.planning_date,
+
+        a.actual_date,
+
+        -- =============================================
         -- FLIGHT STATS
         -- =============================================
 
@@ -34,12 +42,7 @@ export async function GET() {
           DISTINCT f.mission_name
         ) AS total_missions,
 
-        MAX(f.flight_date) AS latest_flight,
-
-        GROUP_CONCAT(
-          DISTINCT f.mission_name
-          SEPARATOR ','
-        ) AS missions
+        MAX(f.flight_date) AS latest_flight
 
       FROM amas a
 
@@ -59,7 +62,9 @@ export async function GET() {
         a.ama_name,
         a.latitude,
         a.longitude,
-        a.status
+        a.status,
+        a.planning_date,
+        a.actual_date
 
       ORDER BY a.id ASC
     `);
@@ -68,55 +73,39 @@ export async function GET() {
     // FORMAT RESPONSE
     // =================================================
 
-    const formatted = rows.map(
-      (item: any) => ({
-        id: Number(item.id),
+    const formatted = rows.map((item: any) => ({
+      id: Number(item.id),
 
-        ama: item.ama_name || "-",
+      ama: item.ama_name || "-",
 
-        lat: Number(item.latitude),
+      lat: Number(item.latitude),
 
-        lng: Number(item.longitude),
+      lng: Number(item.longitude),
 
-        // =============================================
-        // STATUS
-        // =============================================
+      // =============================================
+      // STATUS
+      // =============================================
 
-        status:
-          item.status || "pending",
+      status: item.status || "WAITING",
 
-        // =============================================
-        // STATS
-        // =============================================
+      // =============================================
+      // STATS
+      // =============================================
 
-        total_flights: Number(
-          item.total_flights || 0
-        ),
+      total_flights: Number(item.total_flights || 0),
 
-        total_missions: Number(
-          item.total_missions || 0
-        ),
+      total_missions: Number(item.total_missions || 0),
 
-        // =============================================
-        // DATE
-        // =============================================
+      // =============================================
+      // DATE
+      // =============================================
 
-        latest_flight:
-          item.latest_flight || null,
+      latest_flight: item.latest_flight || null,
 
-        // =============================================
-        // MISSION ARRAY
-        // =============================================
+      planning_date: item.planning_date || null,
 
-        missions:
-          item.missions &&
-          item.missions !== null
-            ? item.missions
-                .split(",")
-                .filter(Boolean)
-            : [],
-      })
-    );
+      actual_date: item.actual_date || null,
+    }));
 
     // =================================================
     // RESPONSE
@@ -124,17 +113,13 @@ export async function GET() {
 
     return NextResponse.json(formatted);
   } catch (error) {
-    console.error(
-      "MAP API ERROR:",
-      error
-    );
+    console.error("MAP API ERROR:", error);
 
     return NextResponse.json(
       {
         success: false,
 
-        message:
-          "Failed fetch map data",
+        message: "Failed fetch map data",
 
         data: [],
       },

@@ -56,7 +56,9 @@ type AmaPoint = {
 
   latest_flight: string | null;
 
-  missions: string[];
+  planning_date: string | null;
+
+  actual_date: string | null;
 };
 
 // =====================================================
@@ -72,7 +74,7 @@ function getMarkerColor(status: string) {
       return "#f59e0b";
 
     default:
-      return "#ef4444";
+      return "#f97316";
   }
 }
 
@@ -98,6 +100,16 @@ function createCustomMarker(color: string) {
     className: "",
 
     iconSize: [18, 18],
+  });
+}
+
+function formatDateOnly(date: string | null) {
+  if (!date) return null;
+
+  return new Date(date).toLocaleDateString("id-ID", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   });
 }
 
@@ -196,8 +208,8 @@ export default function AmaMonitorMap() {
       .length;
   }, [amaPoints]);
 
-  const pendingCount = useMemo(() => {
-    return amaPoints.filter((item) => item.status?.toUpperCase() === "PENDING")
+  const waitingCount = useMemo(() => {
+    return amaPoints.filter((item) => item.status?.toUpperCase() === "WAITING")
       .length;
   }, [amaPoints]);
 
@@ -234,7 +246,7 @@ export default function AmaMonitorMap() {
 
         <div className="overflow-scroll rounded-[32px] border bg-white shadow-sm xl:col-span-3">
           {/* MAP */}
-          <div className="h-[520px] w-full">
+          <div className="h-full w-full">
             <MapContainer
               center={[-2.5, 118]}
               zoom={5}
@@ -255,86 +267,118 @@ export default function AmaMonitorMap() {
                   icon={createCustomMarker(getMarkerColor(item.status))}
                 >
                   <Popup>
-                    <div className="min-w-[230px] space-y-3">
+                    <div className="w-[220px] space-y-3">
                       {/* TITLE */}
                       <div>
-                        <h1 className="text-lg font-bold">{item.ama}</h1>
+                        <h1 className="text-base leading-tight font-bold">
+                          {item.ama}
+                        </h1>
 
-                        <p className="text-xs text-gray-500">
+                        <p className="text-[11px] text-gray-500">
                           Drone monitoring point
                         </p>
                       </div>
 
                       {/* STATUS */}
-                      <div>
-                        <p className="text-xs text-gray-400">Status</p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-[11px] text-gray-400">Status</p>
 
                         <div
-                          className={`mt-1 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                          className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
                             item.status === "SUCCESS"
                               ? "bg-green-100 text-green-700"
                               : item.status === "ONGOING"
                                 ? "bg-yellow-100 text-yellow-700"
-                                : "bg-red-100 text-red-700"
+                                : "bg-orange-100 text-orange-700"
                           }`}
                         >
                           {item.status}
                         </div>
                       </div>
 
-                      {/* STATS */}
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div>
-                          <p className="text-gray-400">Flights</p>
+                      {/* COORDINATE */}
+                      <div className="rounded-xl border bg-gray-50 p-3">
+                        <p className="text-[10px] text-gray-400">Coordinate</p>
 
-                          <h1 className="font-semibold">
-                            {item.total_flights}
+                        <h1 className="mt-1 mb-3 text-xs font-semibold text-gray-700">
+                          {item.lat.toFixed(4)}, {item.lng.toFixed(4)}
+                        </h1>
+                      </div>
+
+                      {/* FLIGHT INFORMATION */}
+                      <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="-mt-3 text-[11px] font-medium tracking-wide text-slate-400 uppercase">
+                              Total Flights
+                            </p>
+
+                            <h1 className="mt-1 mb-3 text-3xl font-bold text-slate-800">
+                              {item.total_flights}
+                            </h1>
+                          </div>
+
+                          {/* ICON */}
+                          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-7 w-7 text-blue-600"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M10.18 9"
+                              />
+
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M21 16v-2l-8-5V3.5a1.5 1.5 0 00-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l4-1 4 1v-1.5L13 19v-5.5L21 16z"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+
+                        {/* LAST UPDATE */}
+                        <div className="mt-4 rounded-xl bg-slate-100 px-3 py-2">
+                          <p className="text-[10px] text-slate-400">
+                            Last Flight Update
+                          </p>
+
+                          <h1 className="mt-1 mb-3 text-xs font-semibold text-slate-700">
+                            {item.latest_flight
+                              ? formatDateOnly(item.latest_flight)
+                              : "No flight activity"}
                           </h1>
-                        </div>
-
-                        <div>
-                          <p className="text-gray-400">Missions</p>
-
-                          <h1 className="font-semibold">
-                            {item.total_missions}
-                          </h1>
-                        </div>
-
-                        <div>
-                          <p className="text-gray-400">Latitude</p>
-
-                          <h1 className="font-semibold">{item.lat}</h1>
-                        </div>
-
-                        <div>
-                          <p className="text-gray-400">Longitude</p>
-
-                          <h1 className="font-semibold">{item.lng}</h1>
                         </div>
                       </div>
 
-                      {/* MISSIONS */}
-                      <div>
-                        <p className="mb-2 text-xs text-gray-400">
-                          Mission List
-                        </p>
+                      {/* DATE */}
+                      <div className="grid grid-cols-2 gap-2">
+                        {/* PLANNING */}
+                        <div className="rounded-xl border border-blue-100 bg-blue-50 p-2.5">
+                          <p className="text-[10px] text-blue-500">Planning</p>
 
-                        <div className="flex flex-wrap gap-2">
-                          {item.missions?.length > 0 ? (
-                            item.missions.map((mission, index) => (
-                              <Link
-                                key={index}
-                                href={`/missions/${mission}`}
-                                className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 transition hover:bg-blue-600 hover:text-white"
-                              >
-                                {mission}
-                              </Link>
-                            ))
-                          ) : (
-                            <div className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-500">
-                              No mission
-                            </div>
-                          )}
+                          <h1 className="mt-1 mb-3 text-[11px] leading-tight font-semibold text-blue-700">
+                            {item.planning_date
+                              ? formatDateOnly(item.planning_date)
+                              : "No planning"}
+                          </h1>
+                        </div>
+
+                        {/* ACTUAL */}
+                        <div className="rounded-xl border border-purple-100 bg-purple-50 p-2.5">
+                          <p className="text-[10px] text-purple-500">Actual</p>
+
+                          <h1 className="mt-1 mb-3 text-[11px] leading-tight font-semibold text-purple-700">
+                            {item.actual_date
+                              ? formatDateOnly(item.actual_date)
+                              : "Belum jalan"}
+                          </h1>
                         </div>
                       </div>
                     </div>
@@ -446,29 +490,32 @@ export default function AmaMonitorMap() {
               </button>
 
               {/* PENDING */}
+              {/* WAITING */}
               <button
                 onClick={() => {
-                  setSelectedStatus("PENDING");
+                  setSelectedStatus("WAITING");
 
                   setOpenStatusModal(true);
                 }}
-                className="group flex w-full items-center justify-between rounded-2xl border border-red-200 bg-red-50 px-5 py-5 text-left transition hover:-translate-y-1 hover:shadow-lg"
+                className="group flex w-full items-center justify-between rounded-2xl border border-orange-200 bg-orange-50 px-5 py-5 text-left transition hover:-translate-y-1 hover:shadow-lg"
               >
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="font-semibold text-red-700">Pending</p>
+                    <p className="font-semibold text-orange-700">Waiting</p>
 
-                    <span className="rounded-full bg-white px-2 py-1 text-[10px] font-bold text-red-700 shadow-sm">
+                    <span className="rounded-full bg-white px-2 py-1 text-[10px] font-bold text-orange-700 shadow-sm">
                       CLICK
                     </span>
                   </div>
 
-                  <p className="mt-1 text-xs text-red-600">Waiting operation</p>
+                  <p className="mt-1 text-xs text-orange-600">
+                    Waiting operation
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-bold text-red-700">
-                    {pendingCount}
+                  <h1 className="text-3xl font-bold text-orange-700">
+                    {waitingCount}
                   </h1>
 
                   <div className="transition group-hover:translate-x-1">→</div>
@@ -570,7 +617,7 @@ export default function AmaMonitorMap() {
                             ? "bg-green-100 text-green-700"
                             : item.status === "ONGOING"
                               ? "bg-yellow-100 text-yellow-700"
-                              : "bg-red-100 text-red-700"
+                              : "bg-orange-100 text-orange-700"
                         }`}
                       >
                         {item.status}

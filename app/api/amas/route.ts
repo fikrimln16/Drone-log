@@ -13,6 +13,11 @@ export async function GET() {
         a.id,
         a.ama_name,
         a.status,
+
+        -- NEW COLUMN
+        a.planning_date,
+        a.actual_date,
+
         a.latitude,
         a.longitude,
 
@@ -22,7 +27,10 @@ export async function GET() {
 
         COUNT(DISTINCT f.estate) AS total_estates,
 
-        COUNT(DISTINCT f.pilot) AS total_pilots
+        COUNT(DISTINCT f.pilot) AS total_pilots,
+
+        -- LAST FLIGHT
+        MAX(f.flight_date) AS last_flight
 
       FROM amas a
 
@@ -33,6 +41,8 @@ export async function GET() {
         a.id,
         a.ama_name,
         a.status,
+        a.planning_date,
+        a.actual_date,
         a.latitude,
         a.longitude
 
@@ -55,7 +65,14 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const { ama_name, status, latitude, longitude } = body;
+    const {
+      ama_name,
+      status,
+      planning_date,
+      actual_date,
+      latitude,
+      longitude,
+    } = body;
 
     await pool.query(
       `
@@ -63,12 +80,21 @@ export async function POST(req: Request) {
       (
         ama_name,
         status,
+        planning_date,
+        actual_date,
         latitude,
         longitude
       )
-      VALUES (?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?)
       `,
-      [ama_name, status, Number(latitude), Number(longitude)]
+      [
+        ama_name,
+        status,
+        planning_date || null,
+        actual_date || null,
+        Number(latitude),
+        Number(longitude),
+      ]
     );
 
     return NextResponse.json({
