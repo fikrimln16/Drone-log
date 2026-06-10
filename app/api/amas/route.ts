@@ -8,46 +8,49 @@ import pool from "@/lib/db";
 
 export async function GET() {
   try {
-    const [rows] = await pool.query(`
-      SELECT
-        a.id,
-        a.ama_name,
-        a.status,
+    const [rows]: any = await pool.query(`
+  SELECT
+    a.id,
 
-        -- NEW COLUMN
-        a.planning_date,
-        a.actual_date,
+    a.ama_name,
 
-        a.latitude,
-        a.longitude,
+    a.status,
 
-        COUNT(f.id) AS total_flights,
+    a.latitude,
 
-        COUNT(DISTINCT f.mission_name) AS total_missions,
+    a.longitude,
 
-        COUNT(DISTINCT f.estate) AS total_estates,
+    a.planning_date,
 
-        COUNT(DISTINCT f.pilot) AS total_pilots,
+    a.actual_date,
 
-        -- LAST FLIGHT
-        MAX(f.flight_date) AS last_flight
+    COUNT(f.id) AS total_flights,
 
-      FROM amas a
+    COUNT(DISTINCT f.mission_name) AS total_missions,
 
-      LEFT JOIN drone_flight_history f
-        ON f.ama = a.ama_name
+    MAX(f.flight_date) AS latest_flight,
 
-      GROUP BY
-        a.id,
-        a.ama_name,
-        a.status,
-        a.planning_date,
-        a.actual_date,
-        a.latitude,
-        a.longitude
+    GROUP_CONCAT(
+      DISTINCT f.mission_name
+      SEPARATOR ','
+    ) AS missions
 
-      ORDER BY a.id DESC
-    `);
+  FROM amas a
+
+  LEFT JOIN drone_flight_history f
+    ON f.ama_id = a.id
+
+  GROUP BY
+    a.id,
+    a.ama_name,
+    a.status,
+    a.latitude,
+    a.longitude,
+    a.planning_date,
+    a.actual_date
+
+  ORDER BY a.id DESC
+`);
 
     return NextResponse.json(rows);
   } catch (error) {

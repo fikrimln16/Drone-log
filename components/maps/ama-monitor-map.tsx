@@ -627,17 +627,19 @@ export default function AmaMonitorMap() {
                     {/* MISSIONS */}
                     <div className="mt-4 flex flex-wrap gap-2">
                       {item.missions?.length > 0 ? (
-                        item.missions.map((mission, index) => (
-                          <Link
+                        item.missions.map((mission: string, index: number) => (
+                          <button
                             key={index}
-                            href={`/missions/${mission}`}
-                            className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 transition hover:bg-blue-600 hover:text-white"
+                            onClick={() =>
+                              (window.location.href = `/missions/${encodeURIComponent(mission)}`)
+                            }
+                            className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 transition hover:scale-[1.03] hover:bg-blue-100 hover:text-blue-800"
                           >
                             {mission}
-                          </Link>
+                          </button>
                         ))
                       ) : (
-                        <div className="rounded-full bg-gray-200 px-3 py-1 text-xs text-gray-600">
+                        <div className="rounded-full bg-gray-200 px-3 py-1 text-xs text-gray-500">
                           No mission
                         </div>
                       )}

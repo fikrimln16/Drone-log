@@ -13,61 +13,48 @@ export async function GET() {
     // =================================================
 
     const [rows]: any = await pool.query(`
-      SELECT
-        a.id,
+  SELECT
+    a.id,
 
-        a.ama_name,
+    a.ama_name,
 
-        a.latitude,
+    a.status,
 
-        a.longitude,
+    a.latitude,
 
-        a.status,
+    a.longitude,
 
-        -- =============================================
-        -- NEW DATE COLUMN
-        -- =============================================
+    a.planning_date,
 
-        a.planning_date,
+    a.actual_date,
 
-        a.actual_date,
+    COUNT(f.id) AS total_flights,
 
-        -- =============================================
-        -- FLIGHT STATS
-        -- =============================================
+    COUNT(DISTINCT f.mission_name) AS total_missions,
 
-        COUNT(f.id) AS total_flights,
+    MAX(f.flight_date) AS latest_flight,
 
-        COUNT(
-          DISTINCT f.mission_name
-        ) AS total_missions,
+    GROUP_CONCAT(
+      DISTINCT f.mission_name
+      SEPARATOR ','
+    ) AS missions
 
-        MAX(f.flight_date) AS latest_flight
+  FROM amas a
 
-      FROM amas a
+  LEFT JOIN drone_flight_history f
+    ON f.ama_id = a.id
 
-      -- =============================================
-      -- FLIGHT RELATION
-      -- =============================================
+  GROUP BY
+    a.id,
+    a.ama_name,
+    a.status,
+    a.latitude,
+    a.longitude,
+    a.planning_date,
+    a.actual_date
 
-      LEFT JOIN drone_flight_history f
-      ON f.ama_id = a.id
-
-      -- =============================================
-      -- GROUP
-      -- =============================================
-
-      GROUP BY
-        a.id,
-        a.ama_name,
-        a.latitude,
-        a.longitude,
-        a.status,
-        a.planning_date,
-        a.actual_date
-
-      ORDER BY a.id ASC
-    `);
+  ORDER BY a.id DESC
+`);
 
     // =================================================
     // FORMAT RESPONSE
@@ -76,35 +63,28 @@ export async function GET() {
     const formatted = rows.map((item: any) => ({
       id: Number(item.id),
 
-      ama: item.ama_name || "-",
+      ama: item.ama_name,
+
+      status: item.status,
 
       lat: Number(item.latitude),
 
       lng: Number(item.longitude),
 
-      // =============================================
-      // STATUS
-      // =============================================
-
-      status: item.status || "WAITING",
-
-      // =============================================
-      // STATS
-      // =============================================
-
       total_flights: Number(item.total_flights || 0),
 
       total_missions: Number(item.total_missions || 0),
 
-      // =============================================
-      // DATE
-      // =============================================
+      latest_flight: item.latest_flight,
 
-      latest_flight: item.latest_flight || null,
+      planning_date: item.planning_date,
 
-      planning_date: item.planning_date || null,
+      actual_date: item.actual_date,
 
-      actual_date: item.actual_date || null,
+      missions:
+        item.missions && item.missions !== null
+          ? item.missions.split(",").filter(Boolean)
+          : [],
     }));
 
     // =================================================
