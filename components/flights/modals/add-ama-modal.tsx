@@ -22,11 +22,15 @@ export default function AddAmaModal({ open, onClose, onSuccess }: Props) {
   const [form, setForm] = useState({
     ama_name: "",
 
-    status: "PENDING",
+    status: "WAITING",
 
     latitude: "",
 
     longitude: "",
+
+    planning_date: "",
+
+    actual_date: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -141,12 +145,55 @@ export default function AddAmaModal({ open, onClose, onSuccess }: Props) {
                 }
                 className="h-[58px] w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 text-base transition outline-none focus:border-blue-500"
               >
-                <option value="PENDING">PENDING</option>
+                <option value="WAITING">WAITING</option>
 
                 <option value="ONGOING">ONGOING</option>
 
                 <option value="SUCCESS">SUCCESS</option>
               </select>
+            </div>
+
+            {/* DATE */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* PLANNING */}
+              <div>
+                <label className="mb-2 block text-xs font-bold tracking-wide text-gray-500 uppercase">
+                  Planning Date
+                </label>
+
+                <input
+                  type="date"
+                  value={form.planning_date}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+
+                      planning_date: e.target.value,
+                    })
+                  }
+                  className="h-[58px] w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm transition outline-none focus:border-blue-500"
+                />
+              </div>
+
+              {/* ACTUAL */}
+              <div>
+                <label className="mb-2 block text-xs font-bold tracking-wide text-gray-500 uppercase">
+                  Actual Date
+                </label>
+
+                <input
+                  type="date"
+                  value={form.actual_date}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+
+                      actual_date: e.target.value,
+                    })
+                  }
+                  className="h-[58px] w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm transition outline-none focus:border-blue-500"
+                />
+              </div>
             </div>
 
             {/* LAT LNG */}
@@ -197,7 +244,12 @@ export default function AddAmaModal({ open, onClose, onSuccess }: Props) {
 
             {/* BUTTON */}
             <button
-              disabled={loading || !form.ama_name || !form.latitude}
+              disabled={
+                loading ||
+                !form.ama_name ||
+                !form.latitude ||
+                !form.planning_date
+              }
               onClick={handleSave}
               className="flex h-[58px] w-full items-center justify-center gap-3 rounded-2xl bg-blue-600 font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
             >

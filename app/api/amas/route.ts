@@ -68,10 +68,10 @@ export async function POST(req: Request) {
     const {
       ama_name,
       status,
-      planning_date,
-      actual_date,
       latitude,
       longitude,
+      planning_date,
+      actual_date,
     } = body;
 
     await pool.query(
@@ -80,20 +80,25 @@ export async function POST(req: Request) {
       (
         ama_name,
         status,
-        planning_date,
-        actual_date,
         latitude,
-        longitude
+        longitude,
+        planning_date,
+        actual_date
       )
       VALUES (?, ?, ?, ?, ?, ?)
       `,
       [
         ama_name,
+
         status,
-        planning_date || null,
-        actual_date || null,
+
         Number(latitude),
+
         Number(longitude),
+
+        planning_date || null,
+
+        actual_date || null,
       ]
     );
 
