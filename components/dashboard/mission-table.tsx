@@ -28,15 +28,7 @@ import Footer from "../layout/footer";
 import AddFlightModal from "../flights/modals/add-flight-model";
 
 // ICONS
-import {
-  List,
-  Plus,
-  MapPinned,
-  Radar,
-  CheckCircle2,
-  Clock3,
-  AlertCircle,
-} from "lucide-react";
+import { List, Plus } from "lucide-react";
 
 // HOOKS
 import useDashboardData from "@/hooks/useDashboardData";
@@ -54,13 +46,12 @@ export default function MissionTable() {
   // SEARCH
   const [search, setSearch] = useState("");
 
-  // ACTIVE MODAL
+  // MODAL
   const [openActiveModal, setOpenActiveModal] = useState(false);
 
-  // ADD FLIGHT
   const [openAddFlight, setOpenAddFlight] = useState(false);
 
-  // FETCH DATA
+  // FETCH
   const { missions, stats, loading } = useDashboardData();
 
   // FILTER
@@ -79,17 +70,21 @@ export default function MissionTable() {
     usePagination(filteredMissions, 5);
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-[#f5f7fb]">
+    <div className="h-screen snap-y snap-mandatory overflow-x-hidden overflow-y-auto bg-[#f5f7fb]">
       {/* NAVBAR */}
       <Navbar title="Mission Dashboard" subtitle="Drone Flight Management" />
 
-      {/* CONTENT */}
-      <div className="w-full px-5 pt-[120px] pb-6 md:px-6 xl:px-7">
-        <div className="mx-auto w-full">
-          {loading ? (
-            <DashboardPageSkeleton />
-          ) : (
-            <div className="space-y-6">
+      {loading ? (
+        <div className="px-5 pt-[120px] pb-10 md:px-6 xl:px-7">
+          <DashboardPageSkeleton />
+        </div>
+      ) : (
+        <>
+          {/* ================================================= */}
+          {/* SECTION 1 */}
+          {/* ================================================= */}
+          <section className="min-h-screen snap-start px-5 pt-[120px] pb-8 md:px-6 xl:px-7">
+            <div className="space-y-4">
               {/* KPI */}
               <DashboardKPI stats={stats} />
 
@@ -99,8 +94,43 @@ export default function MissionTable() {
                 onOpenActive={() => setOpenActiveModal(true)}
               />
 
-              <AmaMonitorMap />
+              {/* CHART */}
+              <DashboardCharts />
+            </div>
+          </section>
 
+          {/* ================================================= */}
+          {/* SECTION 2 */}
+          {/* ================================================= */}
+          <section className="min-h-screen snap-start px-5 pt-[120px] pb-8 md:px-6 xl:px-7">
+            <div className="overflow-hidden rounded-[32px] border border-gray-200 bg-white shadow-sm">
+              {/* HEADER */}
+              <div className="flex items-center justify-between border-b border-gray-100 px-7 py-6">
+                <div>
+                  <h1 className="text-3xl font-bold">AMA Drone Monitoring</h1>
+
+                  <p className="mt-1 text-sm text-gray-500">
+                    Real-time Indonesia drone operation map
+                  </p>
+                </div>
+
+                <div className="rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-700">
+                  • Live Monitor
+                </div>
+              </div>
+
+              {/* MAP */}
+              <div className="h-[calc(100vh-240px)]">
+                <AmaMonitorMap />
+              </div>
+            </div>
+          </section>
+
+          {/* ================================================= */}
+          {/* SECTION 3 */}
+          {/* ================================================= */}
+          <section className="min-h-screen snap-start px-5 pt-[120px] pb-8 md:px-6 xl:px-7">
+            <div className="space-y-6">
               {/* ACTION */}
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 {/* SEARCH */}
@@ -113,16 +143,16 @@ export default function MissionTable() {
                       setCurrentPage(1);
                     }}
                     placeholder="Search mission..."
-                    className="h-[54px] w-full rounded-2xl border bg-white px-5 text-sm transition outline-none focus:border-blue-500 md:text-base"
+                    className="h-[54px] w-full rounded-2xl border border-gray-200 bg-white px-5 text-sm transition outline-none focus:border-blue-500 md:text-base"
                   />
                 </div>
 
-                {/* RIGHT ACTION */}
+                {/* ACTION BUTTONS */}
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                   {/* ALL FLIGHTS */}
                   <Link
                     href="/flights"
-                    className="flex h-[54px] items-center gap-3 rounded-2xl border bg-white px-5 shadow-sm transition hover:bg-gray-100"
+                    className="flex h-[54px] items-center gap-3 rounded-2xl border border-gray-200 bg-white px-5 shadow-sm transition hover:bg-gray-100"
                   >
                     {/* ICON */}
                     <div className="rounded-xl bg-blue-100 p-2">
@@ -142,7 +172,7 @@ export default function MissionTable() {
                   {/* ADD FLIGHT */}
                   <button
                     onClick={() => setOpenAddFlight(true)}
-                    className="flex h-[54px] items-center gap-3 rounded-2xl border bg-white px-5 shadow-sm transition hover:bg-gray-100"
+                    className="flex h-[54px] items-center gap-3 rounded-2xl border border-gray-200 bg-white px-5 shadow-sm transition hover:bg-gray-100"
                   >
                     {/* ICON */}
                     <div className="rounded-xl bg-purple-100 p-2">
@@ -181,13 +211,13 @@ export default function MissionTable() {
                   <span className="font-semibold text-black">{totalPages}</span>
                 </p>
 
-                {/* BUTTON */}
+                {/* BUTTONS */}
                 <div className="flex flex-wrap items-center gap-2">
                   {/* PREVIOUS */}
                   <button
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage((prev) => prev - 1)}
-                    className="rounded-xl border bg-white px-4 py-2 text-sm transition hover:bg-gray-100 disabled:opacity-40"
+                    className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm transition hover:bg-gray-100 disabled:opacity-40"
                   >
                     Previous
                   </button>
@@ -204,8 +234,8 @@ export default function MissionTable() {
                         onClick={() => setCurrentPage(page)}
                         className={`h-10 w-10 rounded-xl border text-sm font-medium transition ${
                           currentPage === page
-                            ? "bg-black text-white"
-                            : "bg-white hover:bg-gray-100"
+                            ? "border-black bg-black text-white"
+                            : "border-gray-200 bg-white hover:bg-gray-100"
                         }`}
                       >
                         {page}
@@ -217,16 +247,16 @@ export default function MissionTable() {
                   <button
                     disabled={currentPage === totalPages}
                     onClick={() => setCurrentPage((prev) => prev + 1)}
-                    className="rounded-xl border bg-white px-4 py-2 text-sm transition hover:bg-gray-100 disabled:opacity-40"
+                    className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm transition hover:bg-gray-100 disabled:opacity-40"
                   >
                     Next
                   </button>
                 </div>
               </div>
             </div>
-          )}
-        </div>
-      </div>
+          </section>
+        </>
+      )}
 
       {/* ACTIVE MODAL */}
       <ActiveFlightsModal
@@ -242,6 +272,7 @@ export default function MissionTable() {
         onClose={() => setOpenAddFlight(false)}
       />
 
+      {/* FOOTER */}
       <Footer />
     </div>
   );

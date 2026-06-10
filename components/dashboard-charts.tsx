@@ -30,14 +30,14 @@ export default function DashboardCharts() {
   }, []);
 
   return (
-    <div className="mb-8 grid grid-cols-1 gap-6 xl:grid-cols-3">
+    <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
       {/* CHART 1 */}
       <ChartCard title="Flight Activity" subtitle="Weekly flight trends">
-        <ResponsiveContainer width="100%" height={260}>
+        <ResponsiveContainer width="100%" height={180}>
           <AreaChart data={chartData.activity}>
             <defs>
               <linearGradient id="flightGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#2563eb" stopOpacity={0.35} />
+                <stop offset="5%" stopColor="#2563eb" stopOpacity={0.25} />
 
                 <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
               </linearGradient>
@@ -49,9 +49,24 @@ export default function DashboardCharts() {
               vertical={false}
             />
 
-            <XAxis dataKey="day" tickLine={false} axisLine={false} />
+            <XAxis
+              dataKey="day"
+              tickLine={false}
+              axisLine={false}
+              tick={{
+                fontSize: 11,
+                fill: "#64748b",
+              }}
+            />
 
-            <YAxis tickLine={false} axisLine={false} />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              tick={{
+                fontSize: 11,
+                fill: "#64748b",
+              }}
+            />
 
             <Tooltip />
 
@@ -59,7 +74,7 @@ export default function DashboardCharts() {
               type="monotone"
               dataKey="flights"
               stroke="#2563eb"
-              strokeWidth={3}
+              strokeWidth={2}
               fillOpacity={1}
               fill="url(#flightGradient)"
             />
@@ -68,13 +83,13 @@ export default function DashboardCharts() {
       </ChartCard>
 
       {/* CHART 2 */}
-      <ChartCard title="Mission Duration" subtitle="Total duration per mission">
-        <ResponsiveContainer width="100%" height={260}>
+      <ChartCard title="Mission Duration" subtitle="Duration per mission">
+        <ResponsiveContainer width="100%" height={180}>
           <BarChart
             data={chartData.duration}
             layout="vertical"
             margin={{
-              left: 30,
+              left: 10,
             }}
           >
             <CartesianGrid
@@ -88,20 +103,20 @@ export default function DashboardCharts() {
               tickLine={false}
               axisLine={false}
               tick={{
-                fill: "#334155",
-                fontSize: 12,
+                fill: "#64748b",
+                fontSize: 10,
               }}
             />
 
             <YAxis
               type="category"
               dataKey="mission"
-              width={110}
+              width={90}
               tickLine={false}
               axisLine={false}
               tick={{
                 fill: "#334155",
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: 600,
               }}
             />
@@ -110,9 +125,9 @@ export default function DashboardCharts() {
 
             <Bar
               dataKey="duration"
-              radius={[0, 10, 10, 0]}
+              radius={[0, 8, 8, 0]}
               fill="#8b5cf6"
-              barSize={18}
+              barSize={12}
             />
           </BarChart>
         </ResponsiveContainer>
@@ -120,12 +135,12 @@ export default function DashboardCharts() {
 
       {/* CHART 3 */}
       <ChartCard title="Total Flight" subtitle="Flight count per mission">
-        <ResponsiveContainer width="100%" height={260}>
+        <ResponsiveContainer width="100%" height={180}>
           <BarChart
             data={chartData.totalFlight}
             layout="vertical"
             margin={{
-              left: 30,
+              left: 10,
             }}
           >
             <CartesianGrid
@@ -133,34 +148,38 @@ export default function DashboardCharts() {
               vertical={false}
               stroke="#f1f5f9"
             />
+
             <XAxis
               type="number"
               tickLine={false}
               axisLine={false}
               tick={{
-                fill: "#334155",
-                fontSize: 12,
+                fill: "#64748b",
+                fontSize: 10,
               }}
             />
+
             <YAxis
               type="category"
               dataKey="mission"
-              width={110}
+              width={90}
               tickLine={false}
               axisLine={false}
               tick={{
                 fill: "#334155",
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: 600,
               }}
             />
+
             <Tooltip />
+
             <Bar
               dataKey="total"
-              radius={[0, 10, 10, 0]}
+              radius={[0, 8, 8, 0]}
               fill="#22c55e"
-              barSize={18}
-            />{" "}
+              barSize={12}
+            />
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>
@@ -170,12 +189,12 @@ export default function DashboardCharts() {
 
 function ChartCard({ title, subtitle, children }: any) {
   return (
-    <div className="rounded-3xl border bg-white p-6 shadow-sm">
+    <div className="rounded-[24px] border bg-white p-4 shadow-sm">
       {/* HEADER */}
-      <div className="mb-6">
-        <h2 className="text-xl font-bold">{title}</h2>
+      <div className="mb-4">
+        <h2 className="text-lg font-bold">{title}</h2>
 
-        <p className="text-sm text-gray-500">{subtitle}</p>
+        <p className="text-xs text-gray-500">{subtitle}</p>
       </div>
 
       {children}

@@ -233,21 +233,6 @@ export default function AmaMonitorMap() {
         {/* ================================================= */}
 
         <div className="overflow-scroll rounded-[32px] border bg-white shadow-sm xl:col-span-3">
-          {/* HEADER */}
-          <div className="flex items-center justify-between border-b px-6 py-5">
-            <div>
-              <h1 className="text-2xl font-bold">AMA Drone Monitoring</h1>
-
-              <p className="mt-1 text-sm text-gray-500">
-                Real-time Indonesia drone operation map
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-blue-100 p-4">
-              <MapPinned className="h-6 w-6 text-blue-600" />
-            </div>
-          </div>
-
           {/* MAP */}
           <div className="h-[520px] w-full">
             <MapContainer
