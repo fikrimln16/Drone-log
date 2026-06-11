@@ -1,4 +1,8 @@
 export type FlightForm = {
+  pilot_ids: number[];
+
+  uav_unit: string;
+
   flight_date: string;
 
   ama: string;
@@ -6,8 +10,6 @@ export type FlightForm = {
   ama_id: number;
 
   estate: string;
-
-  pilot: string;
 
   flight_id: string;
 

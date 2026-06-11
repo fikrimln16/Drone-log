@@ -43,6 +43,11 @@ export default function AddFlightModal({ mission, open, onClose }: Props) {
 
   const [missions, setMissions] = useState<any[]>([]);
 
+  const [pilotSearch, setPilotSearch] = useState("");
+  const [pilots, setPilots] = useState<any[]>([]);
+
+  const hasSearch = pilotSearch.trim().length >= 2;
+
   const [isNewMission, setIsNewMission] = useState(false);
 
   // =====================================================
@@ -53,20 +58,35 @@ export default function AddFlightModal({ mission, open, onClose }: Props) {
     useAddFlightForm(mission, onClose);
 
   useEffect(() => {
-    async function fetchMissions() {
+    async function loadMasterData() {
       try {
-        const response = await fetch("/api/missions");
+        const [missionRes, pilotRes] = await Promise.all([
+          fetch("/api/missions"),
+          fetch("/api/pilots/all"),
+        ]);
 
-        const data = await response.json();
+        const missionData = await missionRes.json();
 
-        setMissions(data);
+        const pilotData = await pilotRes.json();
+
+        setMissions(missionData);
+
+        setPilots(pilotData);
       } catch (error) {
         console.error(error);
       }
     }
 
-    fetchMissions();
-  }, []);
+    loadMasterData();
+  }, [open]);
+  console.log(missions);
+  console.log(pilots);
+
+  const filteredPilots = pilots.filter(
+    (pilot) =>
+      pilot.pilot_name?.toLowerCase().includes(pilotSearch.toLowerCase()) ||
+      pilot.pilot_code?.toLowerCase().includes(pilotSearch.toLowerCase())
+  );
 
   if (!open) return null;
 
@@ -320,18 +340,166 @@ export default function AddFlightModal({ mission, open, onClose }: Props) {
                   />
                 </div>
 
+                {/* UAV UNIT */}
+                <div>
+                  <label className="mb-2 block text-sm font-bold tracking-wide text-gray-600 uppercase">
+                    UAV Unit
+                  </label>
+
+                  <select
+                    value={form.uav_unit || ""}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        uav_unit: e.target.value,
+                      })
+                    }
+                    className={`h-[64px] w-full rounded-2xl border bg-gray-50 px-5 text-lg outline-none ${
+                      errors.uav_unit ? "border-red-500" : "border-gray-200"
+                    }`}
+                  >
+                    <option value="">Select UAV Unit</option>
+
+                    <option value="W1">W1</option>
+                    <option value="W2">W2</option>
+                    <option value="W3">W3</option>
+                    <option value="Sky Mapper">Sky Mapper</option>
+                  </select>
+
+                  {errors.uav_unit && (
+                    <p className="mt-2 text-sm text-red-500">
+                      {errors.uav_unit}
+                    </p>
+                  )}
+                </div>
+
                 {/* PILOT */}
-                <FlightInput
-                  label="Pilot"
-                  value={form.pilot}
-                  error={errors.pilot}
-                  onChange={(value) =>
-                    setForm({
-                      ...form,
-                      pilot: value,
-                    })
-                  }
-                />
+                <div>
+                  <label className="mb-3 block text-sm font-bold tracking-wide text-gray-600 uppercase">
+                    Flight Crew
+                  </label>
+
+                  {/* SEARCH */}
+                  <input
+                    value={pilotSearch}
+                    onChange={(e) => setPilotSearch(e.target.value)}
+                    placeholder="Search pilot..."
+                    className="mb-4 h-[52px] w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 outline-none focus:border-blue-500"
+                  />
+
+                  {/* SELECTED */}
+                  {form.pilot_ids.length > 0 && (
+                    <div className="mb-4">
+                      <p className="mb-2 text-xs font-bold tracking-wide text-gray-500 uppercase">
+                        Selected Pilot
+                      </p>
+
+                      <div className="flex flex-wrap gap-2">
+                        {pilots
+                          .filter((pilot) => form.pilot_ids.includes(pilot.id))
+                          .map((pilot) => (
+                            <div
+                              key={pilot.id}
+                              className="flex items-center gap-2 rounded-full bg-blue-100 px-3 py-2 text-sm font-semibold text-blue-700"
+                            >
+                              {pilot.pilot_name}
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setForm({
+                                    ...form,
+                                    pilot_ids: form.pilot_ids.filter(
+                                      (id) => id !== pilot.id
+                                    ),
+                                  })
+                                }
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* PILOT LIST */}
+                  <div
+                    className={`max-h-[220px] overflow-y-auto rounded-2xl border p-3 ${
+                      errors.pilot_ids ? "border-red-500" : "border-gray-200"
+                    }`}
+                  >
+                    <div className="grid grid-cols-2 gap-3">
+                      {pilotSearch.trim() === "" ? (
+                        <div className="flex h-[260px] items-center justify-center">
+                          <div className="text-center">
+                            <h1 className="text-lg font-semibold text-gray-700">
+                              Search Pilot
+                            </h1>
+
+                            <p className="mt-2 text-sm text-gray-500">
+                              Start typing pilot name to find and select crew
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-3">
+                          {filteredPilots.map((pilot) => {
+                            const selected = form.pilot_ids.includes(pilot.id);
+
+                            return (
+                              <button
+                                key={pilot.id}
+                                type="button"
+                                onClick={() => {
+                                  const exists = form.pilot_ids.includes(
+                                    pilot.id
+                                  );
+
+                                  setForm({
+                                    ...form,
+                                    pilot_ids: exists
+                                      ? form.pilot_ids.filter(
+                                          (id) => id !== pilot.id
+                                        )
+                                      : [...form.pilot_ids, pilot.id],
+                                  });
+                                }}
+                                className={`rounded-2xl border p-4 text-left transition ${
+                                  selected
+                                    ? "border-blue-500 bg-blue-50"
+                                    : "border-gray-200 hover:border-blue-300"
+                                }`}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="font-semibold">
+                                    {pilot.pilot_name}
+                                  </span>
+
+                                  <div
+                                    className={`flex h-6 w-6 items-center justify-center rounded-full ${
+                                      selected
+                                        ? "bg-blue-500 text-white"
+                                        : "border border-gray-300"
+                                    }`}
+                                  >
+                                    {selected && "✓"}
+                                  </div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {errors.pilot_ids && (
+                    <p className="mt-2 text-sm text-red-500">
+                      {errors.pilot_ids}
+                    </p>
+                  )}
+                </div>
               </div>
             </FlightFormSection>
 

@@ -9,35 +9,41 @@ export async function GET() {
     // =====================================================
 
     const [rows] = await pool.query(`
-      SELECT
+    SELECT
         f.*,
 
-        -- =============================================
-        -- AMA INFORMATION
-        -- =============================================
-
         a.ama_name AS ama,
-
         a.latitude,
-
         a.longitude,
+        a.status AS ama_status,
 
+        COUNT(DISTINCT p.id) AS pilot_count,
+
+        GROUP_CONCAT(
+            DISTINCT p.pilot_name
+            ORDER BY p.pilot_name
+            SEPARATOR ', '
+        ) AS pilots
+
+    FROM drone_flight_history f
+
+    LEFT JOIN amas a
+    ON a.id = f.ama_id
+
+    LEFT JOIN flight_pilots fp
+    ON fp.flight_id = f.id
+
+    LEFT JOIN pilots p
+    ON p.id = fp.pilot_id
+
+    GROUP BY
+        f.id,
+        a.ama_name,
+        a.latitude,
+        a.longitude,
         a.status
 
-      FROM drone_flight_history f
-
-      -- =============================================
-      -- JOIN AMA
-      -- =============================================
-
-      LEFT JOIN amas a
-      ON f.ama_id = a.id
-
-      -- =============================================
-      -- ORDER
-      -- =============================================
-
-      ORDER BY f.id DESC
+    ORDER BY f.id DESC
     `);
 
     // =====================================================

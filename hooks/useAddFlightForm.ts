@@ -8,65 +8,43 @@ import { createFlight } from "@/services/flight.service";
 
 import { validateFlight } from "@/utils/flight-validation";
 
-import {
-  FlightErrors,
-  FlightForm,
-} from "@/types/flight";
+import { FlightErrors, FlightForm } from "@/types/flight";
 
 const initialForm: FlightForm = {
   flight_date: "",
-
   ama: "",
-
   estate: "",
 
-  pilot: "",
+  pilot_ids: [],
+
+  uav_unit: "",
 
   flight_id: "",
-
   mission_name: "",
-
   battery_id: "",
-
   battery_id_2: "",
-
   battery_color: "",
-
   start_percent: "",
-
   end_percent: "",
-
   start_volt: "",
-
   end_volt: "",
-
   start_time: "",
-
   end_time: "",
-
   duration_min: "",
-
   notes: "",
-
   ama_id: 0,
 };
 
-export default function useAddFlightForm(
-  mission: string,
-  onClose: () => void
-) {
-  const [loading, setLoading] =
-    useState(false);
+export default function useAddFlightForm(mission: string, onClose: () => void) {
+  const [loading, setLoading] = useState(false);
 
-  const [form, setForm] =
-    useState<FlightForm>({
-      ...initialForm,
+  const [form, setForm] = useState<FlightForm>({
+    ...initialForm,
 
-      mission_name: mission || "",
-    });
+    mission_name: mission || "",
+  });
 
-  const [errors, setErrors] =
-    useState<FlightErrors>({});
+  const [errors, setErrors] = useState<FlightErrors>({});
 
   // =====================================================
   // VALID FORM
@@ -77,11 +55,12 @@ export default function useAddFlightForm(
       !!form.flight_date &&
       !!form.ama &&
       !!form.estate &&
-      !!form.pilot &&
+      Array.isArray(form.pilot_ids) &&
+      form.pilot_ids.length > 0 &&
+      !!form.uav_unit &&
       !!form.flight_id &&
       !!form.mission_name &&
       !!form.battery_id &&
-      !!form.battery_id_2 &&
       !!form.battery_color &&
       !!form.start_percent &&
       !!form.end_percent &&
@@ -98,56 +77,44 @@ export default function useAddFlightForm(
   // =====================================================
 
   async function handleSubmit() {
-    const validation =
-      validateFlight(form);
+    const validation = validateFlight(form);
 
     setErrors(validation);
 
-    if (
-      Object.keys(validation).length > 0
-    ) {
+    if (Object.keys(validation).length > 0) {
       return;
     }
 
     try {
+      console.log(form);
       setLoading(true);
 
       // UX DELAY
-      await new Promise((resolve) =>
-        setTimeout(resolve, 800)
-      );
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       // CREATE FLIGHT
-      const result =
-        await createFlight({
-          ...form,
+      const result = await createFlight({
+        ...form,
 
-          // IMPORTANT
-          mission_name:
-            form.mission_name,
-        });
+        // IMPORTANT
+        mission_name: form.mission_name,
+      });
 
       // FAILED
       if (!result.ok) {
-        toast.error(
-          result.data.message ||
-            "Failed add flight"
-        );
+        toast.error(result.data.message || "Failed add flight");
 
         return;
       }
 
       // SUCCESS
-      toast.success(
-        "Flight added successfully"
-      );
+      toast.success("Flight added successfully");
 
       // RESET FORM
       setForm({
         ...initialForm,
 
-        mission_name:
-          mission || "",
+        mission_name: mission || "",
       });
 
       // CLOSE MODAL
@@ -160,9 +127,7 @@ export default function useAddFlightForm(
     } catch (error) {
       console.error(error);
 
-      toast.error(
-        "Internal server error"
-      );
+      toast.error("Internal server error");
     } finally {
       setLoading(false);
     }
