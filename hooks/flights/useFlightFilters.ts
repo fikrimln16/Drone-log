@@ -21,25 +21,32 @@ export default function useFlightFilters(flights: any[]) {
 
   const filteredFlights = useMemo(() => {
     return flights.filter((item) => {
-      const validSearch =
-        !search ||
-        Object.values(item)
-          .join(" ")
-          .toLowerCase()
-          .includes(search.toLowerCase());
+      const searchValue = search.toLowerCase();
 
+      // SEARCH
+      const validSearch =
+        !search || JSON.stringify(item).toLowerCase().includes(searchValue);
+
+      // MISSION
       const validMission =
         !selectedMission || item.mission_name === selectedMission;
 
+      // AMA
       const validAma = !selectedAma || item.ama === selectedAma;
 
+      // ESTATE
       const validEstate = !selectedEstate || item.estate === selectedEstate;
 
+      // BATTERY
       const validBattery =
         !selectedBattery || item.battery_id === selectedBattery;
 
-      const validPilot = !selectedPilot || item.pilot === selectedPilot;
+      // PILOT
+      const pilots = Array.isArray(item.pilots) ? item.pilots : [];
 
+      const validPilot = !selectedPilot || pilots.includes(selectedPilot);
+
+      // DATE
       const itemDate = new Date(item.flight_date);
 
       const validStart = !startDate || itemDate >= new Date(startDate);

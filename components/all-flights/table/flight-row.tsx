@@ -46,10 +46,18 @@ export default function FlightsRow({
       <td className="p-5 font-medium">{item.mission_name}</td>
 
       {/* PILOT */}
+      {/* PILOT */}
       <td className="p-5">
-        <span className="rounded-full bg-cyan-100 px-4 py-1 text-sm text-cyan-700">
-          {item.pilot || "-"}
-        </span>
+        <div className="flex flex-wrap gap-2">
+          {(item.pilots || []).map((pilot: string) => (
+            <span
+              key={pilot}
+              className="rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-700"
+            >
+              {pilot}
+            </span>
+          ))}
+        </div>
       </td>
 
       {/* BATTERY */}

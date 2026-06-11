@@ -60,16 +60,21 @@ export default function AllFlightsPage() {
   const [openAddFlight, setOpenAddFlight] = useState(false);
 
   // OPTIONS
-  const missionOptions = [...new Set(flights.map((item) => item.mission_name))];
+  const missionOptions = [
+    ...new Set(flights.map((item) => item.mission_name).filter(Boolean)),
+  ];
 
-  const amaOptions = [...new Set(flights.map((item) => item.ama))];
-
-  const estateOptions = [...new Set(flights.map((item) => item.estate))];
-
-  const batteryOptions = [...new Set(flights.map((item) => item.battery_id))];
-
+  const amaOptions = [
+    ...new Set(flights.map((item) => item.ama).filter(Boolean)),
+  ];
+  const estateOptions = [
+    ...new Set(flights.map((item) => item.estate).filter(Boolean)),
+  ];
+  const batteryOptions = [
+    ...new Set(flights.map((item) => item.battery_id).filter(Boolean)),
+  ];
   const pilotOptions = [
-    ...new Set(flights.map((item) => item.pilot).filter(Boolean)),
+    ...new Set(flights.flatMap((item) => item.pilots || [])),
   ];
 
   // PAGINATION

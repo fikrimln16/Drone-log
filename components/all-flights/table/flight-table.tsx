@@ -24,34 +24,42 @@ const columns = [
   {
     label: "DATE",
     key: "flight_date",
+    width: "140px",
   },
   {
     label: "AMA",
     key: "ama",
+    width: "180px",
   },
   {
     label: "ESTATE",
     key: "estate",
+    width: "120px",
   },
   {
     label: "FLIGHT ID",
     key: "flight_id",
+    width: "180px",
   },
   {
     label: "MISSION",
     key: "mission_name",
+    width: "320px",
   },
   {
     label: "PILOT",
-    key: "pilot",
+    key: "pilots",
+    width: "220px",
   },
   {
     label: "BATTERY",
     key: "battery_id",
+    width: "140px",
   },
   {
     label: "DURATION",
     key: "duration_min",
+    width: "120px",
   },
 ];
 
@@ -68,13 +76,17 @@ export default function FlightsTable({
   return (
     <div className="overflow-hidden rounded-[32px] border bg-white shadow-sm">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1400px] border-separate border-spacing-0">
+        <table className="w-full min-w-[1400px] table-fixed border-separate border-spacing-0">
           {/* HEADER */}
           <thead className="bg-gray-50">
             <tr className="border-b">
               {columns.map((column) => (
                 <th
                   key={column.key}
+                  style={{
+                    width: column.width,
+                    minWidth: column.width,
+                  }}
                   onClick={() => onSort(column.key)}
                   className="cursor-pointer p-5 text-left text-sm font-bold tracking-wide text-gray-700"
                 >

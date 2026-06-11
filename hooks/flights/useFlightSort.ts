@@ -8,7 +8,7 @@ export type SortKey =
   | "estate"
   | "flight_id"
   | "mission_name"
-  | "pilot"
+  | "pilots"
   | "battery_id"
   | "duration_min";
 
@@ -19,15 +19,43 @@ export default function useFlightSort(flights: any[]) {
 
   const sortedFlights = useMemo(() => {
     return [...flights].sort((a, b) => {
-      const valueA = a[sortBy];
+      let valueA: any;
+      let valueB: any;
 
-      const valueB = b[sortBy];
+      switch (sortBy) {
+        case "flight_date":
+          valueA = new Date(a.flight_date || 0).getTime();
 
-      if (sortDirection === "asc") {
-        return valueA > valueB ? 1 : -1;
+          valueB = new Date(b.flight_date || 0).getTime();
+          break;
+
+        case "duration_min":
+          valueA = Number(a.duration_min || 0);
+
+          valueB = Number(b.duration_min || 0);
+          break;
+
+        case "pilots":
+          valueA = Array.isArray(a.pilots) ? a.pilots[0] || "" : "";
+
+          valueB = Array.isArray(b.pilots) ? b.pilots[0] || "" : "";
+          break;
+
+        default:
+          valueA = String(a[sortBy] || "").toLowerCase();
+
+          valueB = String(b[sortBy] || "").toLowerCase();
       }
 
-      return valueA < valueB ? 1 : -1;
+      // STRING
+      if (typeof valueA === "string" && typeof valueB === "string") {
+        return sortDirection === "asc"
+          ? valueA.localeCompare(valueB)
+          : valueB.localeCompare(valueA);
+      }
+
+      // NUMBER / DATE
+      return sortDirection === "asc" ? valueA - valueB : valueB - valueA;
     });
   }, [flights, sortBy, sortDirection]);
 

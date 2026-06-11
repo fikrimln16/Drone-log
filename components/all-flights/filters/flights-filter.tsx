@@ -130,12 +130,12 @@ export default function FlightsFilter({
         />
 
         {/* BATTERY */}
-        <SelectFilter
+        {/* <SelectFilter
           label="Battery"
           value={selectedBattery}
           onChange={setSelectedBattery}
           options={batteryOptions}
-        />
+        /> */}
 
         {/* PILOT */}
         <SelectFilter
