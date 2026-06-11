@@ -1,95 +1,164 @@
-import { NextResponse } from "next/server";
-
 import pool from "@/lib/db";
 
+import { NextResponse } from "next/server";
+
 export async function POST(req: Request) {
+  const connection = await pool.getConnection();
+
   try {
     const body = await req.json();
 
-    console.log(body);
+    const flights = body.flights || [];
 
-    for (const item of body) {
-      await pool.query(
+    await connection.beginTransaction();
+
+    for (const flight of flights) {
+      // =====================================
+      // PILOT
+      // =====================================
+
+      const [day, month, year] = flight.flight_date.split("/");
+
+      const mysqlDate = `${year}-${month}-${day}`;
+
+      const [pilotRows]: any = await connection.query(
         `
-        INSERT INTO drone_flight_history (
-          flight_date,
-          ama,
-          estate,
-          pilot,
-          flight_id,
-          mission_name,
-          battery_id,
-          battery_id_2,
-          battery_color,
-          start_percent,
-          end_percent,
-          start_volt,
-          end_volt,
-          start_time,
-          end_time,
-          duration_min,
-          notes,
-          ama_id
-        )
-        VALUES (
-          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-        )
-        `,
+          SELECT id
+          FROM pilots
+          WHERE pilot_name = ?
+          LIMIT 1
+          `,
+        [flight.pilot]
+      );
+
+      let pilotId = flight.pilot_id;
+
+      if (pilotId === -1) {
+        const [result]: any = await connection.query(
+          `
+      INSERT INTO pilots
+      (
+        pilot_name
+      )
+      VALUES (?)
+      `,
+          [flight.new_pilot_name]
+        );
+
+        pilotId = result.insertId;
+      }
+
+      // =====================================
+      // INSERT FLIGHT
+      // =====================================
+
+      const [flightResult]: any = await connection.query(
+        `
+          INSERT INTO drone_flight_history
+          (
+            flight_date,
+            ama_id,
+            estate,
+            flight_id,
+            mission_name,
+            uav_unit,
+            battery_id,
+            battery_id_2,
+            battery_color,
+            start_percent,
+            end_percent,
+            start_volt,
+            end_volt,
+            start_time,
+            end_time,
+            duration_min,
+            notes
+          )
+          VALUES
+          (
+            ?,?,?,?,?,?,?,?,?,?,
+            ?,?,?,?,?,?,?
+          )
+          `,
         [
-          item.flight_date,
+          mysqlDate,
 
-          item.ama,
+          flight.ama_id,
 
-          item.estate,
+          flight.estate,
 
-          item.pilot,
+          flight.flight_id,
 
-          item.flight_id,
+          flight.mission_name,
 
-          item.mission_name,
+          flight.uav_unit,
 
-          item.battery_id,
+          flight.battery_id,
 
-          item.battery_id_2,
+          flight.battery_id_2,
 
-          item.battery_color,
+          flight.battery_color,
 
-          item.start_percent,
+          Number(flight.start_percent || 0),
 
-          item.end_percent,
+          Number(flight.end_percent || 0),
 
-          item.start_volt,
+          Number(flight.start_volt || 0),
 
-          item.end_volt,
+          Number(flight.end_volt || 0),
 
-          item.start_time,
+          flight.start_time,
 
-          item.end_time,
+          flight.end_time,
 
-          item.duration_min,
+          Number(flight.duration_min || 0),
 
-          item.notes || "",
-
-          item.ama_id,
+          flight.notes || "",
         ]
+      );
+
+      // =====================================
+      // RELATION PILOT
+      // =====================================
+
+      await connection.query(
+        `
+        INSERT INTO flight_pilots
+        (
+          flight_id,
+          pilot_id
+        )
+        VALUES (?, ?)
+        `,
+        [flightResult.insertId, pilotId]
       );
     }
 
+    await connection.commit();
+
     return NextResponse.json({
       success: true,
+
+      total: flights.length,
+
       message: "CSV uploaded successfully",
     });
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    await connection.rollback();
+
+    console.error(error);
 
     return NextResponse.json(
       {
         success: false,
-        message: "Upload failed",
+
+        message: "Failed upload CSV",
       },
       {
         status: 500,
       }
     );
+  } finally {
+    connection.release();
   }
 }

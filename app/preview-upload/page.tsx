@@ -45,31 +45,22 @@ const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
 
 type CSVRow = {
   flight_date: string;
-
+  ama: string;
+  mission_name: string;
+  estate: string;
   flight_id: string;
-
   pilot: string;
-
+  uav_unit: string;
   battery_id: string;
-
   battery_id_2: string;
-
   battery_color: string;
-
   start_percent: string;
-
   end_percent: string;
-
   start_volt: string;
-
   end_volt: string;
-
   start_time: string;
-
   end_time: string;
-
   duration_min: string;
-
   notes: string;
 };
 
@@ -94,6 +85,20 @@ export default function PreviewUploadPage() {
 
   const [amas, setAmas] = useState<any[]>([]);
 
+  const [expandedMission, setExpandedMission] = useState<string | null>(null);
+
+  const [pilots, setPilots] = useState<any[]>([]);
+
+  const [pilotMapping, setPilotMapping] = useState<Record<string, number>>({});
+
+  const [newPilotMapping, setNewPilotMapping] = useState<
+    Record<string, string>
+  >({});
+
+  const [amaMapping, setAmaMapping] = useState<Record<string, number>>({});
+
+  const [expandedAma, setExpandedAma] = useState<string | null>(null);
+
   // =====================================================
   // LOAD CSV
   // =====================================================
@@ -111,30 +116,28 @@ export default function PreviewUploadPage() {
   }, [router]);
 
   // =====================================================
-  // FETCH DATA
+  // FETCH DATA MISSION
   // =====================================================
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        // MISSION
-        const missionRes = await fetch("/api/missions");
+  async function fetchData() {
+    try {
+      const missionRes = await fetch("/api/missions");
 
-        const missionData = await missionRes.json();
+      setMissions(await missionRes.json());
 
-        setMissions(missionData);
+      const amaRes = await fetch("/api/maps/ama");
 
-        // AMA
-        const amaRes = await fetch("/api/maps/ama");
+      setAmas(await amaRes.json());
 
-        const amaData = await amaRes.json();
+      const pilotRes = await fetch("/api/pilots/all");
 
-        setAmas(amaData);
-      } catch (error) {
-        console.error(error);
-      }
+      setPilots(await pilotRes.json());
+    } catch (error) {
+      console.error(error);
     }
+  }
 
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -161,9 +164,6 @@ export default function PreviewUploadPage() {
   // DISABLE UPLOAD
   // =====================================================
 
-  const disableUpload =
-    invalidRows.length > 0 || loading || !selectedMission || !selectedAma;
-
   // =====================================================
   // HANDLE UPLOAD
   // =====================================================
@@ -172,16 +172,30 @@ export default function PreviewUploadPage() {
     try {
       setLoading(true);
 
-      const payload = rows.map((item) => ({
-        ...item,
+      const payload = rows.map((item) => {
+        groupedAma.some((group: any) => !amaMapping[group.ama]);
+        const amaId = amaMapping[item.ama];
+        const amaData = amas.find((a) => a.id === amaId);
 
-        mission_name: selectedMission,
+        return {
+          ...item,
 
-        ama_id: selectedAma.id,
+          mission_name: item.mission_name,
 
-        ama: selectedAma.ama,
-      }));
+          ama_id: amaId,
 
+          ama: amaData?.ama || "",
+
+          pilot_id: pilotMapping[item.pilot],
+
+          new_pilot_name:
+            pilotMapping[item.pilot] === -1
+              ? newPilotMapping[item.pilot]
+              : null,
+        };
+      });
+
+      console.log(payload);
       const res = await fetch("/api/upload-json", {
         method: "POST",
 
@@ -189,24 +203,75 @@ export default function PreviewUploadPage() {
           "Content-Type": "application/json",
         },
 
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          flights: payload,
+        }),
       });
 
       const result = await res.json();
 
-      alert(result.message);
+      if (!res.ok) {
+        throw new Error(result.message);
+      }
+
+      alert(result.message || "Upload Success");
 
       localStorage.removeItem("csv-preview");
 
       router.push("/");
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
 
-      alert("Upload failed");
+      alert("Upload Failed");
     } finally {
       setLoading(false);
     }
   }
+
+  const groupedPilots = useMemo(() => {
+    return [...new Set(rows.map((item) => item.pilot))];
+  }, [rows]);
+
+  const groupedAma = useMemo(() => {
+    const map: Record<string, any> = {};
+
+    rows.forEach((row) => {
+      if (!map[row.ama]) {
+        map[row.ama] = {
+          ama: row.ama,
+
+          totalFlights: 0,
+
+          missions: new Set<string>(),
+
+          pilots: new Set<string>(),
+
+          rows: [],
+        };
+      }
+
+      map[row.ama].totalFlights += 1;
+
+      map[row.ama].missions.add(row.mission_name);
+
+      map[row.ama].pilots.add(row.pilot);
+
+      map[row.ama].rows.push(row);
+    });
+
+    return Object.values(map).map((item: any) => ({
+      ...item,
+
+      missions: Array.from(item.missions || []),
+
+      pilots: Array.from(item.pilots || []),
+    }));
+  }, [rows]);
+
+  const disableUpload =
+    invalidRows.length > 0 ||
+    loading ||
+    groupedPilots.some((pilotName) => !pilotMapping[pilotName]);
 
   return (
     <div className="min-h-screen bg-[#f5f7fb]">
@@ -248,314 +313,201 @@ export default function PreviewUploadPage() {
           <StatsCard title="TOTAL ROWS" value={rows.length} />
 
           <StatsCard
-            title="MISSION"
-            value={selectedMission || "Not Selected"}
-            danger={!selectedMission}
+            title="TOTAL MISSIONS"
+            value={[...new Set(rows.map((r) => r.mission_name))].length}
           />
+
+          <StatsCard title="AMA FOUND" value={groupedAma.length} />
 
           <StatsCard title="TOTAL DURATION" value={`${totalDuration} min`} />
-
-          <StatsCard
-            title="SELECTED AMA"
-            value={selectedAma ? selectedAma.ama : "Not Selected"}
-            danger={!selectedAma}
-          />
         </div>
 
-        {/* ================================================= */}
-        {/* WARNING */}
-        {/* ================================================= */}
+        <div className="space-y-5">
+          <div className="rounded-[28px] border bg-white p-6 shadow-sm">
+            <h1 className="text-2xl font-bold">AMA Mapping</h1>
 
-        {invalidRows.length > 0 && (
-          <div className="flex items-center gap-3 rounded-3xl border border-red-200 bg-red-50 px-6 py-5 text-red-700">
-            <AlertCircle className="h-5 w-5" />
-
-            <p>Some rows are invalid. Please fix the CSV file before upload.</p>
-          </div>
-        )}
-
-        {/* ================================================= */}
-        {/* MISSION */}
-        {/* ================================================= */}
-
-        <div className="rounded-[32px] border bg-white p-7 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold tracking-[0.25em] text-gray-400 uppercase">
-                Mission Configuration
-              </p>
-
-              <h1 className="mt-3 text-2xl font-bold">Select Mission</h1>
-
-              <p className="mt-1 text-sm text-gray-500">
-                Prevent duplicate mission naming
-              </p>
-            </div>
-
-            {/* SELECT */}
-            <div className="w-[360px]">
-              {!isNewMission ? (
-                <select
-                  value={selectedMission}
-                  onChange={(e) => {
-                    if (e.target.value === "__new__") {
-                      setIsNewMission(true);
-
-                      setSelectedMission("");
-
-                      return;
-                    }
-
-                    setSelectedMission(e.target.value);
-                  }}
-                  className="h-[58px] w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 transition outline-none focus:border-blue-500"
-                >
-                  <option value="">Select Mission</option>
-
-                  {missions.map((item: any, index: number) => (
-                    <option key={index} value={item.mission_name}>
-                      {item.mission_name}
-                    </option>
-                  ))}
-
-                  <option value="__new__">+ Create New Mission</option>
-                </select>
-              ) : (
-                <div className="space-y-2">
-                  <input
-                    value={selectedMission}
-                    onChange={(e) =>
-                      setSelectedMission(e.target.value.toUpperCase())
-                    }
-                    placeholder="Input new mission..."
-                    className="h-[58px] w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 transition outline-none focus:border-blue-500"
-                  />
-
-                  <button
-                    onClick={() => {
-                      setIsNewMission(false);
-
-                      setSelectedMission("");
-                    }}
-                    className="text-sm font-semibold text-blue-600"
-                  >
-                    ← Back to existing mission
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* ================================================= */}
-        {/* AMA MAP */}
-        {/* ================================================= */}
-
-        <div className="overflow-hidden rounded-[32px] border bg-white shadow-sm">
-          {/* HEADER */}
-          <div className="border-b px-7 py-6">
-            <p className="text-xs font-bold tracking-[0.25em] text-gray-400 uppercase">
-              AMA Configuration
+            <p className="mt-2 text-sm text-gray-500">
+              Match CSV AMA with Database AMA
             </p>
 
-            <h1 className="mt-3 text-2xl font-bold">Pick AMA Point</h1>
+            <div className="mt-6 space-y-4">
+              {groupedAma.map((group: any) => (
+                <div key={group.ama} className="rounded-2xl border p-5">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h2 className="text-xl font-bold">{group.ama}</h2>
 
-            <p className="mt-1 text-sm text-gray-500">
-              Select exact AMA location from map
-            </p>
-          </div>
+                      <p className="mt-1 text-sm text-gray-500">
+                        {group.totalFlights} Flights
+                      </p>
 
-          {/* MAP */}
-          <div className="relative">
-            <MapContainer
-              center={[-2.5, 118]}
-              zoom={5}
-              className="h-[500px] w-full"
-            >
-              <TileLayer
-                url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
-                attribution="Google Satellite"
-              />
-
-              {amas.map((item: any) => {
-                const isSelected = selectedAma?.id === item.id;
-
-                return (
-                  <CircleMarker
-                    key={item.id}
-                    center={[Number(item.lat), Number(item.lng)]}
-                    radius={isSelected ? 12 : 8}
-                    pathOptions={{
-                      color:
-                        item.status === "SUCCESS"
-                          ? "#22c55e"
-                          : item.status === "ONGOING"
-                            ? "#f59e0b"
-                            : "#ef4444",
-
-                      fillColor:
-                        item.status === "SUCCESS"
-                          ? "#22c55e"
-                          : item.status === "ONGOING"
-                            ? "#f59e0b"
-                            : "#ef4444",
-
-                      fillOpacity: 1,
-                    }}
-                    eventHandlers={{
-                      click: () => setSelectedAma(item),
-                    }}
-                  >
-                    <Popup>
-                      <div className="min-w-[220px]">
-                        <h1 className="text-lg font-bold">{item.ama}</h1>
-
-                        <p className="mt-1 text-sm text-gray-500">
-                          {item.total_flights} flights
-                        </p>
-
-                        <div className="mt-4">
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {(group.missions || []).map((mission: string) => (
                           <span
-                            className={`rounded-full px-3 py-1 text-xs font-bold ${
-                              item.status === "SUCCESS"
-                                ? "bg-green-100 text-green-700"
-                                : item.status === "ONGOING"
-                                  ? "bg-yellow-100 text-yellow-700"
-                                  : "bg-red-100 text-red-700"
-                            }`}
+                            key={mission}
+                            className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700"
                           >
-                            {item.status}
+                            {mission}
                           </span>
-                        </div>
-
-                        <button
-                          onClick={() => setSelectedAma(item)}
-                          className="mt-5 w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white"
-                        >
-                          Select AMA
-                        </button>
+                        ))}
                       </div>
-                    </Popup>
-                  </CircleMarker>
-                );
-              })}
-            </MapContainer>
-          </div>
-        </div>
+                    </div>
 
-        {/* ================================================= */}
-        {/* TABLE */}
-        {/* ================================================= */}
-
-        <div className="overflow-hidden rounded-[32px] border bg-white shadow-sm">
-          <div className="overflow-auto">
-            <table className="w-full min-w-[1400px]">
-              <thead className="border-b bg-gray-50">
-                <tr>
-                  <th className="p-5 text-left">DATE</th>
-
-                  <th className="p-5 text-left">FLIGHT ID</th>
-
-                  <th className="p-5 text-left">PILOT</th>
-
-                  <th className="p-5 text-left">BATTERY</th>
-
-                  <th className="p-5 text-left">COLOR</th>
-
-                  <th className="p-5 text-left">DURATION</th>
-
-                  <th className="p-5 text-left">NOTES</th>
-
-                  <th className="p-5 text-left">STATUS</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {rows.map((item, index) => {
-                  const invalid =
-                    !item.flight_date || !item.flight_id || !item.battery_id;
-
-                  return (
-                    <tr
-                      key={index}
-                      className={`border-b ${
-                        invalid ? "bg-red-50" : "hover:bg-gray-50"
-                      }`}
+                    <button
+                      onClick={() =>
+                        setExpandedAma(
+                          expandedAma === group.ama ? null : group.ama
+                        )
+                      }
+                      className="rounded-xl border px-4 py-2 text-sm"
                     >
-                      <td className="p-5">{item.flight_date}</td>
+                      View Flights
+                    </button>
+                  </div>
 
-                      <td className="p-5">
-                        <span className="rounded-full bg-blue-100 px-4 py-1 text-sm text-blue-700">
-                          {item.flight_id}
-                        </span>
-                      </td>
+                  <div className="mt-5">
+                    <label className="mb-2 block text-sm font-semibold">
+                      Map AMA
+                    </label>
 
-                      <td className="p-5 font-semibold text-blue-600">
-                        {item.pilot}
-                      </td>
+                    <select
+                      value={amaMapping[group.ama] || ""}
+                      onChange={(e) =>
+                        setAmaMapping({
+                          ...amaMapping,
 
-                      <td className="p-5">{item.battery_id}</td>
+                          [group.ama]: Number(e.target.value),
+                        })
+                      }
+                      className="h-[54px] w-full rounded-2xl border px-4"
+                    >
+                      <option value="">Select AMA</option>
 
-                      <td className="p-5">{item.battery_color}</td>
+                      {amas.map((ama: any) => (
+                        <option key={ama.id} value={ama.id}>
+                          {ama.ama}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-                      <td className="p-5">
-                        <span className="rounded-full bg-yellow-100 px-4 py-1 text-sm text-yellow-700">
-                          {item.duration_min} min
-                        </span>
-                      </td>
+                  {expandedAma === group.ama && (
+                    <div className="mt-6 overflow-x-auto rounded-2xl border">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b bg-gray-50">
+                            <th className="px-4 py-3 text-left">Mission</th>
 
-                      <td className="p-5">{item.notes}</td>
+                            <th className="px-4 py-3 text-left">Flight</th>
 
-                      <td className="p-5">
-                        {invalid ? (
-                          <span className="rounded-full bg-red-100 px-4 py-1 text-sm text-red-700">
-                            Invalid
-                          </span>
-                        ) : (
-                          <span className="rounded-full bg-green-100 px-4 py-1 text-sm text-green-700">
-                            Valid
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                            <th className="px-4 py-3 text-left">Pilot</th>
+
+                            <th className="px-4 py-3 text-left">UAV</th>
+
+                            <th className="px-4 py-3 text-left">Duration</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {group.rows.map((row: CSVRow, index: number) => (
+                            <tr key={index} className="border-b">
+                              <td className="px-4 py-3">{row.mission_name}</td>
+
+                              <td className="px-4 py-3">{row.flight_id}</td>
+
+                              <td className="px-4 py-3">{row.pilot}</td>
+
+                              <td className="px-4 py-3">{row.uav_unit}</td>
+
+                              <td className="px-4 py-3">
+                                {row.duration_min} min
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+          <div className="rounded-[28px] border bg-white p-6 shadow-sm">
+            <h1 className="text-2xl font-bold">Pilot Mapping</h1>
 
-        {/* ================================================= */}
-        {/* ACTION */}
-        {/* ================================================= */}
+            <p className="mt-2 text-sm text-gray-500">
+              Match CSV Pilot with Database Pilot
+            </p>
 
-        <div className="flex justify-end gap-4">
-          <button
-            onClick={() => router.back()}
-            className="rounded-2xl border bg-white px-6 py-4 font-semibold transition hover:bg-gray-100"
-          >
-            Cancel
-          </button>
+            <div className="mt-6 space-y-4">
+              {groupedPilots.map((pilotName: string) => (
+                <div
+                  key={pilotName}
+                  className="grid grid-cols-1 gap-4 rounded-2xl border p-4 md:grid-cols-2"
+                >
+                  <div>
+                    <p className="text-sm text-gray-500">CSV Pilot</p>
 
-          <button
-            disabled={disableUpload}
-            onClick={handleUpload}
-            className={`flex items-center gap-3 rounded-2xl px-8 py-4 font-semibold text-white transition ${
-              disableUpload
-                ? "cursor-not-allowed bg-gray-300"
-                : "bg-black hover:bg-gray-800"
-            }`}
-          >
-            <Upload className="h-5 w-5" />
+                    <h2 className="font-bold">{pilotName}</h2>
+                  </div>
 
-            {loading
-              ? "Uploading..."
-              : !selectedMission
-                ? "Select Mission First"
-                : !selectedAma
-                  ? "Select AMA First"
-                  : "Upload CSV"}
-          </button>
+                  <div>
+                    <select
+                      value={pilotMapping[pilotName] || ""}
+                      onChange={(e) =>
+                        setPilotMapping({
+                          ...pilotMapping,
+
+                          [pilotName]: Number(e.target.value),
+                        })
+                      }
+                      className="h-[54px] w-full rounded-2xl border px-4"
+                    >
+                      <option value="">Select Pilot</option>
+
+                      {pilots.map((pilot: any, index: number) => (
+                        <option
+                          key={`pilot-${pilot.id}-${index}`}
+                          value={pilot.id}
+                        >
+                          {pilot.pilot_name}
+                        </option>
+                      ))}
+
+                      <option value="-1">+ Create New Pilot</option>
+                    </select>
+
+                    {pilotMapping[pilotName] === -1 && (
+                      <input
+                        type="text"
+                        placeholder="New Pilot Name"
+                        value={newPilotMapping[pilotName] || ""}
+                        onChange={(e) =>
+                          setNewPilotMapping({
+                            ...newPilotMapping,
+
+                            [pilotName]: e.target.value,
+                          })
+                        }
+                        className="mt-3 h-[54px] w-full rounded-2xl border px-4"
+                      />
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="sticky bottom-6 z-50 flex justify-end">
+            <button
+              disabled={disableUpload}
+              onClick={handleUpload}
+              className="flex items-center gap-3 rounded-2xl bg-blue-600 px-8 py-4 font-semibold text-white shadow-lg transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
+            >
+              <Upload className="h-5 w-5" />
+
+              {loading ? "Uploading..." : `Upload ${rows.length} Flights`}
+            </button>
+          </div>
         </div>
       </div>
     </div>
