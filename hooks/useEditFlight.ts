@@ -1,49 +1,54 @@
-"use client";
-
 import { toast } from "sonner";
-
-import { updateFlight } from "@/services/flight.service";
+import { useRouter } from "next/navigation";
 
 export default function useEditFlight() {
+  const router = useRouter();
+
   async function handleUpdate({
     id,
-
     form,
-
     validate,
-
-    onSuccess,
-
     onClose,
-
     setLoading,
   }: any) {
-    const valid = validate();
+    const errors = validate();
 
-    if (!valid) return;
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
 
     try {
       setLoading(true);
 
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const response = await fetch(`/api/flights/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
 
-      const result = await updateFlight(id, form);
+      const result = await response.json();
 
-      if (!result.ok) {
-        toast.error(result.data.message);
+      if (!response.ok) {
+        toast.error(result.message);
 
         return;
       }
 
       toast.success("Flight updated successfully");
 
-      onSuccess(form);
-
+      // tutup modal
       onClose();
-    } catch (err) {
-      console.error(err);
 
-      toast.error("Update failed");
+      window.location.reload();
+
+      // refresh page
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+
+      toast.error("Failed update flight");
     } finally {
       setLoading(false);
     }

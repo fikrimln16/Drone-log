@@ -12,10 +12,7 @@ type Params = {
 // DELETE
 // =====================================================
 
-export async function DELETE(
-  req: Request,
-  { params }: Params
-) {
+export async function DELETE(req: Request, { params }: Params) {
   try {
     const { id } = await params;
 
@@ -30,8 +27,7 @@ export async function DELETE(
     return NextResponse.json({
       success: true,
 
-      message:
-        "Flight deleted successfully",
+      message: "Flight deleted successfully",
     });
   } catch (err) {
     console.error(err);
@@ -53,34 +49,33 @@ export async function DELETE(
 // UPDATE
 // =====================================================
 
-export async function PUT(
-  req: Request,
-  { params }: Params
-) {
+export async function PUT(req: Request, { params }: Params) {
+  const connection = await pool.getConnection();
+
   try {
     const { id } = await params;
 
     const body = await req.json();
 
-    // =================================================
+    // ==========================================
     // FORMAT DATETIME
-    // =================================================
+    // ==========================================
 
-    const startDateTime =
-      body.start_time
-        ? `${body.flight_date} ${body.start_time}:00`
-        : null;
+    const startDateTime = body.start_time
+      ? `${body.flight_date} ${body.start_time}:00`
+      : null;
 
-    const endDateTime =
-      body.end_time
-        ? `${body.flight_date} ${body.end_time}:00`
-        : null;
+    const endDateTime = body.end_time
+      ? `${body.flight_date} ${body.end_time}:00`
+      : null;
 
-    // =================================================
-    // UPDATE
-    // =================================================
+    await connection.beginTransaction();
 
-    await pool.query(
+    // ==========================================
+    // UPDATE FLIGHT
+    // ==========================================
+
+    await connection.query(
       `
       UPDATE drone_flight_history
       SET
@@ -88,7 +83,7 @@ export async function PUT(
         ama = ?,
         ama_id = ?,
         estate = ?,
-        pilot = ?,
+        uav_unit = ?,
         flight_id = ?,
         mission_name = ?,
         battery_id = ?,
@@ -106,63 +101,79 @@ export async function PUT(
       `,
       [
         body.flight_date,
-
         body.ama,
-
-        body.ama_id,
-
+        Number(body.ama_id),
         body.estate,
-
-        body.pilot,
-
+        body.uav_unit,
         body.flight_id,
-
         body.mission_name,
-
         body.battery_id,
-
         body.battery_id_2,
-
         body.battery_color,
-
-        body.start_percent,
-
-        body.end_percent,
-
-        body.start_volt,
-
-        body.end_volt,
-
+        Number(body.start_percent),
+        Number(body.end_percent),
+        Number(body.start_volt),
+        Number(body.end_volt),
         startDateTime,
-
         endDateTime,
-
-        body.duration_min,
-
-        body.notes,
-
-        id,
+        Number(body.duration_min),
+        body.notes || "",
+        Number(id),
       ]
     );
 
+    // ==========================================
+    // REFRESH PILOT RELATION
+    // ==========================================
+
+    await connection.query(
+      `
+      DELETE FROM flight_pilots
+      WHERE flight_id = ?
+      `,
+      [id]
+    );
+
+    if (Array.isArray(body.pilot_ids) && body.pilot_ids.length > 0) {
+      const values = body.pilot_ids.map((pilotId: number) => [
+        Number(id),
+        Number(pilotId),
+      ]);
+
+      await connection.query(
+        `
+        INSERT INTO flight_pilots
+        (
+          flight_id,
+          pilot_id
+        )
+        VALUES ?
+        `,
+        [values]
+      );
+    }
+
+    await connection.commit();
+
     return NextResponse.json({
       success: true,
-
-      message:
-        "Flight updated successfully",
+      message: "Flight updated successfully",
     });
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    await connection.rollback();
+
+    console.error(error);
 
     return NextResponse.json(
       {
         success: false,
-
         message: "Update failed",
       },
       {
         status: 500,
       }
     );
+  } finally {
+    connection.release();
   }
 }

@@ -46,6 +46,9 @@ export default function EditFlightModal({
 
   const { handleUpdate } = useEditFlight();
 
+  const [pilots, setPilots] = useState<any[]>([]);
+  const [missions, setMissions] = useState<any[]>([]);
+
   // =====================================================
   // SET DATA
   // =====================================================
@@ -58,11 +61,13 @@ export default function EditFlightModal({
 
       ama: data.ama || "",
 
-      ama_id: data.ama_id || "",
+      ama_id: Number(data.ama_id || 0),
 
       estate: data.estate || "",
 
-      pilot: data.pilot || "",
+      pilot_ids: data.pilot_ids || [],
+
+      uav_unit: data.uav_unit || "",
 
       flight_id: data.flight_id || "",
 
@@ -74,23 +79,46 @@ export default function EditFlightModal({
 
       battery_color: data.battery_color || "",
 
-      start_percent: data.start_percent || "",
+      start_percent: String(data.start_percent || ""),
 
-      end_percent: data.end_percent || "",
+      end_percent: String(data.end_percent || ""),
 
-      start_volt: data.start_volt || "",
+      start_volt: String(data.start_volt || ""),
 
-      end_volt: data.end_volt || "",
+      end_volt: String(data.end_volt || ""),
 
       start_time: data.start_time ? data.start_time.slice(0, 5) : "",
 
       end_time: data.end_time ? data.end_time.slice(0, 5) : "",
 
-      duration_min: data.duration_min || "",
+      duration_min: String(data.duration_min || ""),
 
       notes: data.notes || "",
     });
   }, [data, setForm]);
+
+  useEffect(() => {
+    async function loadMasterData() {
+      try {
+        const [missionRes, pilotRes] = await Promise.all([
+          fetch("/api/missions"),
+          fetch("/api/pilots/all"),
+        ]);
+
+        const missionData = await missionRes.json();
+
+        const pilotData = await pilotRes.json();
+
+        setMissions(missionData);
+
+        setPilots(pilotData);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    loadMasterData();
+  }, [open]);
 
   if (!open || !data) return null;
 
@@ -144,6 +172,8 @@ export default function EditFlightModal({
                   setForm={setForm}
                   errors={errors}
                   disableFlightId
+                  pilots={pilots}
+                  missions={missions}
                 />
               </div>
             </div>
@@ -212,6 +242,53 @@ export default function EditFlightModal({
                 </div>
               </div>
 
+              {/* FLIGHT CREW */}
+              <div className="rounded-[32px] border bg-white p-6 shadow-sm">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-xs font-semibold tracking-[0.3em] text-gray-400 uppercase">
+                      Flight Crew
+                    </p>
+
+                    <h1 className="mt-3 text-3xl font-bold">
+                      {data.pilots?.length || 0} Pilot
+                    </h1>
+
+                    <p className="mt-2 text-sm text-gray-500">
+                      Assigned pilot & UAV information
+                    </p>
+                  </div>
+                </div>
+
+                {/* UAV */}
+                <div className="mt-6 rounded-2xl bg-gray-50 p-5">
+                  <p className="text-xs font-semibold tracking-wide text-gray-400 uppercase">
+                    UAV UNIT
+                  </p>
+
+                  <h1 className="mt-2 text-2xl font-bold">
+                    {form.uav_unit || "-"}
+                  </h1>
+                </div>
+
+                {/* PILOTS */}
+                <div className="mt-5">
+                  <p className="mb-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">
+                    ASSIGNED PILOTS
+                  </p>
+
+                  <div className="flex flex-wrap gap-2">
+                    {(data.pilots || []).map((pilot: string) => (
+                      <div
+                        key={pilot}
+                        className="rounded-full bg-cyan-100 px-4 py-2 text-sm font-semibold text-cyan-700"
+                      >
+                        {pilot}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
               {/* ================================================= */}
               {/* MAP */}
               {/* ================================================= */}
@@ -266,25 +343,20 @@ export default function EditFlightModal({
           {/* SAVE */}
           <button
             disabled={!isValid || loading}
-            onClick={() =>
+            onClick={() => {
               handleUpdate({
                 id: data.id,
-
                 form,
-
                 validate,
-
                 onClose,
-
                 setLoading,
-
                 onSuccess: (updated: any) =>
                   onSuccess({
                     ...data,
                     ...updated,
                   }),
-              })
-            }
+              });
+            }}
             className="flex min-w-[200px] items-center justify-center gap-3 rounded-2xl bg-blue-600 px-7 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
           >
             {loading ? (

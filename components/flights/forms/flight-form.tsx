@@ -11,6 +11,10 @@ type Props = {
 
   errors: any;
 
+  pilots: any[];
+
+  missions: any[];
+
   disableFlightId?: boolean;
 };
 
@@ -19,6 +23,8 @@ export default function FlightForm({
   setForm,
   errors,
   disableFlightId,
+  pilots,
+  missions,
 }: Props) {
   // AUTO USED BATTERY
   const usedBattery =
@@ -78,28 +84,94 @@ export default function FlightForm({
           />
 
           <FlightInput
-            label="Pilot"
-            value={form.pilot}
-            error={errors.pilot}
+            label="UAV Unit"
+            value={form.uav_unit ?? ""}
+            error={errors.uav_unit}
             onChange={(value) =>
               setForm({
                 ...form,
-                pilot: value,
+                uav_unit: value,
               })
             }
           />
 
-          <FlightInput
-            label="Mission Name"
-            value={form.mission_name}
-            error={errors.mission_name}
-            onChange={(value) =>
-              setForm({
-                ...form,
-                mission_name: value,
-              })
-            }
-          />
+          <div className="md:col-span-2">
+            <label className="mb-3 block text-sm font-bold tracking-wide text-gray-600 uppercase">
+              Assigned Pilots
+            </label>
+
+            <div className="grid grid-cols-2 gap-2">
+              {Array.isArray(pilots) &&
+                pilots.map((pilot) => (
+                  <label
+                    key={pilot.id}
+                    className={`cursor-pointer rounded-2xl border p-3 transition ${
+                      (form.pilot_ids || []).includes(pilot.id)
+                        ? "border-cyan-500 bg-cyan-50"
+                        : "border-gray-200 bg-white"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={(form.pilot_ids || []).includes(pilot.id)}
+                      className="hidden"
+                      onChange={() => {
+                        const exists = (form.pilot_ids || []).includes(
+                          pilot.id
+                        );
+
+                        setForm({
+                          ...form,
+
+                          pilot_ids: exists
+                            ? (form.pilot_ids || []).filter(
+                                (id: number) => id !== pilot.id
+                              )
+                            : [...(form.pilot_ids || []), pilot.id],
+                        });
+                      }}
+                    />
+
+                    <span className="font-semibold">{pilot.pilot_name}</span>
+                  </label>
+                ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-bold tracking-wide text-gray-600 uppercase">
+              Mission Name
+            </label>
+
+            <select
+              value={form.mission_name ?? ""}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  mission_name: e.target.value,
+                })
+              }
+              className={`h-[56px] w-full rounded-2xl border bg-gray-50 px-4 text-base transition outline-none focus:border-blue-500 ${
+                errors.mission_name ? "border-red-300" : "border-gray-200"
+              }`}
+            >
+              <option value="">Select Mission</option>
+
+              {Array.isArray(missions) &&
+                missions.map((mission: any, index: number) => (
+                  <option
+                    key={mission.mission_name || index}
+                    value={mission.mission_name}
+                  >
+                    {mission.mission_name}
+                  </option>
+                ))}
+            </select>
+
+            {errors.mission_name && (
+              <p className="mt-2 text-sm text-red-500">{errors.mission_name}</p>
+            )}
+          </div>
         </div>
       </FlightFormSection>
 

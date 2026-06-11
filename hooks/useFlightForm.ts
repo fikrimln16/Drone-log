@@ -11,7 +11,9 @@ const defaultForm: FlightForm = {
 
   estate: "",
 
-  pilot: "",
+  pilot_ids: [],
+
+  uav_unit: "",
 
   flight_id: "",
 
@@ -53,22 +55,23 @@ export default function useFlightForm(initial?: Partial<FlightForm>) {
 
   const isValid = useMemo(() => {
     return (
-      form.flight_date &&
-      form.ama &&
-      form.estate &&
-      form.pilot &&
-      form.flight_id &&
-      form.mission_name &&
-      form.battery_id &&
-      form.battery_id_2 &&
-      form.battery_color &&
-      form.start_percent &&
-      form.end_percent &&
-      form.start_volt &&
-      form.end_volt &&
-      form.start_time &&
-      form.end_time &&
-      form.duration_min
+      !!form.flight_date &&
+      !!form.ama &&
+      !!form.estate &&
+      (form.pilot_ids || []).length > 0 &&
+      !!form.uav_unit &&
+      !!form.flight_id &&
+      !!form.mission_name &&
+      !!form.battery_id &&
+      !!form.battery_id_2 &&
+      !!form.battery_color &&
+      !!form.start_percent &&
+      !!form.end_percent &&
+      !!form.start_volt &&
+      !!form.end_volt &&
+      !!form.start_time &&
+      !!form.end_time &&
+      !!form.duration_min
     );
   }, [form]);
 
