@@ -27,35 +27,26 @@ export default function MissionKpiGrid({ flights }: Props) {
       flights: number;
       duration: number;
     }
-  > = flights.reduce(
-    (acc, item) => {
-      const pilot = item.pilot?.trim();
+  > = {};
 
-      if (!pilot || pilot === "-" || pilot === "null") {
-        return acc;
-      }
+  flights.forEach((flight) => {
+    const pilots = flight.pilots || [];
 
-      if (!acc[pilot]) {
-        acc[pilot] = {
+    pilots.forEach((pilot: string) => {
+      if (!pilot) return;
+
+      if (!pilotMap[pilot]) {
+        pilotMap[pilot] = {
           flights: 0,
           duration: 0,
         };
       }
 
-      acc[pilot].flights += 1;
+      pilotMap[pilot].flights += 1;
 
-      acc[pilot].duration += Number(item.duration_min || 0);
-
-      return acc;
-    },
-    {} as Record<
-      string,
-      {
-        flights: number;
-        duration: number;
-      }
-    >
-  );
+      pilotMap[pilot].duration += Number(flight.duration_min || 0);
+    });
+  });
 
   const topPilot = Object.entries(pilotMap).sort(
     (a, b) => b[1].duration - a[1].duration
@@ -102,11 +93,11 @@ export default function MissionKpiGrid({ flights }: Props) {
 
       {/* TOP PILOT */}
       <MissionKpiCard
-        title="Top Pilot"
+        title="Most Active Pilot"
         value={topPilot?.[0] || "-"}
-        subtitle={`${topPilot?.[1]?.duration || 0} min • ${
-          topPilot?.[1]?.flights || 0
-        } flights`}
+        subtitle={`${topPilot?.[1]?.flights || 0} flights • ${
+          topPilot?.[1]?.duration || 0
+        } min`}
         icon={<Trophy className="h-7 w-7 text-purple-600" />}
       />
 

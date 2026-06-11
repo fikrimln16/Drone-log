@@ -122,12 +122,56 @@ export default function FlightDetailModal({ data, onClose }: Props) {
 
                   <Item label="Estate" value={data.estate} />
 
-                  <Item label="Pilot" value={data.pilot} />
+                  <Item label="UAV Unit" value={data.uav_unit} />
 
                   <Item
                     label="Flight Duration"
                     value={`${data.duration_min || "-"} min`}
                   />
+                </div>
+              </Section>
+
+              {/* FLIGHT CREW */}
+              <Section title="Flight Crew">
+                <div className="rounded-2xl border bg-white p-5">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div>
+                      <h1 className="text-lg font-bold">Assigned Pilots</h1>
+
+                      <p className="text-sm text-gray-500">
+                        Flight crew member
+                      </p>
+                    </div>
+
+                    <div className="rounded-full bg-cyan-100 px-4 py-2 text-sm font-semibold text-cyan-700">
+                      {data.pilots?.length || 0} Pilot
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    {data.pilots?.length > 0 ? (
+                      data.pilots.map((pilot: string, index: number) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-3 rounded-2xl border border-cyan-100 bg-cyan-50 px-4 py-3"
+                        >
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-100 font-bold text-cyan-700">
+                            {pilot.charAt(0)}
+                          </div>
+
+                          <div>
+                            <p className="font-semibold text-cyan-800">
+                              {pilot}
+                            </p>
+
+                            <p className="text-xs text-cyan-600">Flight Crew</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-500">No pilot assigned</p>
+                    )}
+                  </div>
                 </div>
               </Section>
 
