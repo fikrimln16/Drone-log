@@ -44,9 +44,16 @@ export default function MissionRow({
 
       {/* PILOT */}
       <td className="p-6">
-        <span className="rounded-full bg-cyan-100 px-4 py-1 text-sm text-cyan-700">
-          {item.pilot}
-        </span>
+        <div className="flex flex-wrap gap-2">
+          {item.pilots?.map((pilot: string) => (
+            <span
+              key={pilot}
+              className="rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-700"
+            >
+              {pilot}
+            </span>
+          ))}
+        </div>
       </td>
 
       {/* DURATION */}

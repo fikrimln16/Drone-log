@@ -23,50 +23,89 @@ export async function GET(
 
     const [rows] = await pool.query(
       `
-      SELECT
-        f.*,
+        SELECT
+          f.*,
+
+          -- =============================================
+          -- AMA INFORMATION
+          -- =============================================
+
+          a.ama_name AS ama,
+
+          a.latitude,
+
+          a.longitude,
+
+          a.status,
+
+          -- =============================================
+          -- PILOT INFORMATION
+          -- =============================================
+
+          GROUP_CONCAT(
+            DISTINCT p.pilot_name
+            ORDER BY p.pilot_name
+            SEPARATOR ', '
+          ) AS pilots
+
+        FROM drone_flight_history f
 
         -- =============================================
-        -- AMA INFORMATION
+        -- AMA
         -- =============================================
 
-        a.ama_name AS ama,
+        LEFT JOIN amas a
+          ON f.ama_id = a.id
 
-        a.latitude,
+        -- =============================================
+        -- FLIGHT PILOTS
+        -- =============================================
 
-        a.longitude,
+        LEFT JOIN flight_pilots fp
+          ON fp.flight_id = f.id
 
-        a.status
+        LEFT JOIN pilots p
+          ON p.id = fp.pilot_id
 
-      FROM drone_flight_history f
+        -- =============================================
+        -- FILTER
+        -- =============================================
 
-      -- =============================================
-      -- JOIN AMA
-      -- =============================================
+        WHERE f.mission_name = ?
 
-      LEFT JOIN amas a
-      ON f.ama_id = a.id
+        -- =============================================
+        -- GROUP
+        -- =============================================
 
-      -- =============================================
-      -- FILTER
-      -- =============================================
+        GROUP BY
+          f.id,
+          a.ama_name,
+          a.latitude,
+          a.longitude,
+          a.status
 
-      WHERE f.mission_name = ?
+        -- =============================================
+        -- ORDER
+        -- =============================================
 
-      -- =============================================
-      -- ORDER
-      -- =============================================
-
-      ORDER BY f.flight_date DESC
-      `,
+        ORDER BY
+          f.flight_date DESC,
+          f.id DESC
+        `,
       [mission]
     );
+
+    const formatted = (rows as any[]).map((item) => ({
+      ...item,
+
+      pilots: item.pilots ? item.pilots.split(", ") : [],
+    }));
 
     // =====================================================
     // RESPONSE
     // =====================================================
 
-    return NextResponse.json(rows);
+    return NextResponse.json(formatted);
   } catch (error) {
     console.error(error);
 
