@@ -8,100 +8,172 @@ type Params = {
   }>;
 };
 
-export async function GET(
-  req: Request,
-  { params }: Params
-) {
+export async function GET(req: Request, { params }: Params) {
   try {
-    const { pilot } =
-      await params;
+    const { pilot } = await params;
 
+    const pilotId = Number(pilot);
+
+    // =====================================================
     // SUMMARY
-    const [summaryRows]: any =
-      await pool.query(
-        `
-        SELECT
-          pilot,
+    // =====================================================
 
-          COUNT(*) AS total_flights,
+    const [summaryRows]: any = await pool.query(
+      `
+      SELECT
+        p.id,
 
-          COUNT(DISTINCT mission_name) AS total_missions,
+        p.pilot_name AS pilot,
 
-          SUM(duration_min) AS total_duration,
+        COUNT(
+          DISTINCT fp.flight_id
+        ) AS total_flights,
 
-          ROUND(AVG(duration_min), 1) AS avg_duration,
+        COUNT(
+          DISTINCT f.mission_name
+        ) AS total_missions,
 
-          MAX(flight_date) AS last_flight
+        COALESCE(
+          SUM(f.duration_min),
+          0
+        ) AS total_duration,
 
-        FROM drone_flight_history
+        ROUND(
+          AVG(f.duration_min),
+          1
+        ) AS avg_duration,
 
-        WHERE pilot = ?
+        MAX(f.flight_date) AS last_flight
 
-        GROUP BY pilot
-        `,
-        [pilot]
-      );
+      FROM pilots p
 
-    // MISSIONS
-    const [missionRows]: any =
-      await pool.query(
-        `
-        SELECT
-          mission_name,
+      LEFT JOIN flight_pilots fp
+        ON fp.pilot_id = p.id
 
-          COUNT(*) AS total,
+      LEFT JOIN drone_flight_history f
+        ON f.id = fp.flight_id
 
-          SUM(duration_min) AS duration
+      WHERE p.id = ?
 
-        FROM drone_flight_history
+      GROUP BY
+        p.id,
+        p.pilot_name
+      `,
+      [pilotId]
+    );
 
-        WHERE pilot = ?
+    // =====================================================
+    // MISSION ACTIVITY
+    // =====================================================
 
-        GROUP BY mission_name
+    const [missionRows]: any = await pool.query(
+      `
+      SELECT
+        f.mission_name,
 
-        ORDER BY duration DESC
-        `,
-        [pilot]
-      );
+        COUNT(*) AS total,
 
+        SUM(
+          f.duration_min
+        ) AS duration
+
+      FROM flight_pilots fp
+
+      INNER JOIN drone_flight_history f
+        ON f.id = fp.flight_id
+
+      WHERE fp.pilot_id = ?
+
+      GROUP BY
+        f.mission_name
+
+      ORDER BY duration DESC
+      `,
+      [pilotId]
+    );
+
+    // =====================================================
     // RECENT FLIGHTS
-    const [recentRows]: any =
-      await pool.query(
-        `
-        SELECT
-          flight_id,
-          mission_name,
-          duration_min,
-          flight_date,
-          end_percent
+    // =====================================================
 
-        FROM drone_flight_history
+    const [recentRows]: any = await pool.query(
+      `
+      SELECT
+        f.*,
 
-        WHERE pilot = ?
+        a.ama_name AS ama,
 
-        ORDER BY flight_date DESC
+        a.latitude,
 
-        LIMIT 5
-        `,
-        [pilot]
-      );
+        a.longitude,
+
+        a.status AS ama_status,
+
+        GROUP_CONCAT(
+          DISTINCT p2.pilot_name
+          ORDER BY p2.pilot_name
+          SEPARATOR ', '
+        ) AS pilots
+
+      FROM flight_pilots fp
+
+      INNER JOIN drone_flight_history f
+        ON f.id = fp.flight_id
+
+      LEFT JOIN amas a
+        ON a.id = f.ama_id
+
+      LEFT JOIN flight_pilots fp2
+        ON fp2.flight_id = f.id
+
+      LEFT JOIN pilots p2
+        ON p2.id = fp2.pilot_id
+
+      WHERE fp.pilot_id = ?
+
+      GROUP BY
+        f.id,
+        a.ama_name,
+        a.latitude,
+        a.longitude,
+        a.status
+
+      ORDER BY
+        f.flight_date DESC,
+        f.id DESC
+
+      LIMIT 5
+      `,
+      [pilotId]
+    );
+
+    // =====================================================
+    // FORMAT PILOTS
+    // =====================================================
+
+    const formattedRecentFlights = recentRows.map((item: any) => ({
+      ...item,
+
+      pilots: item.pilots ? item.pilots.split(", ") : [],
+    }));
+
+    // =====================================================
+    // RESPONSE
+    // =====================================================
 
     return NextResponse.json({
-      summary:
-        summaryRows[0] || null,
+      summary: summaryRows[0] || null,
 
       missions: missionRows || [],
 
-      recent_flights:
-        recentRows || [],
+      recent_flights: formattedRecentFlights || [],
     });
   } catch (error) {
     console.error(error);
 
     return NextResponse.json(
       {
-        message:
-          "Failed fetch pilot analytics",
+        message: "Failed fetch pilot analytics",
       },
       {
         status: 500,

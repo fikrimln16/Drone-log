@@ -6,22 +6,36 @@ export async function GET() {
   try {
     const [rows]: any = await pool.query(`
       SELECT
-        pilot,
+        p.id,
 
-        COUNT(*) AS total_flights,
+        p.pilot_name AS pilot,
 
-        COUNT(DISTINCT mission_name) AS total_missions,
+        COUNT(
+          DISTINCT fp.flight_id
+        ) AS total_flights,
 
-        SUM(duration_min) AS total_duration,
+        COUNT(
+          DISTINCT f.mission_name
+        ) AS total_missions,
 
-        MAX(flight_date) AS last_flight
+        COALESCE(
+          SUM(f.duration_min),
+          0
+        ) AS total_duration,
 
-      FROM drone_flight_history
+        MAX(f.flight_date) AS last_flight
 
-      WHERE pilot IS NOT NULL
-        AND pilot != ''
+      FROM pilots p
 
-      GROUP BY pilot
+      LEFT JOIN flight_pilots fp
+        ON fp.pilot_id = p.id
+
+      LEFT JOIN drone_flight_history f
+        ON f.id = fp.flight_id
+
+      GROUP BY
+        p.id,
+        p.pilot_name
 
       ORDER BY total_duration DESC
     `);
