@@ -18,39 +18,64 @@ export default function useExportFilter(flights: any[]) {
   const [endDate, setEndDate] = useState("");
 
   const missions = useMemo(
-    () => [...new Set(flights.map((item) => item.mission_name))],
+    () => [
+      ...new Set(flights.map((item) => item.mission_name).filter(Boolean)),
+    ],
     [flights]
   );
 
-  const amas = [...new Set(flights.map((item) => item.ama))];
+  const amas = useMemo(
+    () => [...new Set(flights.map((item) => item.ama).filter(Boolean))],
+    [flights]
+  );
 
-  const estates = [...new Set(flights.map((item) => item.estate))];
+  const estates = useMemo(
+    () => [...new Set(flights.map((item) => item.estate).filter(Boolean))],
+    [flights]
+  );
 
-  const batteries = [...new Set(flights.map((item) => item.battery_id))];
+  const batteries = useMemo(
+    () => [...new Set(flights.map((item) => item.battery_id).filter(Boolean))],
+    [flights]
+  );
 
-  const pilots = [...new Set(flights.map((item) => item.pilot))];
+  const pilots = useMemo(
+    () => [...new Set(flights.flatMap((item) => item.pilots || []))],
+    [flights]
+  );
 
-  const filteredFlights = flights.filter((item) => {
-    const itemDate = new Date(item.flight_date);
+  const filteredFlights = useMemo(() => {
+    return flights.filter((item) => {
+      const itemDate = new Date(item.flight_date);
 
-    const validSearch =
-      !search ||
-      Object.values(item)
-        .join(" ")
-        .toLowerCase()
-        .includes(search.toLowerCase());
+      const validSearch =
+        !search ||
+        JSON.stringify(item).toLowerCase().includes(search.toLowerCase());
 
-    return (
-      validSearch &&
-      (!mission || item.mission_name === mission) &&
-      (!ama || item.ama === ama) &&
-      (!estate || item.estate === estate) &&
-      (!battery || item.battery_id === battery) &&
-      (!pilot || item.pilot === pilot) &&
-      (!startDate || itemDate >= new Date(startDate)) &&
-      (!endDate || itemDate <= new Date(endDate))
-    );
-  });
+      const validPilot = !pilot || (item.pilots || []).includes(pilot);
+
+      return (
+        validSearch &&
+        (!mission || item.mission_name === mission) &&
+        (!ama || item.ama === ama) &&
+        (!estate || item.estate === estate) &&
+        (!battery || item.battery_id === battery) &&
+        validPilot &&
+        (!startDate || itemDate >= new Date(startDate)) &&
+        (!endDate || itemDate <= new Date(endDate))
+      );
+    });
+  }, [
+    flights,
+    search,
+    mission,
+    ama,
+    estate,
+    battery,
+    pilot,
+    startDate,
+    endDate,
+  ]);
 
   function resetFilters() {
     setSearch("");

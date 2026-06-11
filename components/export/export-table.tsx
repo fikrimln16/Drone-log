@@ -7,7 +7,7 @@ type Props = {
 export default function ExportTable({ flights, onDetail }: Props) {
   return (
     <div className="flex-1 overflow-auto">
-      <table className="w-full min-w-[1500px]">
+      <table className="w-full min-w-[1500px] table-fixed">
         <thead className="sticky top-0 border-b bg-white">
           <tr>
             {[
@@ -39,7 +39,18 @@ export default function ExportTable({ flights, onDetail }: Props) {
 
               <td className="p-5">{item.estate}</td>
 
-              <td className="p-5">{item.pilot || "-"}</td>
+              <td className="p-5">
+                <div className="flex flex-wrap gap-1">
+                  {(item.pilots || []).map((pilot: string) => (
+                    <span
+                      key={pilot}
+                      className="rounded-full bg-cyan-100 px-2 py-1 text-xs font-semibold text-cyan-700"
+                    >
+                      {pilot}
+                    </span>
+                  ))}
+                </div>
+              </td>
 
               <td className="p-5">{item.flight_id}</td>
 
