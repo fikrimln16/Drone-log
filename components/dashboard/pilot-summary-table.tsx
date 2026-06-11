@@ -19,6 +19,8 @@ import usePagination from "@/hooks/usePagination";
 
 import { ChartColumn, Users } from "lucide-react";
 
+import PilotAnalyticsModal from "../pilots/pilot-analytics-modal";
+
 type Pilot = {
   pilot: string;
 
@@ -51,6 +53,14 @@ type SortField =
 
 export default function PilotSummaryTable() {
   const [data, setData] = useState<Pilot[]>([]);
+
+  const [selectedPilot, setSelectedPilot] = useState<string | null>(null);
+
+  const [analyticsOpen, setAnalyticsOpen] = useState(false);
+
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
 
   // =====================================================
   // SEARCH
@@ -85,6 +95,28 @@ export default function PilotSummaryTable() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  async function handleOpenPilot(pilot: string) {
+    console.log(pilot);
+    try {
+      setAnalyticsOpen(true);
+
+      setAnalyticsLoading(true);
+
+      const response = await fetch(`/api/pilots/${encodeURIComponent(pilot)}`);
+
+      const result = await response.json();
+
+      setAnalyticsData(result);
+      // console.log(result);
+
+      setSelectedPilot(pilot);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  }
 
   // =====================================================
   // FILTER + SORT
@@ -468,13 +500,13 @@ export default function PilotSummaryTable() {
 
                   {/* ACTION */}
                   <td className="px-6 py-5">
-                    <Link
-                      href={`/pilot/${encodeURIComponent(item.pilot)}`}
+                    <button
+                      onClick={() => handleOpenPilot(item.id)}
                       className="flex w-fit items-center gap-2 rounded-2xl border border-gray-200 px-4 py-2 text-sm font-semibold transition hover:bg-gray-100"
                     >
                       <Eye className="h-4 w-4" />
                       Detail
-                    </Link>
+                    </button>
                   </td>
                 </tr>
               );
@@ -554,6 +586,18 @@ export default function PilotSummaryTable() {
           </div>
         )}
       </div>
+      <PilotAnalyticsModal
+        open={analyticsOpen}
+        data={analyticsData}
+        loading={analyticsLoading}
+        onClose={() => {
+          setAnalyticsOpen(false);
+
+          setAnalyticsData(null);
+
+          setSelectedPilot(null);
+        }}
+      />
     </div>
   );
 }
