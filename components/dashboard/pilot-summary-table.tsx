@@ -17,6 +17,8 @@ import {
 
 import usePagination from "@/hooks/usePagination";
 
+import { ChartColumn, Users } from "lucide-react";
+
 type Pilot = {
   pilot: string;
 
@@ -267,16 +269,22 @@ export default function PilotSummaryTable() {
           </div>
 
           {/* SEARCH */}
-          <div className="relative w-full xl:w-[360px]">
-            <Search className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Link
+            href="/pilots"
+            className="flex min-w-[200px] items-center gap-3 rounded-[20px] border border-gray-200 bg-white px-4 py-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          >
+            {/* ICON */}
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-100">
+              <ChartColumn className="h-5 w-5 text-cyan-600" />
+            </div>
 
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search pilot, status, AMA..."
-              className="h-[54px] w-full rounded-2xl border border-gray-200 bg-gray-50 pr-5 pl-11 text-sm transition outline-none focus:border-blue-500"
-            />
-          </div>
+            {/* TEXT */}
+            <div>
+              <h1 className="text-base leading-none font-bold">All Pilots</h1>
+
+              <p className="mt-1 text-xs text-gray-500">View analytics</p>
+            </div>
+          </Link>
         </div>
       </div>
 

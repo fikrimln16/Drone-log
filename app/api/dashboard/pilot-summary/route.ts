@@ -13,7 +13,7 @@ export async function GET() {
       FROM amas
     `);
 
-    const totalAma = Number(amaRows[0].total_ama || 0);
+    const totalAma = Number(amaRows[0]?.total_ama || 0);
 
     // ============================================
     // PILOT SUMMARY
@@ -21,37 +21,58 @@ export async function GET() {
 
     const [rows]: any = await pool.query(`
       SELECT
-        f.pilot,
+        p.id,
 
-        COUNT(f.id) AS total_flights,
+        p.pilot_name AS pilot,
 
-        COUNT(DISTINCT f.mission_name)
-          AS total_missions,
+        COUNT(DISTINCT f.id)
+          AS total_flights,
 
-        COUNT(DISTINCT f.ama_id)
-          AS total_amas,
+        COUNT(
+          DISTINCT f.mission_name
+        ) AS total_missions,
+
+        COUNT(
+          DISTINCT f.ama_id
+        ) AS total_amas,
 
         GROUP_CONCAT(
           DISTINCT a.ama_name
+          ORDER BY a.ama_name
+          SEPARATOR ','
         ) AS ama_list,
 
-        SUM(f.duration_min)
-          AS total_duration,
+        COALESCE(
+          SUM(f.duration_min),
+          0
+        ) AS total_duration,
 
-        AVG(f.duration_min)
-          AS avg_duration,
+        ROUND(
+          AVG(f.duration_min),
+          1
+        ) AS avg_duration,
 
         MAX(f.flight_date)
           AS last_flight
 
-      FROM drone_flight_history f
+      FROM pilots p
+
+      LEFT JOIN flight_pilots fp
+      ON fp.pilot_id = p.id
+
+      LEFT JOIN drone_flight_history f
+      ON f.id = fp.flight_id
 
       LEFT JOIN amas a
       ON a.id = f.ama_id
 
-      GROUP BY f.pilot
+      GROUP BY
+        p.id,
+        p.pilot_name
 
-      ORDER BY total_duration DESC
+      ORDER BY
+        total_duration DESC,
+        p.pilot_name ASC
     `);
 
     // ============================================
@@ -70,6 +91,8 @@ export async function GET() {
       }
 
       return {
+        id: item.id,
+
         pilot: item.pilot,
 
         total_flights: Number(item.total_flights || 0),

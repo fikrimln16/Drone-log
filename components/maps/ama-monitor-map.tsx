@@ -267,58 +267,75 @@ export default function AmaMonitorMap() {
                   icon={createCustomMarker(getMarkerColor(item.status))}
                 >
                   <Popup>
-                    <div className="w-[220px] space-y-3">
-                      {/* TITLE */}
+                    <div className="w-[260px] space-y-4">
+                      {/* ================================================= */}
+                      {/* HEADER */}
+                      {/* ================================================= */}
+
                       <div>
-                        <h1 className="text-base leading-tight font-bold">
+                        <h1 className="text-lg leading-tight font-bold text-slate-800">
                           {item.ama}
                         </h1>
 
-                        <p className="text-[11px] text-gray-500">
-                          Drone monitoring point
+                        <p className="mt-1 text-xs text-slate-500">
+                          Drone Monitoring Area
                         </p>
                       </div>
 
+                      {/* ================================================= */}
                       {/* STATUS */}
-                      <div className="flex items-center justify-between">
-                        <p className="text-[11px] text-gray-400">Status</p>
+                      {/* ================================================= */}
 
-                        <div
-                          className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
-                            item.status === "SUCCESS"
-                              ? "bg-green-100 text-green-700"
+                      <div className="rounded-2xl border bg-slate-50 p-3">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-semibold tracking-wide text-slate-500 uppercase">
+                            Status
+                          </p>
+
+                          <div
+                            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold shadow-sm ${
+                              item.status === "SUCCESS"
+                                ? "bg-green-100 text-green-800 ring-1 ring-green-200"
+                                : item.status === "ONGOING"
+                                  ? "bg-yellow-100 text-yellow-800 ring-1 ring-yellow-200"
+                                  : "bg-orange-100 text-orange-800 ring-1 ring-orange-200"
+                            }`}
+                          >
+                            <div
+                              className={`h-2.5 w-2.5 rounded-full ${
+                                item.status === "SUCCESS"
+                                  ? "bg-green-500"
+                                  : item.status === "ONGOING"
+                                    ? "bg-yellow-500"
+                                    : "bg-orange-500"
+                              }`}
+                            />
+
+                            {item.status === "SUCCESS"
+                              ? "Completed"
                               : item.status === "ONGOING"
-                                ? "bg-yellow-100 text-yellow-700"
-                                : "bg-orange-100 text-orange-700"
-                          }`}
-                        >
-                          {item.status}
+                                ? "Ongoing"
+                                : "Waiting"}
+                          </div>
                         </div>
                       </div>
 
-                      {/* COORDINATE */}
-                      <div className="rounded-xl border bg-gray-50 p-3">
-                        <p className="text-[10px] text-gray-400">Coordinate</p>
-
-                        <h1 className="mt-1 mb-3 text-xs font-semibold text-gray-700">
-                          {item.lat.toFixed(4)}, {item.lng.toFixed(4)}
-                        </h1>
-                      </div>
-
+                      {/* ================================================= */}
                       {/* FLIGHT INFORMATION */}
+                      {/* ================================================= */}
+
                       <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-4">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="-mt-3 text-[11px] font-medium tracking-wide text-slate-400 uppercase">
+                            <p className="text-[11px] font-semibold tracking-wide text-slate-400 uppercase">
                               Total Flights
                             </p>
 
-                            <h1 className="mt-1 mb-3 text-3xl font-bold text-slate-800">
+                            <h1 className="mt-2 text-4xl font-bold text-slate-800">
                               {item.total_flights}
                             </h1>
                           </div>
 
-                          {/* ICON */}
                           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100">
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -343,13 +360,13 @@ export default function AmaMonitorMap() {
                           </div>
                         </div>
 
-                        {/* LAST UPDATE */}
+                        {/* LAST FLIGHT */}
                         <div className="mt-4 rounded-xl bg-slate-100 px-3 py-2">
                           <p className="text-[10px] text-slate-400">
-                            Last Flight Update
+                            Last Flight Activity
                           </p>
 
-                          <h1 className="mt-1 mb-3 text-xs font-semibold text-slate-700">
+                          <h1 className="mt-1 text-xs font-semibold text-slate-700">
                             {item.latest_flight
                               ? formatDateOnly(item.latest_flight)
                               : "No flight activity"}
@@ -357,27 +374,34 @@ export default function AmaMonitorMap() {
                         </div>
                       </div>
 
-                      {/* DATE */}
-                      <div className="grid grid-cols-2 gap-2">
-                        {/* PLANNING */}
-                        <div className="rounded-xl border border-blue-100 bg-blue-50 p-2.5">
-                          <p className="text-[10px] text-blue-500">Planning</p>
+                      {/* ================================================= */}
+                      {/* DATE INFORMATION */}
+                      {/* ================================================= */}
 
-                          <h1 className="mt-1 mb-3 text-[11px] leading-tight font-semibold text-blue-700">
+                      <div className="grid grid-cols-2 gap-3">
+                        {/* PLANNING */}
+                        <div className="rounded-xl border border-blue-100 bg-blue-50 p-3">
+                          <p className="text-[10px] font-medium text-blue-500">
+                            Planning
+                          </p>
+
+                          <h1 className="mt-1 text-[11px] leading-tight font-semibold text-blue-700">
                             {item.planning_date
                               ? formatDateOnly(item.planning_date)
-                              : "No planning"}
+                              : "No Planning"}
                           </h1>
                         </div>
 
                         {/* ACTUAL */}
-                        <div className="rounded-xl border border-purple-100 bg-purple-50 p-2.5">
-                          <p className="text-[10px] text-purple-500">Actual</p>
+                        <div className="rounded-xl border border-purple-100 bg-purple-50 p-3">
+                          <p className="text-[10px] font-medium text-purple-500">
+                            Actual
+                          </p>
 
-                          <h1 className="mt-1 mb-3 text-[11px] leading-tight font-semibold text-purple-700">
+                          <h1 className="mt-1 text-[11px] leading-tight font-semibold text-purple-700">
                             {item.actual_date
                               ? formatDateOnly(item.actual_date)
-                              : "Belum jalan"}
+                              : "Waiting"}
                           </h1>
                         </div>
                       </div>
