@@ -51,12 +51,26 @@ export async function GET() {
 
           a.longitude,
 
-          a.status AS ama_status
+          a.status AS ama_status,
+
+          GROUP_CONCAT(
+            DISTINCT p.pilot_name
+            ORDER BY p.pilot_name
+            SEPARATOR ', '
+          ) AS pilots
 
         FROM drone_flight_history f
 
         LEFT JOIN amas a
-        ON a.id = f.ama_id
+          ON a.id = f.ama_id
+
+        LEFT JOIN flight_pilots fp
+          ON fp.flight_id = f.id
+
+        LEFT JOIN pilots p
+          ON p.id = fp.pilot_id
+
+        GROUP BY f.id
 
         ORDER BY f.id DESC
       `);
@@ -192,17 +206,52 @@ export async function GET() {
 
     const [topPilotRows]: any = await pool.query(`
         SELECT
-          pilot,
-          COUNT(*) AS flights,
-          SUM(duration_min) AS duration,
-          MAX(mission_name) AS mission
-        FROM drone_flight_history
-        WHERE pilot IS NOT NULL
-          AND pilot != ''
-        GROUP BY pilot
+          p.pilot_name AS pilot,
+
+          COUNT(
+            DISTINCT fp.flight_id
+          ) AS flights,
+
+          SUM(
+            f.duration_min
+          ) AS duration,
+
+          COUNT(
+            DISTINCT f.mission_name
+          ) AS missions
+
+        FROM pilots p
+
+        LEFT JOIN flight_pilots fp
+          ON fp.pilot_id = p.id
+
+        LEFT JOIN drone_flight_history f
+          ON f.id = fp.flight_id
+
+        GROUP BY
+          p.id,
+          p.pilot_name
+
         ORDER BY duration DESC
+
         LIMIT 1
       `);
+
+    const [pilotCountRows]: any = await pool.query(`
+        SELECT COUNT(*) AS total_pilots
+        FROM pilots
+      `);
+
+    const [uavRows]: any = await pool.query(`
+        SELECT COUNT(DISTINCT uav_unit) AS total_uavs
+        FROM drone_flight_history
+      `);
+
+    const formattedActiveFlights = activeFlightRows.map((item: any) => ({
+      ...item,
+
+      pilots: item.pilots ? item.pilots.split(", ") : [],
+    }));
 
     // =====================================================
     // RESPONSE
@@ -221,9 +270,7 @@ export async function GET() {
       ),
 
       // ACTIVE
-      active_flights: activeRows[0]?.active_flights || 0,
-
-      active_flight_list: activeFlightRows || [],
+      active_flight_list: formattedActiveFlights || [],
 
       // BATTERY
       battery_alerts: batteryRows[0]?.battery_alerts || 0,
@@ -259,6 +306,10 @@ export async function GET() {
 
       // TOP PILOT
       top_pilot: topPilotRows[0] || null,
+
+      total_pilots: pilotCountRows[0]?.total_pilots || 0,
+
+      total_uavs: uavRows[0]?.total_uavs || 0,
     });
   } catch (error) {
     console.error(error);
