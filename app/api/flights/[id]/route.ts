@@ -13,10 +13,30 @@ type Params = {
 // =====================================================
 
 export async function DELETE(req: Request, { params }: Params) {
+  const connection = await pool.getConnection();
+
   try {
     const { id } = await params;
 
-    await pool.query(
+    await connection.beginTransaction();
+
+    // ==========================================
+    // DELETE FLIGHT PILOTS
+    // ==========================================
+
+    await connection.query(
+      `
+      DELETE FROM flight_pilots
+      WHERE flight_id = ?
+      `,
+      [id]
+    );
+
+    // ==========================================
+    // DELETE FLIGHT
+    // ==========================================
+
+    await connection.query(
       `
       DELETE FROM drone_flight_history
       WHERE id = ?
@@ -24,24 +44,28 @@ export async function DELETE(req: Request, { params }: Params) {
       [id]
     );
 
+    await connection.commit();
+
     return NextResponse.json({
       success: true,
-
       message: "Flight deleted successfully",
     });
   } catch (err) {
+    await connection.rollback();
+
     console.error(err);
 
     return NextResponse.json(
       {
         success: false,
-
         message: "Delete failed",
       },
       {
         status: 500,
       }
     );
+  } finally {
+    connection.release();
   }
 }
 
