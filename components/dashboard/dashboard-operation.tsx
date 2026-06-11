@@ -4,7 +4,6 @@ import { Activity, AlertTriangle, Plane, UploadCloud } from "lucide-react";
 
 import Link from "next/link";
 
-
 type Props = {
   stats: any;
 
@@ -12,8 +11,7 @@ type Props = {
 };
 
 export default function DashboardOperation({ stats, onOpenActive }: Props) {
-  const activeFlights = stats.active_flights || 0;
-
+  const activeFlights = stats.active_flight_list?.length || 0;
   const batteryAlerts = stats.battery_alerts || 0;
 
   const latestUpload = stats.latest_upload
@@ -137,9 +135,7 @@ export default function DashboardOperation({ stats, onOpenActive }: Props) {
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-gray-500">
-                Top Pilot
-              </p>
+              <p className="text-sm font-semibold text-gray-500">Top Pilot</p>
 
               <Link
                 href="/pilots"

@@ -69,6 +69,8 @@ export async function GET() {
 
         LEFT JOIN pilots p
           ON p.id = fp.pilot_id
+        
+        WHERE DATE(f.flight_date)=CURDATE()
 
         GROUP BY f.id
 
