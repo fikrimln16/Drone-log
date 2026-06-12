@@ -63,7 +63,9 @@ export default function AmaPage() {
 
       ongoing: amas.filter((x) => x.status === "ONGOING").length,
 
-      pending: amas.filter((x) => x.status === "PENDING").length,
+      next: amas.filter((x) => x.status === "NEXT").length,
+
+      waiting: amas.filter((x) => x.status === "WAITING").length,
     };
   }, [amas]);
 
