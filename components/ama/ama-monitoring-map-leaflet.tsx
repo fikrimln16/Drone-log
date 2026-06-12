@@ -31,13 +31,19 @@ type Props = {
 function getColor(status: string) {
   switch (status?.toUpperCase()) {
     case "SUCCESS":
-      return "#22c55e";
+      return "#22c55e"; // green-500
 
     case "ONGOING":
-      return "#eab308";
+      return "#0ea5e9"; // sky-500
+
+    case "NEXT":
+      return "#f97316"; // orange-500
+
+    case "WAITING":
+      return "#eab308"; // yellow-500
 
     default:
-      return "#f97316";
+      return "#94a3b8"; // slate-400
   }
 }
 
@@ -62,16 +68,18 @@ export default function AmaMonitorMapLeaflet({ amas, onSelectAma }: Props) {
           center={[ama.latitude, ama.longitude]}
           radius={8}
           pathOptions={{
-            color: "white",
+            color: "#ffffff",
             weight: 3,
             fillColor: getColor(ama.status),
             fillOpacity: 1,
+            opacity: 1,
           }}
           eventHandlers={{
             click: () => {
               onSelectAma?.(ama);
             },
           }}
+          className="animate-pulse"
         >
           <Popup>
             <div className="min-w-[220px]">
@@ -82,15 +90,35 @@ export default function AmaMonitorMapLeaflet({ amas, onSelectAma }: Props) {
                   <span>Status</span>
 
                   <span
-                    className={`rounded-full px-2 py-1 text-xs font-semibold ${
+                    className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold ${
                       ama.status === "SUCCESS"
-                        ? "bg-green-100 text-green-500"
+                        ? "bg-green-100 text-green-800 ring-1 ring-green-200"
                         : ama.status === "ONGOING"
-                          ? "bg-yellow-100 text-yellow-500"
-                          : "bg-red-100 text-orange-500"
+                          ? "bg-sky-100 text-sky-800 ring-1 ring-sky-200"
+                          : ama.status === "NEXT"
+                            ? "bg-orange-100 text-orange-800 ring-1 ring-orange-200"
+                            : "bg-yellow-100 text-yellow-800 ring-1 ring-yellow-200"
                     }`}
                   >
-                    {ama.status}
+                    <div
+                      className={`h-2 w-2 rounded-full ${
+                        ama.status === "SUCCESS"
+                          ? "bg-green-500"
+                          : ama.status === "ONGOING"
+                            ? "bg-sky-500"
+                            : ama.status === "NEXT"
+                              ? "bg-orange-500"
+                              : "bg-yellow-500"
+                      }`}
+                    />
+
+                    {ama.status === "SUCCESS"
+                      ? "Completed"
+                      : ama.status === "ONGOING"
+                        ? "On Progress"
+                        : ama.status === "NEXT"
+                          ? "Next"
+                          : "Waiting"}
                   </span>
                 </div>
 

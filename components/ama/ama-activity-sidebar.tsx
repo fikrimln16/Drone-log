@@ -28,23 +28,33 @@ export default function AmaActivitySidebar({
       value: "ALL",
       label: "All",
     },
+
     {
       value: "SUCCESS",
       label: "Completed",
       bg: "bg-green-500",
       active: "bg-green-100 text-green-800 ring-1 ring-green-200",
     },
+
     {
       value: "ONGOING",
       label: "Ongoing",
-      bg: "bg-yellow-500",
-      active: "bg-yellow-100 text-yellow-800 ring-1 ring-yellow-200",
+      bg: "bg-sky-500",
+      active: "bg-sky-100 text-sky-800 ring-1 ring-sky-200",
     },
+
+    {
+      value: "NEXT",
+      label: "Next",
+      bg: "bg-orange-500",
+      active: "bg-orange-100 text-orange-800 ring-1 ring-orange-200",
+    },
+
     {
       value: "WAITING",
       label: "Waiting",
-      bg: "bg-orange-500",
-      active: "bg-orange-100 text-orange-800 ring-1 ring-orange-200",
+      bg: "bg-yellow-500",
+      active: "bg-yellow-100 text-yellow-800 ring-1 ring-yellow-200",
     },
   ];
 

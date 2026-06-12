@@ -14,16 +14,20 @@ export default function AmaActivityCard({ ama, selected, onClick }: Props) {
   return (
     <button
       onClick={onClick}
-      className={`w-full rounded-[28px] border p-5 text-left transition ${
-        selected ? "border-blue-300 bg-blue-50" : "bg-white hover:bg-gray-50"
+      className={`w-full rounded-[28px] border p-5 text-left transition-all duration-200 ${
+        selected
+          ? "border-blue-300 bg-blue-50 shadow-md"
+          : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
       }`}
     >
       {/* HEADER */}
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="line-clamp-1 text-xl font-bold">{ama.ama_name}</h1>
+          <h1 className="line-clamp-1 text-lg font-bold text-slate-900">
+            {ama.ama_name}
+          </h1>
 
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-xs text-slate-500">
             {Number(ama.latitude).toFixed(4)},{" "}
             {Number(ama.longitude).toFixed(4)}
           </p>
@@ -66,7 +70,9 @@ export default function AmaActivityCard({ ama, selected, onClick }: Props) {
           </div>
         </div>
 
-        <span className="text-sm font-semibold text-blue-600">View Detail</span>
+        <span className="text-sm font-semibold text-blue-600">
+          View Details →
+        </span>
       </div>
     </button>
   );
@@ -80,32 +86,63 @@ function SmallCard({ icon, title, value, color }: any) {
   };
 
   return (
-    <div className={`rounded-2xl border p-4 ${styles[color]}`}>
+    <div className={`rounded-2xl border p-3 ${styles[color]}`}>
       <div className="flex items-center gap-2">
         {icon}
 
-        <p className="text-xs font-bold tracking-widest uppercase">{title}</p>
+        <p className="text-[10px] font-bold tracking-wider uppercase">
+          {title}
+        </p>
       </div>
 
-      <h1 className="mt-3 text-3xl font-bold">{value}</h1>
+      <h1 className="mt-2 text-2xl font-bold">{value}</h1>
     </div>
   );
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const styles: any = {
-    SUCCESS: "bg-green-100 text-green-700",
+  const config: Record<
+    string,
+    {
+      label: string;
+      className: string;
+      dot: string;
+    }
+  > = {
+    SUCCESS: {
+      label: "Completed",
+      className: "bg-green-100 text-green-800 ring-1 ring-green-200",
+      dot: "bg-green-500",
+    },
 
-    ONGOING: "bg-yellow-100 text-yellow-700",
+    ONGOING: {
+      label: "Ongoing",
+      className: "bg-sky-100 text-sky-800 ring-1 ring-sky-200",
+      dot: "bg-sky-500",
+    },
 
-    PENDING: "bg-red-100 text-red-700",
+    NEXT: {
+      label: "Next",
+      className: "bg-orange-100 text-orange-800 ring-1 ring-orange-200",
+      dot: "bg-orange-500",
+    },
+
+    WAITING: {
+      label: "Waiting",
+      className: "bg-yellow-100 text-yellow-800 ring-1 ring-yellow-200",
+      dot: "bg-yellow-500",
+    },
   };
 
+  const current = config[status?.toUpperCase()] || config.WAITING;
+
   return (
-    <span
-      className={`rounded-full px-4 py-1 text-xs font-bold ${styles[status]}`}
+    <div
+      className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-bold shadow-sm ${current.className}`}
     >
-      {status}
-    </span>
+      <div className={`h-2.5 w-2.5 rounded-full ${current.dot}`} />
+
+      {current.label}
+    </div>
   );
 }
