@@ -35,7 +35,7 @@ export async function PUT(
     // VALIDATION
     // =================================================
 
-    const allowedStatus = ["WAITING", "ONGOING", "SUCCESS"];
+    const allowedStatus = ["WAITING", "NEXT", "ONGOING", "SUCCESS"];
 
     if (status && !allowedStatus.includes(status.toUpperCase())) {
       return NextResponse.json(

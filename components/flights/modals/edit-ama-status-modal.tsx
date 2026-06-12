@@ -107,7 +107,7 @@ export default function EditAmaStatusModal({
     switch (status?.toUpperCase()) {
       case "SUCCESS":
         return {
-          badge: "bg-green-100 text-green-700",
+          badge: "bg-green-100 text-green-800 ring-1 ring-green-200",
 
           border: "border-green-200",
 
@@ -116,20 +116,38 @@ export default function EditAmaStatusModal({
 
       case "ONGOING":
         return {
-          badge: "bg-yellow-100 text-yellow-700",
+          badge: "bg-sky-100 text-sky-800 ring-1 ring-sky-200",
 
-          border: "border-yellow-200",
+          border: "border-sky-200",
 
-          button: "bg-yellow-500 hover:bg-yellow-600",
+          button: "bg-sky-600 hover:bg-sky-700",
         };
 
-      default:
+      case "NEXT":
         return {
-          badge: "bg-orange-100 text-orange-700",
+          badge: "bg-orange-100 text-orange-800 ring-1 ring-orange-200",
 
           border: "border-orange-200",
 
           button: "bg-orange-600 hover:bg-orange-700",
+        };
+
+      case "WAITING":
+        return {
+          badge: "bg-yellow-100 text-yellow-800 ring-1 ring-yellow-200",
+
+          border: "border-yellow-200",
+
+          button: "bg-yellow-600 hover:bg-yellow-700",
+        };
+
+      default:
+        return {
+          badge: "bg-slate-100 text-slate-700 ring-1 ring-slate-200",
+
+          border: "border-slate-200",
+
+          button: "bg-slate-600 hover:bg-slate-700",
         };
     }
   }
@@ -189,9 +207,15 @@ export default function EditAmaStatusModal({
                         <h1 className="text-2xl font-bold">{item.ama}</h1>
 
                         <div
-                          className={`rounded-full px-4 py-1 text-xs font-bold ${style.badge}`}
+                          className={`rounded-full px-4 py-2 text-xs font-bold ${style.badge}`}
                         >
-                          {selectedStatus}
+                          {selectedStatus === "SUCCESS"
+                            ? "Completed"
+                            : selectedStatus === "ONGOING"
+                              ? "On Progress"
+                              : selectedStatus === "NEXT"
+                                ? "Next"
+                                : "Waiting"}
                         </div>
                       </div>
 
@@ -272,6 +296,8 @@ export default function EditAmaStatusModal({
                           className="h-[54px] w-full rounded-2xl border bg-gray-50 px-5 font-semibold outline-none focus:border-blue-500"
                         >
                           <option value="WAITING">WAITING</option>
+
+                          <option value="NEXT">NEXT</option>
 
                           <option value="ONGOING">ONGOING</option>
 
