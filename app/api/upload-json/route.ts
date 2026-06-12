@@ -21,33 +21,6 @@ export async function POST(req: Request) {
 
       const mysqlDate = `${year}-${month}-${day}`;
 
-      const [pilotRows]: any = await connection.query(
-        `
-          SELECT id
-          FROM pilots
-          WHERE pilot_name = ?
-          LIMIT 1
-          `,
-        [flight.pilot]
-      );
-
-      let pilotId = flight.pilot_id;
-
-      if (pilotId === -1) {
-        const [result]: any = await connection.query(
-          `
-      INSERT INTO pilots
-      (
-        pilot_name
-      )
-      VALUES (?)
-      `,
-          [flight.new_pilot_name]
-        );
-
-        pilotId = result.insertId;
-      }
-
       // =====================================
       // INSERT FLIGHT
       // =====================================
@@ -121,17 +94,44 @@ export async function POST(req: Request) {
       // RELATION PILOT
       // =====================================
 
-      await connection.query(
-        `
-        INSERT INTO flight_pilots
+      const pilotNames = String(flight.pilot || "")
+        .split("_")
+        .map((pilot: string) => pilot.trim())
+        .filter(Boolean);
+
+      for (const pilotName of pilotNames) {
+        let pilotId = flight.pilot_mapping?.[pilotName];
+
+        // create new pilot
+        if (!pilotId && flight.new_pilot_mapping?.[pilotName]) {
+          const [newPilot]: any = await connection.query(
+            `
+        INSERT INTO pilots
         (
-          flight_id,
-          pilot_id
+          pilot_name
         )
-        VALUES (?, ?)
+        VALUES (?)
         `,
-        [flightResult.insertId, pilotId]
-      );
+            [flight.new_pilot_mapping[pilotName]]
+          );
+
+          pilotId = newPilot.insertId;
+        }
+
+        if (!pilotId) continue;
+
+        await connection.query(
+          `
+    INSERT INTO flight_pilots
+    (
+      flight_id,
+      pilot_id
+    )
+    VALUES (?, ?)
+    `,
+          [flightResult.insertId, pilotId]
+        );
+      }
     }
 
     await connection.commit();

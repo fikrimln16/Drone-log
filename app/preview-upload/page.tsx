@@ -180,18 +180,13 @@ export default function PreviewUploadPage() {
         return {
           ...item,
 
-          mission_name: item.mission_name,
-
           ama_id: amaId,
 
           ama: amaData?.ama || "",
 
-          pilot_id: pilotMapping[item.pilot],
+          pilot_mapping: pilotMapping,
 
-          new_pilot_name:
-            pilotMapping[item.pilot] === -1
-              ? newPilotMapping[item.pilot]
-              : null,
+          new_pilot_mapping: newPilotMapping,
         };
       });
 
@@ -228,9 +223,16 @@ export default function PreviewUploadPage() {
     }
   }
 
-  const groupedPilots = useMemo(() => {
-    return [...new Set(rows.map((item) => item.pilot))];
-  }, [rows]);
+  const groupedPilots = [
+    ...new Set(
+      rows.flatMap((row: any) =>
+        String(row.pilot || "")
+          .split("_")
+          .map((pilot) => pilot.trim())
+          .filter(Boolean)
+      )
+    ),
+  ];
 
   const groupedAma = useMemo(() => {
     const map: Record<string, any> = {};
@@ -254,7 +256,13 @@ export default function PreviewUploadPage() {
 
       map[row.ama].missions.add(row.mission_name);
 
-      map[row.ama].pilots.add(row.pilot);
+      String(row.pilot || "")
+        .split("_")
+        .map((pilot) => pilot.trim())
+        .filter(Boolean)
+        .forEach((pilot) => {
+          map[row.ama].pilots.add(pilot);
+        });
 
       map[row.ama].rows.push(row);
     });
@@ -262,16 +270,32 @@ export default function PreviewUploadPage() {
     return Object.values(map).map((item: any) => ({
       ...item,
 
-      missions: Array.from(item.missions || []),
+      missions: Array.from(item.missions),
 
-      pilots: Array.from(item.pilots || []),
+      pilots: Array.from(item.pilots),
     }));
   }, [rows]);
 
+  const hasUnmappedPilot = groupedPilots.some((pilotName) => {
+    const selected = pilotMapping[pilotName];
+
+    if (selected === undefined || selected === null) {
+      return true;
+    }
+
+    if (selected === -1 && !newPilotMapping[pilotName]) {
+      return true;
+    }
+
+    return false;
+  });
+
+  const hasUnmappedAma = groupedAma.some(
+    (group: any) => !amaMapping[group.ama]
+  );
+
   const disableUpload =
-    invalidRows.length > 0 ||
-    loading ||
-    groupedPilots.some((pilotName) => !pilotMapping[pilotName]);
+    invalidRows.length > 0 || loading || hasUnmappedPilot || hasUnmappedAma;
 
   return (
     <div className="min-h-screen bg-[#f5f7fb]">
@@ -499,7 +523,7 @@ export default function PreviewUploadPage() {
           </div>
           <div className="sticky bottom-6 z-50 flex justify-end">
             <button
-              disabled={disableUpload}
+              // disabled={disableUpload}
               onClick={handleUpload}
               className="flex items-center gap-3 rounded-2xl bg-blue-600 px-8 py-4 font-semibold text-white shadow-lg transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
             >
