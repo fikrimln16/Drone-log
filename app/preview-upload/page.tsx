@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import dynamic from "next/dynamic";
 
-import { AlertCircle, FileSpreadsheet, Upload } from "lucide-react";
+import { AlertCircle, FileSpreadsheet, Upload, MapPinned } from "lucide-react";
 
 import "leaflet/dist/leaflet.css";
 
@@ -30,6 +30,13 @@ const TileLayer = dynamic(
 
 const CircleMarker = dynamic(
   () => import("react-leaflet").then((mod) => mod.CircleMarker),
+  {
+    ssr: false,
+  }
+);
+
+const Tooltip = dynamic(
+  () => import("react-leaflet").then((mod) => mod.Tooltip),
   {
     ssr: false,
   }
@@ -83,6 +90,8 @@ export default function PreviewUploadPage() {
 
   const [selectedAma, setSelectedAma] = useState<any>(null);
 
+  const [selectedMapAma, setSelectedMapAma] = useState<any>(null);
+
   const [amas, setAmas] = useState<any[]>([]);
 
   const [expandedMission, setExpandedMission] = useState<string | null>(null);
@@ -95,8 +104,7 @@ export default function PreviewUploadPage() {
     Record<string, string>
   >({});
 
-  const [amaMapping, setAmaMapping] = useState<Record<string, number>>({});
-
+  const [amaMapping, setAmaMapping] = useState<Record<string, any>>({});
   const [expandedAma, setExpandedAma] = useState<string | null>(null);
 
   // =====================================================
@@ -174,15 +182,18 @@ export default function PreviewUploadPage() {
 
       const payload = rows.map((item) => {
         groupedAma.some((group: any) => !amaMapping[group.ama]);
-        const amaId = amaMapping[item.ama];
-        const amaData = amas.find((a) => a.id === amaId);
+        const selectedAma = amaMapping[item.ama];
+
+        const amaId = selectedAma?.id;
 
         return {
           ...item,
 
-          ama_id: amaId,
+          ama_id: selectedAma?.id,
 
-          ama: amaData?.ama || "",
+          latitude: selectedAma?.latitude,
+
+          longitude: selectedAma?.longitude,
 
           pilot_mapping: pilotMapping,
 
@@ -291,7 +302,7 @@ export default function PreviewUploadPage() {
   });
 
   const hasUnmappedAma = groupedAma.some(
-    (group: any) => !amaMapping[group.ama]
+    (group: any) => !amaMapping[group.ama]?.id
   );
 
   const disableUpload =
@@ -389,30 +400,226 @@ export default function PreviewUploadPage() {
                     </button>
                   </div>
 
-                  <div className="mt-5">
-                    <label className="mb-2 block text-sm font-semibold">
-                      Map AMA
-                    </label>
+                  <div className="mt-5 grid gap-5 lg:grid-cols-2">
+                    {/* MAP */}
+                    <div className="overflow-hidden rounded-2xl border">
+                      <MapContainer
+                        center={[-2.5, 118]}
+                        zoom={5}
+                        style={{
+                          height: "280px",
+                          width: "100%",
+                        }}
+                      >
+                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-                    <select
-                      value={amaMapping[group.ama] || ""}
-                      onChange={(e) =>
-                        setAmaMapping({
-                          ...amaMapping,
+                        {amas.map((ama: any) => (
+                          <CircleMarker
+                            key={ama.id}
+                            center={[Number(ama.lat), Number(ama.lng)]}
+                            radius={selectedMapAma?.id === ama.id ? 16 : 10}
+                            pathOptions={{
+                              color:
+                                selectedMapAma?.id === ama.id
+                                  ? "#2563eb"
+                                  : "white",
 
-                          [group.ama]: Number(e.target.value),
-                        })
-                      }
-                      className="h-[54px] w-full rounded-2xl border px-4"
-                    >
-                      <option value="">Select AMA</option>
+                              weight: selectedMapAma?.id === ama.id ? 4 : 3,
 
-                      {amas.map((ama: any) => (
-                        <option key={ama.id} value={ama.id}>
-                          {ama.ama}
-                        </option>
-                      ))}
-                    </select>
+                              fillColor:
+                                ama.status === "SUCCESS"
+                                  ? "#22c55e"
+                                  : ama.status === "ON_PROGRESS"
+                                    ? "#0ea5e9"
+                                    : ama.status === "NEXT"
+                                      ? "#f97316"
+                                      : "#eab308",
+
+                              fillOpacity: 1,
+                            }}
+                            eventHandlers={{
+                              click: () => {
+                                setSelectedMapAma(ama);
+
+                                setAmaMapping({
+                                  ...amaMapping,
+                                  [group.ama]: ama,
+                                });
+                              },
+                            }}
+                          >
+                            <Tooltip
+                              permanent
+                              direction="top"
+                              offset={[0, -12]}
+                              opacity={1}
+                              interactive={false}
+                            >
+                              <div className="rounded-lg bg-white px-2 py-1 text-xs font-bold shadow">
+                                {ama.ama}
+                              </div>
+                            </Tooltip>
+
+                            <Popup>
+                              <div className="w-[220px]">
+                                <h1 className="font-bold text-slate-900">
+                                  {ama.ama}
+                                </h1>
+
+                                <p className="mt-1 text-xs text-slate-500">
+                                  AMA Monitoring Point
+                                </p>
+
+                                <div className="mt-4 space-y-2 text-sm">
+                                  <div className="flex justify-between">
+                                    <span>Status</span>
+
+                                    <span className="font-semibold">
+                                      {ama.status}
+                                    </span>
+                                  </div>
+
+                                  <div className="flex justify-between">
+                                    <span>Latitude</span>
+
+                                    <span>{Number(ama.lat).toFixed(5)}</span>
+                                  </div>
+
+                                  <div className="flex justify-between">
+                                    <span>Longitude</span>
+
+                                    <span>{Number(ama.lng).toFixed(5)}</span>
+                                  </div>
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedMapAma(ama);
+
+                                    setAmaMapping({
+                                      ...amaMapping,
+                                      [group.ama]: ama,
+                                    });
+                                  }}
+                                  className="mt-4 w-full rounded-xl bg-blue-600 py-2 text-sm font-semibold text-white"
+                                >
+                                  Select AMA
+                                </button>
+                              </div>
+                            </Popup>
+                          </CircleMarker>
+                        ))}
+                      </MapContainer>
+                    </div>
+
+                    {/* SELECTED AMA */}
+                    <div className="rounded-[28px] border bg-white p-5 shadow-sm">
+                      {/* HEADER */}
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="text-xs font-bold tracking-[0.3em] text-blue-600 uppercase">
+                            Selected AMA
+                          </p>
+
+                          <h1 className="mt-2 text-2xl font-bold text-slate-900">
+                            {amaMapping[group.ama]?.ama || "-"}
+                          </h1>
+
+                          <p className="mt-1 text-sm text-slate-500">
+                            Location selected from map
+                          </p>
+                        </div>
+
+                        <div className="rounded-2xl bg-blue-100 p-3">
+                          <MapPinned className="h-6 w-6 text-blue-600" />
+                        </div>
+                      </div>
+
+                      {/* STATUS */}
+                      {amaMapping[group.ama] && (
+                        <div className="mt-5">
+                          <div
+                            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold shadow-sm ${
+                              amaMapping[group.ama].status === "SUCCESS"
+                                ? "bg-green-100 text-green-800 ring-1 ring-green-200"
+                                : amaMapping[group.ama].status === "ONGOING"
+                                  ? "bg-sky-100 text-sky-800 ring-1 ring-sky-200"
+                                  : amaMapping[group.ama].status === "NEXT"
+                                    ? "bg-orange-100 text-orange-800 ring-1 ring-orange-200"
+                                    : "bg-yellow-100 text-yellow-800 ring-1 ring-yellow-200"
+                            }`}
+                          >
+                            <div
+                              className={`h-2.5 w-2.5 rounded-full ${
+                                amaMapping[group.ama].status === "SUCCESS"
+                                  ? "bg-green-500"
+                                  : amaMapping[group.ama].status === "ONGOING"
+                                    ? "bg-sky-500"
+                                    : amaMapping[group.ama].status === "NEXT"
+                                      ? "bg-orange-500"
+                                      : "bg-yellow-500"
+                              }`}
+                            />
+
+                            {amaMapping[group.ama].status}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* COORDINATE */}
+                      <div className="mt-5 grid grid-cols-2 gap-3">
+                        <div className="rounded-2xl border bg-slate-50 p-4">
+                          <p className="text-xs text-slate-500">Latitude</p>
+
+                          <h1 className="mt-2 font-bold text-slate-900">
+                            {amaMapping[group.ama]?.lat
+                              ? Number(amaMapping[group.ama].lat).toFixed(6)
+                              : "-"}
+                          </h1>
+                        </div>
+
+                        <div className="rounded-2xl border bg-slate-50 p-4">
+                          <p className="text-xs text-slate-500">Longitude</p>
+
+                          <h1 className="mt-2 font-bold text-slate-900">
+                            {amaMapping[group.ama]?.lng
+                              ? Number(amaMapping[group.ama].lng).toFixed(6)
+                              : "-"}
+                          </h1>
+                        </div>
+                      </div>
+
+                      {/* SUMMARY */}
+                      <div className="mt-4 rounded-2xl bg-blue-50 p-4">
+                        <p className="text-xs font-semibold tracking-wide text-blue-600 uppercase">
+                          Mapping Summary
+                        </p>
+
+                        <p className="mt-2 text-sm text-blue-800">
+                          CSV AMA <strong>{group.ama}</strong> will be linked to
+                          database AMA{" "}
+                          <strong>
+                            {amaMapping[group.ama]?.ama_name || "-"}
+                          </strong>
+                        </p>
+                      </div>
+
+                      {/* ACTION */}
+                      <button
+                        type="button"
+                        disabled={!selectedMapAma}
+                        onClick={() =>
+                          setAmaMapping({
+                            ...amaMapping,
+                            [group.ama]: selectedMapAma,
+                          })
+                        }
+                        className="mt-5 w-full rounded-2xl bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:bg-gray-300"
+                      >
+                        Assign Selected AMA
+                      </button>
+                    </div>
                   </div>
 
                   {expandedAma === group.ama && (

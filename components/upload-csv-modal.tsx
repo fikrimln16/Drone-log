@@ -348,6 +348,11 @@ export default function UploadCSVModal({ open, onClose }: Props) {
               new pilot records.
             </li>
 
+            <li>
+              • Example: Pandu_Kris_Fikri will create 3 pilot assignments:
+              Pandu, Kris, and Fikri.
+            </li>
+
             <li>• Date format must use DD/MM/YYYY.</li>
 
             <li>• Time format must use HH:mm.</li>
