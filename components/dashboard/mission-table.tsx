@@ -69,7 +69,7 @@ export default function MissionTable() {
 
   // PAGINATION
   const { paginatedData, currentPage, setCurrentPage, totalPages } =
-    usePagination(filteredMissions, 5);
+    usePagination(filteredMissions, 7);
 
   return (
     <div className="h-screen snap-y snap-mandatory overflow-x-hidden overflow-y-auto scroll-smooth bg-[#f5f7fb]">
@@ -231,7 +231,7 @@ export default function MissionTable() {
               {/* PAGINATION */}
               {/* ================================================= */}
 
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="mt-2 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <p className="text-sm text-gray-500">
                   Page{" "}
                   <span className="font-semibold text-black">
