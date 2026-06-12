@@ -47,9 +47,9 @@ export default function AmaFlightTable({ flights }: Props) {
                 Mission
               </th>
 
-              <th className="px-6 py-4 text-left text-xs font-bold tracking-widest text-gray-500 uppercase">
+              {/* <th className="px-6 py-4 text-left text-xs font-bold tracking-widest text-gray-500 uppercase">
                 Pilot
-              </th>
+              </th> */}
 
               <th className="px-6 py-4 text-left text-xs font-bold tracking-widest text-gray-500 uppercase">
                 Estate
@@ -87,9 +87,9 @@ export default function AmaFlightTable({ flights }: Props) {
                   </span>
                 </td>
 
-                <td className="px-6 py-5 text-sm font-medium">
+                {/* <td className="px-6 py-5 text-sm font-medium">
                   {flight.pilot || "-"}
-                </td>
+                </td> */}
 
                 <td className="px-6 py-5 text-sm">{flight.estate || "-"}</td>
 

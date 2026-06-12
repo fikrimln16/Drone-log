@@ -106,7 +106,7 @@ export default function AmaMonitorMapLeaflet({ amas, onSelectAma }: Props) {
                   <span className="font-semibold">{ama.total_missions}</span>
                 </div>
 
-                <div className="flex justify-between">
+                {/* <div className="flex justify-between">
                   <span>Latitude</span>
 
                   <span className="font-semibold">{ama.latitude}</span>
@@ -116,7 +116,7 @@ export default function AmaMonitorMapLeaflet({ amas, onSelectAma }: Props) {
                   <span>Longitude</span>
 
                   <span className="font-semibold">{ama.longitude}</span>
-                </div>
+                </div> */}
               </div>
             </div>
           </Popup>
