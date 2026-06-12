@@ -34,10 +34,10 @@ function getColor(status: string) {
       return "#22c55e";
 
     case "ONGOING":
-      return "#f59e0b";
+      return "#eab308";
 
     default:
-      return "#ef4444";
+      return "#f97316";
   }
 }
 
@@ -84,10 +84,10 @@ export default function AmaMonitorMapLeaflet({ amas, onSelectAma }: Props) {
                   <span
                     className={`rounded-full px-2 py-1 text-xs font-semibold ${
                       ama.status === "SUCCESS"
-                        ? "bg-green-100 text-green-700"
+                        ? "bg-green-100 text-green-500"
                         : ama.status === "ONGOING"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-red-100 text-red-700"
+                          ? "bg-yellow-100 text-yellow-500"
+                          : "bg-red-100 text-orange-500"
                     }`}
                   >
                     {ama.status}

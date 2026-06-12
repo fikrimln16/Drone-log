@@ -12,6 +12,8 @@ import AmaDetailSection from "@/components/ama/ama-detail-section";
 
 import AmaActivitySidebar from "@/components/ama/ama-activity-sidebar";
 
+import Link from "next/link";
+
 type Ama = {
   id: number;
 
@@ -78,14 +80,12 @@ export default function AmaPage() {
       <Navbar title="AMA Monitoring" subtitle="Operational area monitoring" />
 
       <div className="space-y-6 px-4 pt-[110px] pb-10">
-        {/* HEADER */}
-        <div>
-          <h1 className="text-5xl font-bold">AMA Overview</h1>
-
-          <p className="mt-2 text-lg text-gray-500">
-            Real-time operational area monitoring
-          </p>
-        </div>
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 rounded-2xl border bg-white px-5 py-3 text-sm font-semibold shadow-sm transition hover:bg-gray-100"
+        >
+          ← Back to Dashboard
+        </Link>
 
         {/* STATS */}
         <AmaStatsGrid stats={stats} />

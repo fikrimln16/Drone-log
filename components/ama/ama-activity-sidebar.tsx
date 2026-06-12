@@ -49,7 +49,7 @@ export default function AmaActivitySidebar({
   ];
 
   return (
-    <div className="flex h-full min-h-[850px] flex-col overflow-hidden rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="flex h-[850px] flex-col overflow-hidden rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
       {/* ================================================= */}
       {/* HEADER */}
       {/* ================================================= */}

@@ -101,10 +101,10 @@ export default function AmaDetailSection({ selectedAma }: Props) {
           <span
             className={`rounded-full px-5 py-2 text-sm font-semibold ${
               selectedAma.status === "SUCCESS"
-                ? "bg-green-100 text-green-700"
+                ? "bg-green-100 text-green-500"
                 : selectedAma.status === "ONGOING"
-                  ? "bg-yellow-100 text-yellow-700"
-                  : "bg-red-100 text-red-700"
+                  ? "bg-yellow-100 text-yellow-500"
+                  : "bg-red-100 text-orange-500"
             }`}
           >
             {selectedAma.status}
