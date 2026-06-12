@@ -68,13 +68,19 @@ type AmaPoint = {
 function getMarkerColor(status: string) {
   switch (status?.toUpperCase()) {
     case "SUCCESS":
-      return "#22c55e";
+      return "#22c55e"; // green
 
     case "ONGOING":
-      return "#f59e0b";
+      return "#0ea5e9"; // sky
+
+    case "NEXT":
+      return "#f97316"; // orange
+
+    case "WAITING":
+      return "#eab308"; // yellow
 
     default:
-      return "#f97316";
+      return "#94a3b8";
   }
 }
 
@@ -198,20 +204,32 @@ export default function AmaMonitorMap() {
   // STATUS COUNTS
   // =====================================================
 
-  const successCount = useMemo(() => {
-    return amaPoints.filter((item) => item.status?.toUpperCase() === "SUCCESS")
-      .length;
-  }, [amaPoints]);
+  const successCount = useMemo(
+    () =>
+      amaPoints.filter((item) => item.status?.toUpperCase() === "SUCCESS")
+        .length,
+    [amaPoints]
+  );
 
-  const ongoingCount = useMemo(() => {
-    return amaPoints.filter((item) => item.status?.toUpperCase() === "ONGOING")
-      .length;
-  }, [amaPoints]);
+  const progressCount = useMemo(
+    () =>
+      amaPoints.filter((item) => item.status?.toUpperCase() === "ONGOING")
+        .length,
+    [amaPoints]
+  );
 
-  const waitingCount = useMemo(() => {
-    return amaPoints.filter((item) => item.status?.toUpperCase() === "WAITING")
-      .length;
-  }, [amaPoints]);
+  const nextCount = useMemo(
+    () =>
+      amaPoints.filter((item) => item.status?.toUpperCase() === "NEXT").length,
+    [amaPoints]
+  );
+
+  const waitingCount = useMemo(
+    () =>
+      amaPoints.filter((item) => item.status?.toUpperCase() === "WAITING")
+        .length,
+    [amaPoints]
+  );
 
   // =====================================================
   // FILTER DATA
@@ -297,8 +315,10 @@ export default function AmaMonitorMap() {
                               item.status === "SUCCESS"
                                 ? "bg-green-100 text-green-800 ring-1 ring-green-200"
                                 : item.status === "ONGOING"
-                                  ? "bg-yellow-100 text-yellow-800 ring-1 ring-yellow-200"
-                                  : "bg-orange-100 text-orange-800 ring-1 ring-orange-200"
+                                  ? "bg-sky-100 text-sky-800 ring-1 ring-sky-200"
+                                  : item.status === "NEXT"
+                                    ? "bg-orange-100 text-orange-800 ring-1 ring-orange-200"
+                                    : "bg-yellow-100 text-yellow-800 ring-1 ring-yellow-200"
                             }`}
                           >
                             <div
@@ -306,16 +326,20 @@ export default function AmaMonitorMap() {
                                 item.status === "SUCCESS"
                                   ? "bg-green-500"
                                   : item.status === "ONGOING"
-                                    ? "bg-yellow-500"
-                                    : "bg-orange-500"
+                                    ? "bg-sky-500"
+                                    : item.status === "NEXT"
+                                      ? "bg-orange-500"
+                                      : "bg-yellow-500"
                               }`}
                             />
 
                             {item.status === "SUCCESS"
                               ? "Completed"
                               : item.status === "ONGOING"
-                                ? "Ongoing"
-                                : "Waiting"}
+                                ? "On Progress"
+                                : item.status === "NEXT"
+                                  ? "Next"
+                                  : "Waiting"}
                           </div>
                         </div>
                       </div>
@@ -435,10 +459,10 @@ export default function AmaMonitorMap() {
             </div>
 
             {/* CONTENT */}
-            <div className="mt-6 flex flex-1 flex-col gap-4">
+            <div className="mt-6 flex flex-1 flex-col gap-3">
               {/* TOTAL */}
-              <div className="rounded-2xl border bg-gray-50 p-5">
-                <p className="text-sm text-gray-500">Total AMA Point</p>
+              <div className="rounded-2xl border bg-slate-50 p-5">
+                <p className="text-sm text-slate-500">Total AMA Point</p>
 
                 <div className="mt-3 flex items-center justify-between">
                   <h1 className="text-4xl font-bold">{amaPoints.length}</h1>
@@ -453,97 +477,82 @@ export default function AmaMonitorMap() {
               <button
                 onClick={() => {
                   setSelectedStatus("SUCCESS");
-
                   setOpenStatusModal(true);
                 }}
-                className="group flex w-full items-center justify-between rounded-2xl border border-green-200 bg-green-50 px-5 py-5 text-left transition hover:-translate-y-1 hover:shadow-lg"
+                className="group flex items-center justify-between rounded-2xl border border-green-200 bg-green-50 px-5 py-4 text-left transition hover:-translate-y-1 hover:shadow-lg"
               >
                 <div>
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold text-green-700">Success</p>
-
-                    <span className="rounded-full bg-white px-2 py-1 text-[10px] font-bold text-green-700 shadow-sm">
-                      CLICK
-                    </span>
-                  </div>
+                  <p className="font-semibold text-green-700">Success</p>
 
                   <p className="mt-1 text-xs text-green-600">
-                    Finished mission
+                    Completed mission
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-bold text-green-700">
-                    {successCount}
-                  </h1>
-
-                  <div className="transition group-hover:translate-x-1">→</div>
-                </div>
+                <h1 className="text-3xl font-bold text-green-700">
+                  {successCount}
+                </h1>
               </button>
 
-              {/* ONGOING */}
+              {/* ON PROGRESS */}
               <button
                 onClick={() => {
                   setSelectedStatus("ONGOING");
-
                   setOpenStatusModal(true);
                 }}
-                className="group flex w-full items-center justify-between rounded-2xl border border-yellow-200 bg-yellow-50 px-5 py-5 text-left transition hover:-translate-y-1 hover:shadow-lg"
+                className="group flex items-center justify-between rounded-2xl border border-sky-200 bg-sky-50 px-5 py-4 text-left transition hover:-translate-y-1 hover:shadow-lg"
               >
                 <div>
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold text-yellow-700">Ongoing</p>
+                  <p className="font-semibold text-sky-700">On Progress</p>
 
-                    <span className="rounded-full bg-white px-2 py-1 text-[10px] font-bold text-yellow-700 shadow-sm">
-                      CLICK
-                    </span>
-                  </div>
+                  <p className="mt-1 text-xs text-sky-600">Active operation</p>
+                </div>
 
-                  <p className="mt-1 text-xs text-yellow-600">
-                    Active monitoring
+                <h1 className="text-3xl font-bold text-sky-700">
+                  {progressCount}
+                </h1>
+              </button>
+
+              {/* NEXT */}
+              <button
+                onClick={() => {
+                  setSelectedStatus("NEXT");
+                  setOpenStatusModal(true);
+                }}
+                className="group flex items-center justify-between rounded-2xl border border-orange-200 bg-orange-50 px-5 py-4 text-left transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div>
+                  <p className="font-semibold text-orange-700">Next</p>
+
+                  <p className="mt-1 text-xs text-orange-600">
+                    Upcoming deployment
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-bold text-yellow-700">
-                    {ongoingCount}
-                  </h1>
-
-                  <div className="transition group-hover:translate-x-1">→</div>
-                </div>
+                <h1 className="text-3xl font-bold text-orange-700">
+                  {nextCount}
+                </h1>
               </button>
 
-              {/* PENDING */}
               {/* WAITING */}
               <button
                 onClick={() => {
                   setSelectedStatus("WAITING");
-
                   setOpenStatusModal(true);
                 }}
-                className="group flex w-full items-center justify-between rounded-2xl border border-orange-200 bg-orange-50 px-5 py-5 text-left transition hover:-translate-y-1 hover:shadow-lg"
+                className="group flex items-center justify-between rounded-2xl border border-yellow-200 bg-yellow-50 px-5 py-4 text-left transition hover:-translate-y-1 hover:shadow-lg"
               >
                 <div>
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold text-orange-700">Waiting</p>
+                  <p className="font-semibold text-yellow-700">Waiting</p>
 
-                    <span className="rounded-full bg-white px-2 py-1 text-[10px] font-bold text-orange-700 shadow-sm">
-                      CLICK
-                    </span>
-                  </div>
-
-                  <p className="mt-1 text-xs text-orange-600">
-                    Waiting operation
+                  <p className="mt-1 text-xs text-yellow-600">
+                    Waiting schedule
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-bold text-orange-700">
-                    {waitingCount}
-                  </h1>
-
-                  <div className="transition group-hover:translate-x-1">→</div>
-                </div>
+                <h1 className="text-3xl font-bold text-yellow-700">
+                  {waitingCount}
+                </h1>
               </button>
 
               {/* QUICK ACTION */}
@@ -551,40 +560,32 @@ export default function AmaMonitorMap() {
                 {/* ADD AMA */}
                 <button
                   onClick={() => setOpenAddAma(true)}
-                  className="group flex items-center justify-between rounded-2xl border bg-white px-4 py-4 transition hover:border-blue-300 hover:bg-blue-50 hover:shadow-md"
+                  className="group flex items-center gap-3 rounded-2xl border bg-white px-4 py-4 transition hover:border-blue-300 hover:bg-blue-50 hover:shadow-md"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-2xl bg-blue-100 p-3 transition group-hover:bg-blue-200">
-                      <MapPinned className="h-5 w-5 text-blue-600" />
-                    </div>
+                  <div className="rounded-2xl bg-blue-100 p-3">
+                    <MapPinned className="h-5 w-5 text-blue-600" />
+                  </div>
 
-                    <div className="text-left">
-                      <h1 className="text-sm font-bold">Add AMA</h1>
+                  <div className="text-left">
+                    <h1 className="text-sm font-bold">Add AMA</h1>
 
-                      <p className="mt-1 text-[11px] text-gray-500">
-                        New location
-                      </p>
-                    </div>
+                    <p className="text-[11px] text-gray-500">New location</p>
                   </div>
                 </button>
 
                 {/* EDIT STATUS */}
                 <button
                   onClick={() => setOpenEditStatus(true)}
-                  className="group flex items-center justify-between rounded-2xl border bg-white px-4 py-4 transition hover:border-purple-300 hover:bg-purple-50 hover:shadow-md"
+                  className="group flex items-center gap-3 rounded-2xl border bg-white px-4 py-4 transition hover:border-purple-300 hover:bg-purple-50 hover:shadow-md"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-2xl bg-purple-100 p-3 transition group-hover:bg-purple-200">
-                      <RadioTower className="h-5 w-5 text-purple-600" />
-                    </div>
+                  <div className="rounded-2xl bg-purple-100 p-3">
+                    <RadioTower className="h-5 w-5 text-purple-600" />
+                  </div>
 
-                    <div className="text-left">
-                      <h1 className="text-sm font-bold">Edit Status</h1>
+                  <div className="text-left">
+                    <h1 className="text-sm font-bold">Edit Status</h1>
 
-                      <p className="mt-1 text-[11px] text-gray-500">
-                        AMA condition
-                      </p>
-                    </div>
+                    <p className="text-[11px] text-gray-500">AMA condition</p>
                   </div>
                 </button>
               </div>
@@ -640,8 +641,10 @@ export default function AmaMonitorMap() {
                           item.status === "SUCCESS"
                             ? "bg-green-100 text-green-700"
                             : item.status === "ONGOING"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-orange-100 text-orange-700"
+                              ? "bg-sky-100 text-sky-700"
+                              : item.status === "NEXT"
+                                ? "bg-orange-100 text-orange-700"
+                                : "bg-yellow-100 text-yellow-700"
                         }`}
                       >
                         {item.status}
