@@ -69,7 +69,7 @@ export default function MissionTable() {
 
   // PAGINATION
   const { paginatedData, currentPage, setCurrentPage, totalPages } =
-    usePagination(filteredMissions, 7);
+    usePagination(filteredMissions, 6);
 
   return (
     <div className="h-screen snap-y snap-mandatory overflow-x-hidden overflow-y-auto scroll-smooth bg-[#f5f7fb]">

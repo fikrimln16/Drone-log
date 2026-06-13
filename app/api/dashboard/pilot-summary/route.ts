@@ -21,39 +21,49 @@ export async function GET() {
 
     const [rows]: any = await pool.query(`
       SELECT
-        p.id,
+          p.id,
 
-        p.pilot_name AS pilot,
+          p.pilot_name AS pilot,
 
-        COUNT(DISTINCT f.id)
-          AS total_flights,
+          COUNT(DISTINCT f.id)
+            AS total_flights,
 
-        COUNT(
-          DISTINCT f.mission_name
-        ) AS total_missions,
+          COUNT(DISTINCT f.mission_name)
+            AS total_missions,
 
-        COUNT(
-          DISTINCT f.ama_id
-        ) AS total_amas,
+          COUNT(DISTINCT f.ama_id)
+            AS total_amas,
 
-        GROUP_CONCAT(
-          DISTINCT a.ama_name
-          ORDER BY a.ama_name
-          SEPARATOR ','
-        ) AS ama_list,
+          GROUP_CONCAT(
+            DISTINCT a.ama_name
+            ORDER BY a.ama_name
+            SEPARATOR ','
+          ) AS ama_list,
 
-        COALESCE(
-          SUM(f.duration_min),
-          0
-        ) AS total_duration,
+          COALESCE(
+            SUM(f.duration_min),
+            0
+          ) AS total_duration,
 
-        ROUND(
-          AVG(f.duration_min),
-          1
-        ) AS avg_duration,
+          COALESCE(
+            SUM(
+              CASE
+                WHEN YEAR(f.flight_date) = YEAR(CURDATE())
+                AND MONTH(f.flight_date) = MONTH(CURDATE())
+                THEN f.duration_min
+                ELSE 0
+              END
+            ),
+            0
+          ) AS duration_this_month,
 
-        MAX(f.flight_date)
-          AS last_flight
+          ROUND(
+            AVG(f.duration_min),
+            1
+          ) AS avg_duration,
+
+          MAX(f.flight_date)
+            AS last_flight
 
       FROM pilots p
 
@@ -81,12 +91,15 @@ export async function GET() {
 
     const formatted = rows.map((item: any) => {
       const totalHours = Number(item.total_duration || 0) / 60;
+      const durationThisMonth = Number(item.duration_this_month || 0);
+
+      const hoursThisMonth = durationThisMonth / 60;
 
       let status = "OPTIMAL";
 
-      if (totalHours > 160) {
+      if (durationThisMonth > 160) {
         status = "NEED REST";
-      } else if (totalHours < 120) {
+      } else if (durationThisMonth < 120) {
         status = "UNDER TARGET";
       }
 
@@ -103,9 +116,13 @@ export async function GET() {
 
         total_duration: Number(item.total_duration || 0),
 
+        duration_this_month: durationThisMonth,
+
         avg_duration: Number(item.avg_duration || 0),
 
         total_hours: totalHours.toFixed(1),
+
+        total_hours_this_month: hoursThisMonth.toFixed(1),
 
         last_flight: item.last_flight,
 

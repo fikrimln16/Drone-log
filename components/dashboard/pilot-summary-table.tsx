@@ -22,6 +22,8 @@ import { ChartColumn, Users } from "lucide-react";
 import PilotAnalyticsModal from "../pilots/pilot-analytics-modal";
 
 type Pilot = {
+  id: number;
+
   pilot: string;
 
   total_flights: number;
@@ -32,9 +34,13 @@ type Pilot = {
 
   total_duration: number;
 
+  total_duration_this_month: number;
+
   avg_duration: number;
 
   total_hours: string;
+
+  total_hours_this_month: string;
 
   status: string;
 
@@ -48,6 +54,7 @@ type SortField =
   | "total_missions"
   | "total_flights"
   | "total_hours"
+  | "total_hours_this_month"
   | "avg_duration"
   | "status";
 
@@ -177,6 +184,11 @@ export default function PilotSummaryTable() {
 
           valueB = Number(b.total_hours);
 
+          break;
+
+        case "total_hours_this_month":
+          valueA = Number(a.total_hours_this_month);
+          valueB = Number(b.total_hours_this_month);
           break;
 
         case "avg_duration":
@@ -325,7 +337,7 @@ export default function PilotSummaryTable() {
       {/* ===================================================== */}
 
       <div className="overflow-x-auto">
-        <table className="w-full table-fixed">
+        <table className="w-full min-w-[1600px] table-fixed">
           <thead>
             <tr className="border-b bg-gray-50/80 text-left">
               {/* PILOT */}
@@ -379,6 +391,17 @@ export default function PilotSummaryTable() {
                 </div>
               </th>
 
+              {/* THIS MONTH */}
+              <th
+                onClick={() => handleSort("total_hours_this_month")}
+                className="w-[180px] cursor-pointer px-6 py-5"
+              >
+                <div className="flex items-center gap-2 text-sm font-bold whitespace-nowrap">
+                  THIS MONTH
+                  {renderSortIcon("total_hours_this_month")}
+                </div>
+              </th>
+
               {/* AVG */}
               <th
                 onClick={() => handleSort("avg_duration")}
@@ -418,11 +441,16 @@ export default function PilotSummaryTable() {
                 <tr
                   key={index}
                   className="border-b transition hover:bg-gray-50"
+                  style={{
+                    height: 88,
+                  }}
                 >
                   {/* PILOT */}
-                  <td className="px-6 py-5">
+                  <td className="px-6 py-5 whitespace-nowrap">
                     <div>
-                      <h1 className="truncate font-bold">{item.pilot}</h1>
+                      <h1 className="truncate font-bold" title={item.pilot}>
+                        {item.pilot}
+                      </h1>
 
                       <p className="mt-1 text-xs text-gray-500">
                         {item.total_duration} total minutes
@@ -431,34 +459,43 @@ export default function PilotSummaryTable() {
                   </td>
 
                   {/* MISSION */}
-                  <td className="px-6 py-5">
+                  <td className="px-6 py-5 whitespace-nowrap">
                     <div className="w-fit rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700">
                       {item.total_missions} Missions
                     </div>
                   </td>
 
                   {/* AMA */}
-                  <td className="px-6 py-5">
+                  <td className="px-6 py-5 whitespace-nowrap">
                     <div>
                       <div className="w-fit rounded-full bg-purple-50 px-3 py-1 text-sm font-semibold text-purple-700">
                         {item.ama_coverage}
                       </div>
 
-                      <p className="mt-2 truncate text-xs text-gray-500">
-                        {item.ama_list.join(", ")}
-                      </p>
+                      {item.ama_list?.length ? (
+                        <p
+                          className="mt-2 max-w-[220px] truncate text-xs text-gray-500"
+                          title={item.ama_list.join(", ")}
+                        >
+                          {item.ama_list.join(", ")}
+                        </p>
+                      ) : (
+                        <span className="mt-2 inline-flex rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-500">
+                          No AMA Coverage
+                        </span>
+                      )}
                     </div>
                   </td>
 
                   {/* FLIGHTS */}
-                  <td className="px-6 py-5">
+                  <td className="px-6 py-5 whitespace-nowrap">
                     <div className="w-fit rounded-full bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700">
                       {item.total_flights} Flights
                     </div>
                   </td>
 
                   {/* HOURS */}
-                  <td className="px-6 py-5">
+                  <td className="px-6 py-5 whitespace-nowrap">
                     <div>
                       <h1 className="font-bold">{item.total_hours} hr</h1>
 
@@ -482,15 +519,53 @@ export default function PilotSummaryTable() {
                     </div>
                   </td>
 
+                  {/* THIS MONTH */}
+                  <td className="px-6 py-5 whitespace-nowrap">
+                    {Number(item.total_hours_this_month) > 0 ? (
+                      <div>
+                        <h1 className="font-bold text-sky-700">
+                          {item.total_hours_this_month} hr
+                        </h1>
+
+                        <p className="mt-1 text-xs text-gray-500">
+                          Current month
+                        </p>
+
+                        <div className="mt-2 h-2 w-[120px] overflow-hidden rounded-full bg-gray-100">
+                          <div
+                            className="h-full rounded-full bg-sky-500"
+                            style={{
+                              width: `${Math.min(
+                                (Number(item.total_hours_this_month) / 40) *
+                                  100,
+                                100
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-2">
+                        <div className="inline-flex w-fit items-center gap-2 rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-600">
+                          ✈️ No Flight
+                        </div>
+
+                        <p className="text-xs text-gray-400">
+                          No activity this month
+                        </p>
+                      </div>
+                    )}
+                  </td>
+
                   {/* AVG */}
                   <td className="px-6 py-5 font-semibold">
                     {Number(item.avg_duration).toFixed(1)} min
                   </td>
 
                   {/* STATUS */}
-                  <td className="px-6 py-5">
+                  <td className="px-6 py-5 whitespace-nowrap">
                     <div
-                      className={`flex w-fit items-center gap-2 rounded-full px-3 py-2 text-xs font-bold ${style.bg} ${style.text}`}
+                      className={`flex w-[130px] items-center justify-center gap-2 rounded-full px-3 py-2 text-xs font-bold ${style.bg} ${style.text}`}
                     >
                       {style.icon}
 
@@ -499,7 +574,7 @@ export default function PilotSummaryTable() {
                   </td>
 
                   {/* ACTION */}
-                  <td className="px-6 py-5">
+                  <td className="px-6 py-5 whitespace-nowrap">
                     <button
                       onClick={() => handleOpenPilot(item.id)}
                       className="flex w-fit items-center gap-2 rounded-2xl border border-gray-200 px-4 py-2 text-sm font-semibold transition hover:bg-gray-100"
