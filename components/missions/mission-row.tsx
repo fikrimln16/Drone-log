@@ -29,23 +29,23 @@ export default function MissionRow({
       </td>
 
       {/* AMA */}
-      <td className="p-6">
-        <span className="rounded-full bg-purple-100 px-4 py-1 text-sm text-purple-700">
-          {item.ama}
+      <td className="px-6 py-5">
+        <span className="inline-flex rounded-full bg-purple-100 px-3 py-1 text-sm font-medium whitespace-nowrap text-purple-700">
+          {item.ama || "-"}
         </span>
       </td>
 
       {/* ESTATE */}
-      <td className="p-6">
-        <span className="rounded-full bg-green-100 px-4 py-1 text-sm text-green-700">
-          {item.estate}
+      <td className="px-6 py-5">
+        <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-sm font-medium whitespace-nowrap text-green-700">
+          {item.estate || "-"}
         </span>
       </td>
 
       {/* PILOT */}
-      <td className="p-6">
+      <td className="px-6 py-5">
         <div className="flex flex-wrap gap-2">
-          {item.pilots?.map((pilot: string) => (
+          {(item.pilots || []).map((pilot: string) => (
             <span
               key={pilot}
               className="rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-700"

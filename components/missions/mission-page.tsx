@@ -56,7 +56,7 @@ export default function MissionPage({ mission }: Props) {
     usePagination(sortedFlights, 5);
 
   return (
-    <div className="h-screen bg-[#f5f7fb]">
+    <div className="min-w-screen bg-[#f5f7fb]">
       {/* NAVBAR */}
       <Navbar title="Flight Check" subtitle="UAV Flight Log Manager" />
 

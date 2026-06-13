@@ -31,8 +31,8 @@ export default function MissionTable({
 }: Props) {
   return (
     <div className="mt-6 overflow-hidden rounded-[32px] border bg-white shadow-sm">
-      <div className="w-full overflow-x-auto">
-        <table className="w-full min-w-300">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[1500px] table-fixed">
           {/* HEAD */}
           <thead className="border-b bg-gray-50">
             <tr>
@@ -92,7 +92,9 @@ export default function MissionTable({
                 onSort={onSort}
               />
 
-              <th className="p-4 text-right text-sm font-bold">ACTION</th>
+              <th className="w-[160px] px-6 py-5 text-center text-sm font-bold">
+                ACTION
+              </th>
             </tr>
           </thead>
 
