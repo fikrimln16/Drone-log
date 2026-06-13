@@ -1,7 +1,6 @@
 "use client";
 
 import MissionRow from "./mission-row";
-
 import MissionSortHeader from "./mission-sort-header";
 
 type Props = {
@@ -14,10 +13,6 @@ type Props = {
   onSort: (key: any) => void;
 
   onDetail: (item: any) => void;
-
-  onEdit: (item: any) => void;
-
-  onDelete: (item: any) => void;
 };
 
 export default function MissionTable({
@@ -26,14 +21,11 @@ export default function MissionTable({
   sortDirection,
   onSort,
   onDetail,
-  onEdit,
-  onDelete,
 }: Props) {
   return (
     <div className="mt-6 overflow-hidden rounded-[32px] border bg-white shadow-sm">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1500px] table-fixed">
-          {/* HEAD */}
+        <table className="w-full min-w-[1200px] table-fixed">
           <thead className="border-b bg-gray-50">
             <tr>
               <MissionSortHeader
@@ -42,6 +34,7 @@ export default function MissionTable({
                 sortBy={sortBy}
                 sortDirection={sortDirection}
                 onSort={onSort}
+                width="140px"
               />
 
               <MissionSortHeader
@@ -50,14 +43,7 @@ export default function MissionTable({
                 sortBy={sortBy}
                 sortDirection={sortDirection}
                 onSort={onSort}
-              />
-
-              <MissionSortHeader
-                label="AMA"
-                field="ama"
-                sortBy={sortBy}
-                sortDirection={sortDirection}
-                onSort={onSort}
+                width="180px"
               />
 
               <MissionSortHeader
@@ -66,14 +52,34 @@ export default function MissionTable({
                 sortBy={sortBy}
                 sortDirection={sortDirection}
                 onSort={onSort}
+                width="180px"
               />
 
               <MissionSortHeader
                 label="PILOT"
-                field="pilot"
+                field="pilots"
                 sortBy={sortBy}
                 sortDirection={sortDirection}
                 onSort={onSort}
+                width="320px"
+              />
+
+              <MissionSortHeader
+                label="UAV"
+                field="uav_unit"
+                sortBy={sortBy}
+                sortDirection={sortDirection}
+                onSort={onSort}
+                width="140px"
+              />
+
+              <MissionSortHeader
+                label="battery_usage"
+                field="battery_usage"
+                sortBy={sortBy}
+                sortDirection={sortDirection}
+                onSort={onSort}
+                width="160px"
               />
 
               <MissionSortHeader
@@ -82,14 +88,7 @@ export default function MissionTable({
                 sortBy={sortBy}
                 sortDirection={sortDirection}
                 onSort={onSort}
-              />
-
-              <MissionSortHeader
-                label="NOTES"
-                field="notes"
-                sortBy={sortBy}
-                sortDirection={sortDirection}
-                onSort={onSort}
+                width="140px"
               />
 
               <th className="w-[160px] px-6 py-5 text-center text-sm font-bold">
@@ -98,17 +97,18 @@ export default function MissionTable({
             </tr>
           </thead>
 
-          {/* BODY */}
           <tbody>
             {flights.map((item) => (
-              <MissionRow
-                key={item.id}
-                item={item}
-                onDetail={onDetail}
-                onEdit={onEdit}
-                onDelete={onDelete}
-              />
+              <MissionRow key={item.id} item={item} onDetail={onDetail} />
             ))}
+
+            {flights.length === 0 && (
+              <tr>
+                <td colSpan={7} className="py-12 text-center text-slate-400">
+                  No flight data available
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

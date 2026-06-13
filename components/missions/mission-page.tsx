@@ -55,6 +55,23 @@ export default function MissionPage({ mission }: Props) {
   const { paginatedData, currentPage, setCurrentPage, totalPages } =
     usePagination(sortedFlights, 5);
 
+  const uniquePilots = new Set<string>();
+
+  flights.forEach((flight) => {
+    (flight.pilots || []).forEach((pilot: string) => {
+      if (pilot) {
+        uniquePilots.add(pilot);
+      }
+    });
+  });
+
+  const totalPilots = uniquePilots.size;
+
+  const totalDuration = flights.reduce(
+    (acc, item) => acc + Number(item.duration_min || 0),
+    0
+  );
+
   return (
     <div className="min-w-screen bg-[#f5f7fb]">
       {/* NAVBAR */}
@@ -65,7 +82,11 @@ export default function MissionPage({ mission }: Props) {
         {/* HEADER */}
         <MissionHeader
           mission={mission}
+          ama={flights?.[0]?.ama || "-"}
+          amaStatus={flights?.[0]?.status || "-"}
           totalFlights={flights.length}
+          totalPilots={totalPilots}
+          totalDuration={totalDuration}
           onOpenExport={() => setOpenExport(true)}
           onAdd={() => setOpenAdd(true)}
         />
@@ -80,8 +101,6 @@ export default function MissionPage({ mission }: Props) {
           sortDirection={sortDirection}
           onSort={handleSort}
           onDetail={(item) => setSelectedFlight(item)}
-          onEdit={(item) => setEditFlight(item)}
-          onDelete={(item) => setDeleteFlight(item)}
         />
         {/* PAGINATION */}
         <div className="mt-3 flex items-center justify-between">

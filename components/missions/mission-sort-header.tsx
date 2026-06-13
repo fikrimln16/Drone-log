@@ -1,3 +1,5 @@
+"use client";
+
 import { ArrowDown, ArrowUp } from "lucide-react";
 
 type Props = {
@@ -10,6 +12,8 @@ type Props = {
   sortDirection: "asc" | "desc";
 
   onSort: (key: string) => void;
+
+  width?: string;
 };
 
 export default function MissionSortHeader({
@@ -18,23 +22,30 @@ export default function MissionSortHeader({
   sortBy,
   sortDirection,
   onSort,
+  width,
 }: Props) {
   const active = sortBy === field;
 
   return (
-    <th className="p-6 text-left">
+    <th
+      style={{
+        width,
+        minWidth: width,
+      }}
+      className="px-6 py-5 text-left"
+    >
       <button
         onClick={() => onSort(field)}
-        className="flex items-center gap-2 text-sm font-bold tracking-wide"
+        className="flex items-center gap-2 text-sm font-bold tracking-wide whitespace-nowrap"
       >
         {label}
 
         {!active ? (
-          <ArrowDown className="h-4 w-4 text-gray-300" />
+          <ArrowDown className="h-4 w-4 text-slate-300" />
         ) : sortDirection === "asc" ? (
-          <ArrowDown className="h-4 w-4 text-blue-600" />
-        ) : (
           <ArrowUp className="h-4 w-4 text-blue-600" />
+        ) : (
+          <ArrowDown className="h-4 w-4 text-blue-600" />
         )}
       </button>
     </th>

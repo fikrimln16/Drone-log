@@ -1,6 +1,6 @@
 "use client";
 
-import { Battery, Clock3, Plane, Timer, Trophy, User } from "lucide-react";
+import { Battery, Clock3, Plane, Timer, Users, Trophy } from "lucide-react";
 
 import MissionKpiCard from "./mission-kpi-card";
 
@@ -9,7 +9,6 @@ type Props = {
 };
 
 export default function MissionKpiGrid({ flights }: Props) {
-  // TOTAL
   const totalFlights = flights.length;
 
   const totalDuration = flights.reduce(
@@ -18,56 +17,47 @@ export default function MissionKpiGrid({ flights }: Props) {
   );
 
   const avgDuration =
-    totalFlights > 0 ? (totalDuration / totalFlights).toFixed(1) : 0;
+    totalFlights > 0 ? (totalDuration / totalFlights).toFixed(1) : "0";
 
-  // TOP PILOT
-  const pilotMap: Record<
-    string,
-    {
-      flights: number;
-      duration: number;
-    }
-  > = {};
+  // =====================================
+  // PILOT INVOLVED
+  // =====================================
+
+  const uniquePilots = new Set<string>();
 
   flights.forEach((flight) => {
-    const pilots = flight.pilots || [];
-
-    pilots.forEach((pilot: string) => {
-      if (!pilot) return;
-
-      if (!pilotMap[pilot]) {
-        pilotMap[pilot] = {
-          flights: 0,
-          duration: 0,
-        };
-      }
-
-      pilotMap[pilot].flights += 1;
-
-      pilotMap[pilot].duration += Number(flight.duration_min || 0);
+    (flight.pilots || []).forEach((pilot: string) => {
+      if (pilot) uniquePilots.add(pilot);
     });
   });
 
-  const topPilot = Object.entries(pilotMap).sort(
-    (a, b) => b[1].duration - a[1].duration
-  )[0];
+  const pilotCount = uniquePilots.size;
 
-  // BATTERY EFFICIENCY
+  // =====================================
+  // BATTERY
+  // =====================================
+
   const batteryUsage = flights.reduce((acc, item) => {
-    return acc + (Number(item.start_percent) - Number(item.end_percent));
+    return (
+      acc + (Number(item.start_percent || 0) - Number(item.end_percent || 0))
+    );
   }, 0);
 
   const avgBatteryUsage =
-    totalFlights > 0 ? (batteryUsage / totalFlights).toFixed(1) : 0;
+    totalFlights > 0 ? (batteryUsage / totalFlights).toFixed(1) : "0";
 
+  // =====================================
   // LONGEST FLIGHT
+  // =====================================
+
   const longestFlight = [...flights].sort(
     (a, b) => Number(b.duration_min) - Number(a.duration_min)
   )[0];
 
+  const pilotList = [...uniquePilots];
+
   return (
     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-      {/* TOTAL */}
       <MissionKpiCard
         title="Total Flights"
         value={totalFlights}
@@ -75,7 +65,6 @@ export default function MissionKpiGrid({ flights }: Props) {
         icon={<Plane className="h-7 w-7 text-blue-600" />}
       />
 
-      {/* TOTAL DURATION */}
       <MissionKpiCard
         title="Total Duration"
         value={`${totalDuration} min`}
@@ -83,7 +72,6 @@ export default function MissionKpiGrid({ flights }: Props) {
         icon={<Clock3 className="h-7 w-7 text-green-600" />}
       />
 
-      {/* AVG */}
       <MissionKpiCard
         title="Avg Duration"
         value={`${avgDuration} min`}
@@ -91,17 +79,33 @@ export default function MissionKpiGrid({ flights }: Props) {
         icon={<Timer className="h-7 w-7 text-yellow-600" />}
       />
 
-      {/* TOP PILOT */}
-      <MissionKpiCard
-        title="Most Active Pilot"
-        value={topPilot?.[0] || "-"}
-        subtitle={`${topPilot?.[1]?.flights || 0} flights • ${
-          topPilot?.[1]?.duration || 0
-        } min`}
-        icon={<Trophy className="h-7 w-7 text-purple-600" />}
-      />
+      <div className="rounded-[28px] border bg-white p-6 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="rounded-2xl bg-cyan-100 p-3">
+            <Users className="h-6 w-6 text-cyan-600" />
+          </div>
 
-      {/* BATTERY */}
+          <div>
+            <h1 className="text-xl font-bold">Pilots Involved</h1>
+
+            <p className="text-sm text-slate-500">
+              Flight crews in this mission
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5 flex flex-wrap gap-2">
+          {pilotList.map((pilot) => (
+            <span
+              key={pilot}
+              className="rounded-full bg-cyan-100 px-3 py-2 text-sm font-semibold text-cyan-700"
+            >
+              {pilot}
+            </span>
+          ))}
+        </div>
+      </div>
+
       <MissionKpiCard
         title="Battery Efficiency"
         value={`${avgBatteryUsage}%`}
@@ -109,12 +113,11 @@ export default function MissionKpiGrid({ flights }: Props) {
         icon={<Battery className="h-7 w-7 text-orange-600" />}
       />
 
-      {/* LONGEST */}
       <MissionKpiCard
         title="Longest Flight"
         value={longestFlight?.flight_id || "-"}
         subtitle={`${longestFlight?.duration_min || 0} min duration`}
-        icon={<User className="h-7 w-7 text-cyan-600" />}
+        icon={<Trophy className="h-7 w-7 text-cyan-600" />}
       />
     </div>
   );

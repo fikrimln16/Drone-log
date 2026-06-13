@@ -5,7 +5,15 @@ import { ArrowLeft, Download, Plus } from "lucide-react";
 type Props = {
   mission: string;
 
+  ama: string;
+
+  amaStatus: string;
+
   totalFlights: number;
+
+  totalPilots: number;
+
+  totalDuration: number;
 
   onOpenExport: () => void;
 
@@ -15,6 +23,10 @@ type Props = {
 export default function MissionHeader({
   mission,
   totalFlights,
+  ama,
+  amaStatus,
+  totalDuration,
+  totalPilots,
   onOpenExport,
   onAdd,
 }: Props) {
@@ -30,36 +42,29 @@ export default function MissionHeader({
       </Link>
 
       {/* HEADER */}
-      <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-        {/* TITLE */}
-        <div>
-          <h1 className="text-4xl font-bold tracking-tight">{mission}</h1>
+      <div>
+        <h1 className="text-4xl font-bold tracking-tight">{mission}</h1>
 
-          <p className="mt-2 text-lg text-gray-500">
-            {totalFlights} flights logged
-          </p>
-        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <span className="rounded-full bg-purple-100 px-4 py-1 text-sm font-semibold text-purple-700">
+            {ama}
+          </span>
 
-        {/* BUTTON */}
-        <div className="flex items-center gap-3">
-          {/* EXPORT */}
-          <button
-            onClick={onOpenExport}
-            className="flex h-[48px] items-center gap-3 rounded-2xl border bg-white px-5 font-semibold shadow-sm transition hover:bg-gray-100"
+          <span
+            className={`rounded-full px-4 py-1 text-sm font-semibold ${
+              amaStatus === "SUCCESS"
+                ? "bg-green-100 text-green-700"
+                : amaStatus === "ONGOING"
+                  ? "bg-blue-100 text-blue-700"
+                  : "bg-yellow-100 text-yellow-700"
+            }`}
           >
-            <Download className="h-5 w-5" />
-            Export CSV
-          </button>
-
-          {/* ADD */}
-          <button
-            onClick={onAdd}
-            className="flex h-[48px] items-center gap-3 rounded-2xl bg-black px-5 font-semibold text-white shadow-lg transition hover:scale-[1.02]"
-          >
-            <Plus className="h-5 w-5" />
-            Add Flight
-          </button>
+            ● {amaStatus}
+          </span>
         </div>
+        <p className="mt-3 text-lg text-gray-500">
+          {totalFlights} flights logged with {totalPilots} pilots.
+        </p>
       </div>
     </div>
   );

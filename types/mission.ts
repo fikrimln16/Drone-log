@@ -34,6 +34,10 @@ export type Flight = {
   duration_min: number;
 
   notes: string;
+
+  status?: string;
+
+  pilots?: [];
 };
 
 export type SortKey =

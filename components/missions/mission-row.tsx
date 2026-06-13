@@ -1,51 +1,48 @@
+"use client";
+
+import { Eye } from "lucide-react";
+
 type Props = {
   item: any;
 
   onDetail: (item: any) => void;
-
-  onEdit: (item: any) => void;
-
-  onDelete: (item: any) => void;
 };
 
-export default function MissionRow({
-  item,
-  onDetail,
-  onEdit,
-  onDelete,
-}: Props) {
+export default function MissionRow({ item, onDetail }: Props) {
+  const batteryUsed =
+    Number(item.start_percent || 0) - Number(item.end_percent || 0);
+
   return (
-    <tr className="border-b transition hover:bg-gray-50">
+    <tr className="border-b transition hover:bg-slate-50">
       {/* DATE */}
-      <td className="p-6 text-lg">
+      <td className="px-6 py-5 text-sm font-medium whitespace-nowrap">
         {new Date(item.flight_date).toLocaleDateString("id-ID")}
       </td>
 
-      {/* FLIGHT */}
-      <td className="p-6">
-        <span className="rounded-full bg-blue-100 px-4 py-1 text-sm text-blue-700">
-          {item.flight_id}
-        </span>
-      </td>
-
-      {/* AMA */}
+      {/* FLIGHT ID */}
       <td className="px-6 py-5">
-        <span className="inline-flex rounded-full bg-purple-100 px-3 py-1 text-sm font-medium whitespace-nowrap text-purple-700">
-          {item.ama || "-"}
+        <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700">
+          {item.flight_id}
         </span>
       </td>
 
       {/* ESTATE */}
       <td className="px-6 py-5">
-        <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-sm font-medium whitespace-nowrap text-green-700">
-          {item.estate || "-"}
-        </span>
+        {item.estate && item.estate !== "-" && item.estate.trim() !== "" ? (
+          <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-sm font-semibold whitespace-nowrap text-green-700">
+            {item.estate}
+          </span>
+        ) : (
+          <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold whitespace-nowrap text-slate-600">
+            No Estate Selected
+          </span>
+        )}
       </td>
 
       {/* PILOT */}
       <td className="px-6 py-5">
         <div className="flex flex-wrap gap-2">
-          {(item.pilots || []).map((pilot: string) => (
+          {(item.pilots || []).slice(0, 3).map((pilot: string) => (
             <span
               key={pilot}
               className="rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-700"
@@ -53,42 +50,44 @@ export default function MissionRow({
               {pilot}
             </span>
           ))}
+
+          {(item.pilots || []).length > 3 && (
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+              +{item.pilots.length - 3}
+            </span>
+          )}
         </div>
       </td>
 
+      {/* UAV */}
+      <td className="px-6 py-5">
+        <span className="rounded-full bg-indigo-100 px-3 py-1 text-sm font-semibold text-indigo-700">
+          {item.uav_unit || "-"}
+        </span>
+      </td>
+
+      {/* BATTERY */}
+      <td className="px-6 py-5">
+        <span className="rounded-full bg-orange-100 px-3 py-1 text-sm font-semibold text-orange-700">
+          {batteryUsed}%
+        </span>
+      </td>
+
       {/* DURATION */}
-      <td className="p-6">
-        <span className="rounded-full bg-yellow-100 px-4 py-1 text-sm text-yellow-700">
+      <td className="px-6 py-5">
+        <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm font-semibold text-yellow-700">
           {item.duration_min} min
         </span>
       </td>
 
-      {/* NOTES */}
-      <td className="max-w-[250px] p-6 text-lg">
-        <p className="truncate">{item.notes}</p>
-      </td>
-
       {/* ACTION */}
-      <td className="space-x-2 p-6 text-right">
+      <td className="px-6 py-5 text-center">
         <button
           onClick={() => onDetail(item)}
-          className="rounded-2xl border bg-white px-5 py-2 text-sm transition hover:bg-gray-100"
+          className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition hover:bg-slate-100"
         >
+          <Eye className="h-4 w-4" />
           Detail
-        </button>
-
-        <button
-          onClick={() => onEdit(item)}
-          className="rounded-2xl bg-blue-50 px-5 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-100"
-        >
-          Edit
-        </button>
-
-        <button
-          onClick={() => onDelete(item)}
-          className="rounded-2xl bg-red-50 px-5 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100"
-        >
-          Delete
         </button>
       </td>
     </tr>

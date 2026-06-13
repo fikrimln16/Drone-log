@@ -9,6 +9,8 @@ export type FlightForm = {
 
   ama_id: number;
 
+  status?: string;
+
   estate: string;
 
   flight_id: string;
