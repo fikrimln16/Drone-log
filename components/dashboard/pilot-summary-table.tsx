@@ -21,6 +21,8 @@ import { ChartColumn, Users } from "lucide-react";
 
 import PilotAnalyticsModal from "../pilots/pilot-analytics-modal";
 
+import Image from "next/image";
+
 type Pilot = {
   id: number;
 
@@ -446,15 +448,42 @@ export default function PilotSummaryTable() {
                   }}
                 >
                   {/* PILOT */}
-                  <td className="px-6 py-5 whitespace-nowrap">
-                    <div>
-                      <h1 className="truncate font-bold" title={item.pilot}>
-                        {item.pilot}
-                      </h1>
+                  <td className="px-6 py-5">
+                    <div className="flex items-center gap-4">
+                      {/* PHOTO */}
+                      <div className="overflow-hidden rounded-2xl border-2 border-cyan-100 shadow-sm">
+                        <Image
+                          src={item.photo_url || "/images/default-avatar.png"}
+                          alt={item.pilot}
+                          width={56}
+                          height={56}
+                          className="h-14 w-14 object-cover"
+                        />
+                      </div>
 
-                      <p className="mt-1 text-xs text-gray-500">
-                        {item.total_duration} total minutes
-                      </p>
+                      {/* INFO */}
+                      <div className="min-w-0">
+                        <h1
+                          className="truncate font-bold text-slate-900"
+                          title={item.pilot}
+                        >
+                          {item.pilot}
+                        </h1>
+
+                        <p className="mt-1 text-xs text-slate-500">
+                          Drone Pilot
+                        </p>
+
+                        <div className="mt-2 flex items-center gap-2">
+                          <span className="rounded-full bg-cyan-50 px-2 py-1 text-[11px] font-semibold text-cyan-700">
+                            {item.total_flights} Flights
+                          </span>
+
+                          <span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-600">
+                            {item.total_hours} hr
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </td>
 
