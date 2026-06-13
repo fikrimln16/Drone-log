@@ -3,6 +3,7 @@
 import { Activity, AlertTriangle, Plane, UploadCloud } from "lucide-react";
 
 import Link from "next/link";
+import Image from "next/image";
 
 type Props = {
   stats: any;
@@ -134,24 +135,40 @@ export default function DashboardOperation({ stats, onOpenActive }: Props) {
       <div className="flex min-h-[220px] flex-col justify-between rounded-[28px] border bg-white p-6 shadow-sm">
         <div className="flex items-start justify-between">
           <div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center">
               <p className="text-sm font-semibold text-gray-500">Top Pilot</p>
 
               <Link
                 href="/pilots"
-                className="rounded-xl border bg-white px-3 py-1.5 text-xs font-semibold transition hover:bg-gray-100"
+                className="mx-2 rounded-xl border bg-white px-3 py-1.5 text-xs font-semibold transition hover:bg-gray-100"
               >
                 View All
               </Link>
             </div>
 
-            <h1 className="mt-3 text-4xl font-bold text-cyan-600">
-              {stats.top_pilot?.pilot || "-"}
-            </h1>
+            <div className="mt-4 flex items-center gap-3">
+              <div className="overflow-hidden rounded-2xl border bg-slate-100">
+                <Image
+                  src={
+                    stats.top_pilot?.photo_url || "/images/default-avatar.png"
+                  }
+                  alt={stats.top_pilot?.pilot || "Pilot"}
+                  width={56}
+                  height={56}
+                  className="h-14 w-14 object-cover"
+                />
+              </div>
 
-            <p className="mt-2 text-sm text-gray-500">
-              Most active pilot this month
-            </p>
+              <div>
+                <h1 className="text-2xl font-bold text-cyan-600">
+                  {stats.top_pilot?.pilot || "-"}
+                </h1>
+
+                <p className="text-sm text-gray-500">
+                  Most active pilot this month
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="rounded-2xl bg-cyan-100 p-4">

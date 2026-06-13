@@ -207,36 +207,44 @@ export async function GET() {
     // =====================================================
 
     const [topPilotRows]: any = await pool.query(`
-        SELECT
-          p.pilot_name AS pilot,
+      SELECT
+        p.id,
 
-          COUNT(
-            DISTINCT fp.flight_id
-          ) AS flights,
+        p.pilot_name AS pilot,
 
-          SUM(
-            f.duration_min
-          ) AS duration,
+        p.photo_url,
 
-          COUNT(
-            DISTINCT f.mission_name
-          ) AS missions
+        COUNT(
+          DISTINCT fp.flight_id
+        ) AS flights,
 
-        FROM pilots p
+        COALESCE(
+          SUM(f.duration_min),
+          0
+        ) AS duration,
 
-        LEFT JOIN flight_pilots fp
-          ON fp.pilot_id = p.id
+        COUNT(
+          DISTINCT f.mission_name
+        ) AS missions
 
-        LEFT JOIN drone_flight_history f
-          ON f.id = fp.flight_id
+      FROM pilots p
 
-        GROUP BY
-          p.id,
-          p.pilot_name
+      LEFT JOIN flight_pilots fp
+        ON fp.pilot_id = p.id
 
-        ORDER BY duration DESC
+      LEFT JOIN drone_flight_history f
+        ON f.id = fp.flight_id
 
-        LIMIT 1
+      GROUP BY
+        p.id,
+        p.pilot_name,
+        p.photo_url
+
+      ORDER BY
+        duration DESC,
+        flights DESC
+
+      LIMIT 1
       `);
 
     const [pilotCountRows]: any = await pool.query(`

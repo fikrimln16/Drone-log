@@ -10,6 +10,8 @@ export async function GET() {
 
         p.pilot_name AS pilot,
 
+        p.photo_url,
+
         COUNT(
           DISTINCT fp.flight_id
         ) AS total_flights,
@@ -18,12 +20,22 @@ export async function GET() {
           DISTINCT f.mission_name
         ) AS total_missions,
 
+        COUNT(
+          DISTINCT f.ama_id
+        ) AS total_amas,
+
         COALESCE(
           SUM(f.duration_min),
           0
         ) AS total_duration,
 
-        MAX(f.flight_date) AS last_flight
+        ROUND(
+          AVG(f.duration_min),
+          1
+        ) AS avg_duration,
+
+        MAX(f.flight_date)
+          AS last_flight
 
       FROM pilots p
 
@@ -35,9 +47,13 @@ export async function GET() {
 
       GROUP BY
         p.id,
-        p.pilot_name
+        p.pilot_name,
+        p.photo_url
 
-      ORDER BY total_duration DESC
+      ORDER BY
+        total_duration DESC,
+        total_flights DESC,
+        p.pilot_name ASC
     `);
 
     return NextResponse.json(rows);

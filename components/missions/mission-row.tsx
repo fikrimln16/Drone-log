@@ -2,6 +2,8 @@
 
 import { Eye } from "lucide-react";
 
+import Link from "next/link";
+
 type Props = {
   item: any;
 
@@ -82,13 +84,13 @@ export default function MissionRow({ item, onDetail }: Props) {
 
       {/* ACTION */}
       <td className="px-6 py-5 text-center">
-        <button
-          onClick={() => onDetail(item)}
+        <Link
+          href={`/flights/${item.flight_id}`}
           className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition hover:bg-slate-100"
         >
           <Eye className="h-4 w-4" />
           Detail
-        </button>
+        </Link>
       </td>
     </tr>
   );

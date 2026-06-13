@@ -4,6 +4,7 @@ import { Clock3, Plane, ShieldCheck, X } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import FlightDetailModal from "../flights/flight-detail-modal";
+import Image from "next/image";
 
 type Props = {
   open: boolean;
@@ -67,9 +68,15 @@ export default function PilotAnalyticsModal({
         {/* HEADER */}
         <div className="border-b px-8 py-7">
           <div className="flex items-center gap-5">
-            {/* AVATAR */}
-            <div className="flex h-20 w-20 items-center justify-center rounded-[28px] bg-cyan-100 text-3xl font-bold text-cyan-700">
-              {summary?.pilot?.charAt(0)}
+            {/* PHOTO */}
+            <div className="h-24 w-24 overflow-hidden rounded-[28px] border-2 border-cyan-100 bg-white shadow-sm">
+              <Image
+                src={summary?.photo_url || "/images/default-avatar.png"}
+                alt={summary?.pilot || "Pilot"}
+                width={96}
+                height={96}
+                className="h-full w-full object-cover"
+              />
             </div>
 
             {/* INFO */}
@@ -78,7 +85,9 @@ export default function PilotAnalyticsModal({
                 Pilot Analytics
               </p>
 
-              <h1 className="mt-2 text-5xl font-bold">{summary?.pilot}</h1>
+              <h1 className="mt-2 text-4xl font-bold">{summary?.pilot}</h1>
+
+              <p className="mt-1 text-gray-500">Drone Pilot</p>
 
               <div
                 className={`mt-3 inline-flex rounded-full px-4 py-1 text-sm font-semibold ${status.className}`}

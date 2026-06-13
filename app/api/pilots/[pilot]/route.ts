@@ -25,6 +25,8 @@ export async function GET(req: Request, { params }: Params) {
 
         p.pilot_name AS pilot,
 
+        p.photo_url,
+
         COUNT(
           DISTINCT fp.flight_id
         ) AS total_flights,
@@ -57,7 +59,8 @@ export async function GET(req: Request, { params }: Params) {
 
       GROUP BY
         p.id,
-        p.pilot_name
+        p.pilot_name,
+        p.photo_url
       `,
       [pilotId]
     );

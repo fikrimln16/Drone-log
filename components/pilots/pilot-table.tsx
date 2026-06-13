@@ -6,6 +6,7 @@ import PilotAnalyticsModal from "./pilot-analytics-modal";
 
 import { ArrowDown, ArrowUp } from "lucide-react";
 
+import Image from "next/image";
 type Props = {
   pilots: any[];
 
@@ -242,12 +243,20 @@ export default function PilotTable({ pilots, loading }: Props) {
                   >
                     {/* PILOT */}
                     <td className="px-6 py-5">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-100 font-bold text-cyan-700">
-                          {pilot.pilot?.[0] || "P"}
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div className="h-[52px] w-[52px] flex-shrink-0 overflow-hidden rounded-2xl border-2 border-cyan-100 shadow-sm">
+                          <Image
+                            src={
+                              pilot.photo_url || "/images/default-avatar.png"
+                            }
+                            alt={pilot.pilot}
+                            width={52}
+                            height={52}
+                            className="h-full w-full object-cover"
+                          />
                         </div>
 
-                        <div>
+                        <div className="min-w-0">
                           <p className="font-bold">{pilot.pilot}</p>
 
                           <p className="text-sm text-gray-500">Drone Pilot</p>
