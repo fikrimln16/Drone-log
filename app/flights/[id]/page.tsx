@@ -148,9 +148,10 @@ export default function FlightDetailPage() {
               </button>
             </div>
           </div>
+          <FlightHeroCard data={data} />
 
           {/* CONTENT */}
-          <div className="mt-5 grid gap-5 xl:grid-cols-12">
+          <div className="mt-4 grid gap-4 xl:grid-cols-12">
             <div className="space-y-5 xl:col-span-6">
               <FlightSummaryCard data={data} />
 
@@ -159,7 +160,6 @@ export default function FlightDetailPage() {
 
             <div className="space-y-5 xl:col-span-6">
               <FlightMapCard data={data} />
-
               <FlightCrewCard data={data} />
 
               <FlightNotesCard data={data} />

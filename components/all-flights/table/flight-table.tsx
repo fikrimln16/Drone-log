@@ -24,12 +24,12 @@ const columns = [
   {
     label: "DATE",
     key: "flight_date",
-    width: "140px",
+    width: "120px",
   },
   {
     label: "AMA",
     key: "ama",
-    width: "180px",
+    width: "140px",
   },
   {
     label: "ESTATE",
@@ -44,22 +44,27 @@ const columns = [
   {
     label: "MISSION",
     key: "mission_name",
-    width: "320px",
+    width: "260px",
   },
   {
     label: "PILOT",
     key: "pilots",
-    width: "220px",
+    width: "260px",
   },
   {
     label: "BATTERY",
     key: "battery_id",
-    width: "140px",
+    width: "120px",
   },
   {
     label: "DURATION",
     key: "duration_min",
     width: "120px",
+  },
+  {
+    label: "ACTION",
+    key: "action",
+    width: "140px",
   },
 ];
 
@@ -79,7 +84,7 @@ export default function FlightsTable({
         <table className="w-full min-w-[1400px] table-fixed border-separate border-spacing-0">
           {/* HEADER */}
           <thead className="bg-gray-50">
-            <tr className="border-b">
+            <tr>
               {columns.map((column) => (
                 <th
                   key={column.key}
@@ -87,28 +92,32 @@ export default function FlightsTable({
                     width: column.width,
                     minWidth: column.width,
                   }}
-                  onClick={() => onSort(column.key)}
-                  className="cursor-pointer p-5 text-left text-sm font-bold tracking-wide text-gray-700"
+                  className={`p-5 text-sm font-bold tracking-wide text-gray-700 ${
+                    column.key === "action" ? "text-center" : "text-left"
+                  }`}
                 >
-                  <div className="flex items-center gap-2">
-                    {column.label}
+                  {column.key === "action" ? (
+                    column.label
+                  ) : (
+                    <div
+                      onClick={() => onSort(column.key)}
+                      className="flex cursor-pointer items-center gap-2"
+                    >
+                      {column.label}
 
-                    {sortBy === column.key ? (
-                      sortDirection === "asc" ? (
-                        <ArrowUp className="h-4 w-4 text-blue-600" />
+                      {sortBy === column.key ? (
+                        sortDirection === "asc" ? (
+                          <ArrowUp className="h-4 w-4 text-blue-600" />
+                        ) : (
+                          <ArrowDown className="h-4 w-4 text-blue-600" />
+                        )
                       ) : (
-                        <ArrowDown className="h-4 w-4 text-blue-600" />
-                      )
-                    ) : (
-                      <ArrowDown className="h-4 w-4 text-gray-300" />
-                    )}
-                  </div>
+                        <ArrowDown className="h-4 w-4 text-gray-300" />
+                      )}
+                    </div>
+                  )}
                 </th>
               ))}
-
-              <th className="p-5 text-right text-sm font-bold tracking-wide text-gray-700">
-                ACTION
-              </th>
             </tr>
           </thead>
 
@@ -118,9 +127,9 @@ export default function FlightsTable({
               <FlightsRow
                 key={item.id}
                 item={item}
-                onDetail={onDetail}
-                onEdit={onEdit}
-                onDelete={onDelete}
+                // onDetail={onDetail}
+                // onEdit={onEdit}
+                // onDelete={onDelete}
               />
             ))}
 

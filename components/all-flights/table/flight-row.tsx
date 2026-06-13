@@ -1,19 +1,10 @@
+import Link from "next/link";
+
 type Props = {
   item: any;
-
-  onDetail: (item: any) => void;
-
-  onEdit: (item: any) => void;
-
-  onDelete: (item: any) => void;
 };
 
-export default function FlightsRow({
-  item,
-  onDetail,
-  onEdit,
-  onDelete,
-}: Props) {
+export default function FlightsRow({ item }: Props) {
   return (
     <tr className="border-b transition hover:bg-gray-50">
       {/* DATE */}
@@ -72,33 +63,13 @@ export default function FlightsRow({
 
       {/* ACTION */}
       <td className="p-5">
-        <div className="flex justify-end gap-2">
-          {/* DETAIL */}
-          <button
-            type="button"
-            onClick={() => onDetail(item)}
-            className="rounded-xl border px-4 py-2 text-sm transition hover:bg-gray-100"
+        <div className="flex justify-end">
+          <Link
+            href={`/flights/${item.flight_id}`}
+            className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition hover:bg-slate-100"
           >
-            Detail
-          </button>
-
-          {/* EDIT */}
-          <button
-            type="button"
-            onClick={() => onEdit(item)}
-            className="rounded-xl bg-blue-50 px-4 py-2 text-sm text-blue-600 transition hover:bg-blue-100"
-          >
-            Edit
-          </button>
-
-          {/* DELETE */}
-          <button
-            type="button"
-            onClick={() => onDelete(item)}
-            className="rounded-xl bg-red-50 px-4 py-2 text-sm text-red-600 transition hover:bg-red-100"
-          >
-            Delete
-          </button>
+            View Detail
+          </Link>
         </div>
       </td>
     </tr>

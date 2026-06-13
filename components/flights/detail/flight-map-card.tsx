@@ -49,23 +49,6 @@ export default function FlightMapCard({ data }: Props) {
         </div>
       </div>
 
-      {/* INFO BAR */}
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-slate-50 p-4">
-        <div>
-          <p className="text-xs text-slate-500">AMA</p>
-
-          <h1 className="font-bold">{data.ama_name}</h1>
-        </div>
-
-        <div
-          className={`rounded-full px-4 py-2 text-xs font-bold ring-1 ${getStatusStyle(
-            data.status
-          )}`}
-        >
-          {data.status}
-        </div>
-      </div>
-
       {/* MAP */}
       <div className="overflow-hidden rounded-2xl border">
         <FlightMapLeaflet data={data} />
