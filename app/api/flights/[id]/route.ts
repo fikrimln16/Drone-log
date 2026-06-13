@@ -9,6 +9,83 @@ type Params = {
 };
 
 // =====================================================
+// GET
+// =====================================================
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    const [rows]: any = await pool.query(
+      `
+      SELECT
+        f.*,
+        a.ama_name,
+        a.latitude,
+        a.longitude,
+        a.status,
+
+        GROUP_CONCAT(
+          DISTINCT p.id
+          SEPARATOR ','
+        ) AS pilot_ids,
+
+        GROUP_CONCAT(
+          p.pilot_name
+          SEPARATOR ','
+        ) AS pilots
+
+      FROM drone_flight_history f
+
+      LEFT JOIN amas a
+      ON a.id = f.ama_id
+
+      LEFT JOIN flight_pilots fp
+      ON fp.flight_id = f.id
+
+      LEFT JOIN pilots p
+      ON p.id = fp.pilot_id
+
+      WHERE f.flight_id = ?
+
+      GROUP BY f.id
+      `,
+      [id]
+    );
+
+    if (!rows.length) {
+      return NextResponse.json(
+        { message: "Flight not found" },
+        { status: 404 }
+      );
+    }
+
+    const flight = {
+      ...rows[0],
+
+      pilots: rows[0].pilots
+        ? rows[0].pilots
+            .split(",")
+            .map((pilot: string) => pilot.trim())
+            .filter(Boolean)
+        : [],
+
+      pilot_ids: rows[0].pilot_ids
+        ? rows[0].pilot_ids.split(",").map((id: string) => Number(id))
+        : [],
+    };
+
+    return NextResponse.json(flight);
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json({ message: "Error" }, { status: 500 });
+  }
+}
+
+// =====================================================
 // DELETE
 // =====================================================
 
