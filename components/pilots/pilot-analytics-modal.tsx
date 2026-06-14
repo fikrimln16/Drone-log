@@ -71,7 +71,7 @@ export default function PilotAnalyticsModal({
             {/* PHOTO */}
             <div className="h-24 w-24 overflow-hidden rounded-[28px] border-2 border-cyan-100 bg-white shadow-sm">
               <Image
-                src={summary?.photo_url || "/images/default-avatar.png"}
+                src={summary?.photo_url || "/uploads/pilots/default-avatar.png"}
                 alt={summary?.pilot || "Pilot"}
                 width={96}
                 height={96}

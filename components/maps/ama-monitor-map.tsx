@@ -59,6 +59,8 @@ type AmaPoint = {
   planning_date: string | null;
 
   actual_date: string | null;
+
+  missions: [];
 };
 
 // =====================================================

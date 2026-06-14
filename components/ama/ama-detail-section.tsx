@@ -29,17 +29,21 @@ type Flight = {
 
   flight_id: string;
 
-  mission_name: string;
+  flight_date: string;
 
-  pilot: string;
+  mission_name: string;
 
   estate: string;
 
+  uav_unit: string;
+
   duration_min: number;
 
-  start_time: string;
-
   battery_id: string;
+
+  end_percent: number;
+
+  pilots: string[];
 };
 
 type Props = {
@@ -119,7 +123,7 @@ export default function AmaDetailSection({ selectedAma }: Props) {
       {/* TABLE */}
       <AmaFlightTable
         flights={flights}
-        onDetail={(flight) => setSelectedFlight(flight)}
+        // onDetail={(flight) => setSelectedFlight(flight)}
       />
 
       <FlightDetailModal

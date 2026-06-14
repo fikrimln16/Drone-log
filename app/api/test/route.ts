@@ -1,25 +1,10 @@
-import { prisma } from "@/lib/prisma";
-
-import { NextResponse } from "next/server";
+import pool from "@/lib/db";
 
 export async function GET() {
-  try {
-    const flights =
-      await prisma.flight.findMany({
-        take: 5,
-      });
+  console.log(process.env.DB_HOST);
+  console.log("TEST");
 
-    return NextResponse.json(flights);
-  } catch (error) {
-    console.error(error);
-
-    return NextResponse.json(
-      {
-        message: "Error",
-      },
-      {
-        status: 500,
-      }
-    );
-  }
+  return Response.json({
+    host: process.env.DB_HOST,
+  });
 }

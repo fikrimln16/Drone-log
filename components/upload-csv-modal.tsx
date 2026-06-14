@@ -2,8 +2,7 @@
 
 import { useRef } from "react";
 
-import Papa from "papaparse";
-
+import Papa, { ParseResult } from "papaparse";
 import { useRouter } from "next/navigation";
 
 import { Download, FileSpreadsheet, Upload, X } from "lucide-react";
