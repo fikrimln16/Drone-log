@@ -15,8 +15,22 @@ export default function PilotsPage() {
 
   const [loading, setLoading] = useState(true);
 
+  const [summary, setSummary] = useState<any>(null);
+  async function fetchSummary() {
+    try {
+      const res = await fetch("/api/pilots/summary");
+
+      const data = await res.json();
+
+      setSummary(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   useEffect(() => {
     fetchPilots();
+    fetchSummary();
   }, []);
 
   async function fetchPilots() {
@@ -64,26 +78,50 @@ export default function PilotsPage() {
         </Link>
 
         {/* SUMMARY */}
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-          <PilotCard title="Total Pilots" value={totalPilots} color="blue" />
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <PilotCard
+            title="Total Pilots"
+            value={summary?.total_pilots || 0}
+            color="blue"
+          />
 
           <PilotCard
-            title="Total Flights"
-            value={totalFlights}
+            title="Active Pilots"
+            value={summary?.active_pilots || 0}
+            subtitle="This Month"
             color="purple"
           />
 
           <PilotCard
-            title="Total Duration"
-            value={`${totalDuration} min`}
+            title="Flight Hours"
+            value={`${summary?.total_hours || 0} hr`}
             color="yellow"
           />
 
           <PilotCard
-            title="Average Duration"
-            value={`${
-              totalFlights > 0 ? Math.round(totalDuration / totalFlights) : 0
-            } min`}
+            title="Top Pilot"
+            value={summary?.top_pilot?.pilot_name || "-"}
+            subtitle={`${summary?.top_pilot?.total_flights || 0} Flights`}
+            image={summary?.top_pilot?.photo_url}
+            color="cyan"
+          />
+
+          <PilotCard
+            title="Most flight hours this month"
+            value={summary?.flight_hours_leader?.pilot_name || "-"}
+            subtitle={`${(
+              Number(summary?.flight_hours_leader?.duration || 0) / 60
+            ).toFixed(1)} hr this month`}
+            image={summary?.flight_hours_leader?.photo_url}
+            color="red"
+          />
+
+          <PilotCard
+            title="AMA Coverage"
+            value={`${summary?.ama_coverage?.covered || 0}/${
+              summary?.ama_coverage?.total || 0
+            }`}
+            subtitle="Covered AMA"
             color="green"
           />
         </div>

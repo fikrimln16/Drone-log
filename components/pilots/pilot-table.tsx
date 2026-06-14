@@ -6,6 +6,8 @@ import PilotAnalyticsModal from "./pilot-analytics-modal";
 
 import { ArrowDown, ArrowUp } from "lucide-react";
 
+import PilotSortHeader from "./pilot-sort-header";
+
 import Image from "next/image";
 type Props = {
   pilots: any[];
@@ -15,10 +17,11 @@ type Props = {
 
 type SortKey =
   | "pilot"
+  | "total_amas"
   | "total_duration"
-  | "total_flights"
-  | "total_missions"
-  | "last_flight";
+  | "duration_this_month"
+  | "last_flight"
+  | "status";
 
 export default function PilotTable({ pilots, loading }: Props) {
   // =====================================================
@@ -57,38 +60,26 @@ export default function PilotTable({ pilots, loading }: Props) {
   // SORT DATA
   // =====================================================
 
-  const sortedPilots = useMemo(() => {
-    return [...(pilots || [])].sort((a, b) => {
-      const valueA = a?.[sortBy];
+  const sortedPilots = [...pilots].sort((a, b) => {
+    const aValue = a[sortBy];
+    const bValue = b[sortBy];
 
-      const valueB = b?.[sortBy];
+    if (sortBy === "last_flight") {
+      const aDate = aValue ? new Date(aValue).getTime() : 0;
 
-      // DATE
-      if (sortBy === "last_flight") {
-        const dateA = valueA ? new Date(valueA).getTime() : 0;
+      const bDate = bValue ? new Date(bValue).getTime() : 0;
 
-        const dateB = valueB ? new Date(valueB).getTime() : 0;
+      return sortDirection === "asc" ? aDate - bDate : bDate - aDate;
+    }
 
-        return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
-      }
+    if (typeof aValue === "number" && typeof bValue === "number") {
+      return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
+    }
 
-      // NUMBER
-      if (
-        sortBy === "total_duration" ||
-        sortBy === "total_flights" ||
-        sortBy === "total_missions"
-      ) {
-        return sortDirection === "asc"
-          ? Number(valueA || 0) - Number(valueB || 0)
-          : Number(valueB || 0) - Number(valueA || 0);
-      }
-
-      // STRING
-      return sortDirection === "asc"
-        ? String(valueA || "").localeCompare(String(valueB || ""))
-        : String(valueB || "").localeCompare(String(valueA || ""));
-    });
-  }, [pilots, sortBy, sortDirection]);
+    return sortDirection === "asc"
+      ? String(aValue).localeCompare(String(bValue))
+      : String(bValue).localeCompare(String(aValue));
+  });
 
   // =====================================================
   // STATUS
@@ -156,66 +147,65 @@ export default function PilotTable({ pilots, loading }: Props) {
   return (
     <div className="overflow-hidden rounded-[32px] border bg-white shadow-sm">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[900px] table-fixed">
+        <table className="w-full min-w-[1200px]">
           {/* ================================================= */}
           {/* HEAD */}
           {/* ================================================= */}
 
-          <thead className="border-b bg-gray-50">
+          <thead className="border-b bg-slate-50">
             <tr>
-              <th
-                onClick={() => handleSort("pilot")}
-                className="cursor-pointer px-6 py-5 text-left text-sm font-bold"
-              >
-                <div className="flex items-center gap-2">
-                  PILOT
-                  <SortIcon column="pilot" />
-                </div>
+              <PilotSortHeader
+                label="PILOT"
+                field="pilot"
+                sortBy={sortBy}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                className="w-[320px]"
+              />
+
+              <PilotSortHeader
+                label="AMA COVERAGE"
+                field="total_amas"
+                sortBy={sortBy}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+
+              <PilotSortHeader
+                label="FLIGHT HOURS"
+                field="total_duration"
+                sortBy={sortBy}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+
+              <PilotSortHeader
+                label="THIS MONTH"
+                field="duration_this_month"
+                sortBy={sortBy}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+
+              <PilotSortHeader
+                label="LAST ACTIVITY"
+                field="last_flight"
+                sortBy={sortBy}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+
+              <PilotSortHeader
+                label="STATUS"
+                field="status"
+                sortBy={sortBy}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+
+              <th className="px-6 py-5 text-center text-xs font-bold tracking-wider text-slate-500 uppercase">
+                Action
               </th>
-
-              <th
-                onClick={() => handleSort("total_duration")}
-                className="cursor-pointer px-6 py-5 text-left text-sm font-bold"
-              >
-                <div className="flex items-center gap-2">
-                  TOTAL HOURS
-                  <SortIcon column="total_duration" />
-                </div>
-              </th>
-
-              <th
-                onClick={() => handleSort("total_flights")}
-                className="cursor-pointer px-6 py-5 text-left text-sm font-bold"
-              >
-                <div className="flex items-center gap-2">
-                  FLIGHTS
-                  <SortIcon column="total_flights" />
-                </div>
-              </th>
-
-              <th
-                onClick={() => handleSort("total_missions")}
-                className="cursor-pointer px-6 py-5 text-left text-sm font-bold"
-              >
-                <div className="flex items-center gap-2">
-                  MISSIONS
-                  <SortIcon column="total_missions" />
-                </div>
-              </th>
-
-              <th
-                onClick={() => handleSort("last_flight")}
-                className="cursor-pointer px-6 py-5 text-left text-sm font-bold"
-              >
-                <div className="flex items-center gap-2">
-                  LAST FLIGHT
-                  <SortIcon column="last_flight" />
-                </div>
-              </th>
-
-              <th className="px-6 py-5 text-left text-sm font-bold">STATUS</th>
-
-              <th className="px-6 py-5 text-right text-sm font-bold">ACTION</th>
             </tr>
           </thead>
 
@@ -239,67 +229,126 @@ export default function PilotTable({ pilots, loading }: Props) {
                 return (
                   <tr
                     key={pilot.id}
-                    className="border-b transition hover:bg-gray-50"
+                    className="border-b transition hover:bg-slate-50"
                   >
                     {/* PILOT */}
                     <td className="px-6 py-5">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <div className="h-[52px] w-[52px] flex-shrink-0 overflow-hidden rounded-2xl border-2 border-cyan-100 shadow-sm">
-                          <Image
-                            src={
-                              pilot.photo_url || "/images/default-avatar.png"
-                            }
-                            alt={pilot.pilot}
-                            width={52}
-                            height={52}
-                            className="h-full w-full object-cover"
-                          />
+                      <div className="flex min-w-[260px] items-center gap-4">
+                        <div className="h-14 min-h-14 w-14 min-w-14 flex-shrink-0 overflow-hidden rounded-2xl border-2 border-cyan-100 shadow-sm">
+                          {pilot.photo_url ? (
+                            <Image
+                              src={pilot.photo_url}
+                              alt={pilot.pilot}
+                              width={56}
+                              height={56}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-cyan-100 text-lg font-black text-cyan-700">
+                              {pilot.pilot?.charAt(0)}
+                            </div>
+                          )}
                         </div>
 
                         <div className="min-w-0">
-                          <p className="font-bold">{pilot.pilot}</p>
+                          <h1
+                            className="line-clamp-2 text-base font-bold text-slate-900"
+                            title={pilot.pilot}
+                          >
+                            {pilot.pilot}
+                          </h1>
 
-                          <p className="text-sm text-gray-500">Drone Pilot</p>
+                          <p className="mt-1 text-xs text-slate-500">
+                            {pilot.total_flights} Flights •{" "}
+                            {pilot.total_missions} Missions
+                          </p>
                         </div>
                       </div>
                     </td>
 
-                    {/* HOURS */}
+                    {/* AMA COVERAGE */}
                     <td className="px-6 py-5">
-                      <span className="rounded-full bg-yellow-100 px-4 py-1 text-sm font-semibold text-yellow-700">
-                        {(duration / 60).toFixed(1)} hr
-                      </span>
+                      <div>
+                        <div className="inline-flex rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-purple-700">
+                          {pilot.ama_coverage}
+                        </div>
+
+                        {pilot.ama_list?.length > 0 && (
+                          <p
+                            className="mt-2 max-w-[180px] truncate text-xs text-slate-500"
+                            title={pilot.ama_list.join(", ")}
+                          >
+                            {pilot.ama_list.join(", ")}
+                          </p>
+                        )}
+                      </div>
                     </td>
 
-                    {/* FLIGHTS */}
-                    <td className="px-6 py-5">{pilot.total_flights}</td>
-
-                    {/* MISSIONS */}
-                    <td className="px-6 py-5">{pilot.total_missions}</td>
-
-                    {/* LAST FLIGHT */}
+                    {/* TOTAL HOURS */}
                     <td className="px-6 py-5">
-                      {pilot.last_flight
-                        ? new Date(pilot.last_flight).toLocaleDateString(
-                            "id-ID"
-                          )
-                        : "-"}
+                      <div>
+                        <h1 className="font-bold text-slate-900">
+                          {pilot.total_hours} hr
+                        </h1>
+
+                        <div className="mt-2 h-2 w-[120px] overflow-hidden rounded-full bg-slate-100">
+                          <div
+                            className="h-full rounded-full bg-cyan-500"
+                            style={{
+                              width: `${Math.min(
+                                Number(pilot.total_hours),
+                                100
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* THIS MONTH */}
+                    <td className="px-6 py-5">
+                      <div className="inline-flex flex-col rounded-2xl bg-sky-50 px-4 py-3">
+                        <span className="font-bold text-sky-700">
+                          {pilot.total_hours_this_month} hr
+                        </span>
+
+                        <span className="text-xs text-sky-500">
+                          Current Month
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* LAST ACTIVITY */}
+                    <td className="px-6 py-5">
+                      {pilot.last_flight ? (
+                        <div>
+                          <p className="font-medium text-slate-800">
+                            {new Date(pilot.last_flight).toLocaleDateString(
+                              "id-ID"
+                            )}
+                          </p>
+
+                          <p className="text-xs text-slate-500">Last Flight</p>
+                        </div>
+                      ) : (
+                        <span className="text-slate-400">No Activity</span>
+                      )}
                     </td>
 
                     {/* STATUS */}
-                    <td className="px-6 py-5">
+                    <td className="px-6 py-5 text-center">
                       <span
-                        className={`rounded-full px-4 py-1 text-sm font-semibold ${status.className}`}
+                        className={`inline-flex rounded-full px-4 py-1 text-xs font-bold ${status.className}`}
                       >
                         {status.label}
                       </span>
                     </td>
 
                     {/* ACTION */}
-                    <td className="px-6 py-5 text-right">
+                    <td className="px-6 py-5 text-center">
                       <button
                         onClick={() => handleViewAnalytics(pilot.id)}
-                        className="rounded-2xl border bg-white px-5 py-2 text-sm transition hover:bg-gray-100"
+                        className="rounded-2xl border border-slate-200 bg-white px-5 py-2 text-sm font-semibold transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
                       >
                         View Analytics
                       </button>

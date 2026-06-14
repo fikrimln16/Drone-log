@@ -1,0 +1,55 @@
+import { ArrowDown, ArrowUp } from "lucide-react";
+
+type SortKey =
+  | "pilot"
+  | "total_amas"
+  | "total_duration"
+  | "duration_this_month"
+  | "last_flight"
+  | "status";
+
+type Props = {
+  label: string;
+
+  field: SortKey;
+
+  sortBy: SortKey;
+
+  sortDirection: "asc" | "desc";
+
+  onSort: (key: SortKey) => void;
+
+  className?: string;
+};
+
+export default function PilotSortHeader({
+  label,
+  field,
+  sortBy,
+  sortDirection,
+  onSort,
+  className,
+}: Props) {
+  const active = sortBy === field;
+
+  return (
+    <th
+      className={`px-6 py-5 text-left text-xs font-bold tracking-wider uppercase ${className}`}
+    >
+      <button
+        onClick={() => onSort(field)}
+        className="flex items-center gap-2 text-slate-500 transition hover:text-cyan-600"
+      >
+        {label}
+
+        {!active ? (
+          <ArrowDown className="h-4 w-4 text-slate-300" />
+        ) : sortDirection === "asc" ? (
+          <ArrowUp className="h-4 w-4 text-cyan-600" />
+        ) : (
+          <ArrowDown className="h-4 w-4 text-cyan-600" />
+        )}
+      </button>
+    </th>
+  );
+}
