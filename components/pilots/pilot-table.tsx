@@ -195,13 +195,13 @@ export default function PilotTable({ pilots, loading }: Props) {
                 onSort={handleSort}
               />
 
-              <PilotSortHeader
+              {/* <PilotSortHeader
                 label="STATUS"
                 field="status"
                 sortBy={sortBy}
                 sortDirection={sortDirection}
                 onSort={handleSort}
-              />
+              /> */}
 
               <th className="px-6 py-5 text-center text-xs font-bold tracking-wider text-slate-500 uppercase">
                 Action
@@ -336,15 +336,24 @@ export default function PilotTable({ pilots, loading }: Props) {
                     </td>
 
                     {/* STATUS */}
-                    <td className="px-6 py-5">
-                      <div className="flex items-center justify-center">
-                        <span
-                          className={`inline-flex h-8 min-w-[120px] items-center justify-center rounded-full text-xs font-bold ${status.className}`}
+                    {/* <td className="px-6 py-5">
+                      <div className="flex justify-center">
+                        <div
+                          className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold ${status.className}`}
                         >
+                          <div
+                            className={`h-2 w-2 rounded-full ${
+                              status.label === "Safe"
+                                ? "bg-green-500"
+                                : status.label === "High Load"
+                                  ? "bg-red-500"
+                                  : "bg-yellow-500"
+                            }`}
+                          />
                           {status.label}
-                        </span>
+                        </div>
                       </div>
-                    </td>
+                    </td> */}
 
                     {/* ACTION */}
                     <td className="px-6 py-5 text-center">
