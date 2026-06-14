@@ -336,12 +336,14 @@ export default function PilotTable({ pilots, loading }: Props) {
                     </td>
 
                     {/* STATUS */}
-                    <td className="px-6 py-5 text-center">
-                      <span
-                        className={`inline-flex rounded-full px-4 py-1 text-xs font-bold ${status.className}`}
-                      >
-                        {status.label}
-                      </span>
+                    <td className="px-6 py-5">
+                      <div className="flex items-center justify-center">
+                        <span
+                          className={`inline-flex h-8 min-w-[120px] items-center justify-center rounded-full text-xs font-bold ${status.className}`}
+                        >
+                          {status.label}
+                        </span>
+                      </div>
                     </td>
 
                     {/* ACTION */}
