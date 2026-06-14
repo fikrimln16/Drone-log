@@ -110,22 +110,30 @@ export default function MissionTable() {
             <div className="flex min-h-[calc(100vh-130px)] flex-col">
               <div className="overflow-hidden rounded-[32px] border border-gray-200 bg-white shadow-sm">
                 {/* HEADER */}
-                <div className="flex items-center justify-between border-b border-gray-100 px-7 py-6">
+                <div className="flex flex-col gap-4 px-5 py-5 md:flex-row md:items-center md:justify-between md:px-7 md:py-6">
+                  {/* TITLE */}
                   <div>
-                    <h1 className="text-3xl font-bold">AMA Drone Monitoring</h1>
+                    <h1 className="text-2xl font-bold md:text-3xl">
+                      AMA Drone Monitoring
+                    </h1>
 
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 max-w-md text-sm text-gray-500">
                       Real-time Indonesia drone operation map
                     </p>
                   </div>
 
-                  <div className="rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-700">
-                    • Live Monitor
+                  {/* LIVE STATUS */}
+                  <div className="inline-flex w-fit items-center gap-2 rounded-full bg-green-100 px-3 py-2 text-xs font-semibold text-green-700 md:px-4 md:text-sm">
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+
+                    <span className="md:hidden">Live</span>
+
+                    <span className="hidden md:inline">Live Monitor</span>
                   </div>
                 </div>
 
                 {/* MAP */}
-                <div className="h-[calc(100vh-240px)]">
+                <div className="h-full">
                   <AmaMonitorMap />
                 </div>
               </div>

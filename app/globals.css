@@ -124,6 +124,73 @@ body {
   font-family: var(--font-sans);
 }
 
+/* Desktop */
+.ama-popup .leaflet-popup-content {
+  margin: 12px;
+}
+
+.ama-popup .leaflet-popup-content-wrapper {
+  border-radius: 20px;
+}
+
+.ama-marker {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+.ama-marker-dot {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 4px;
+  top: 4px;
+  border-radius: 9999px;
+  border: 2px solid white;
+  z-index: 2;
+}
+
+.ama-marker-pulse {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  opacity: 0.6;
+  animation: amaPulse 1.8s infinite;
+}
+
+@keyframes amaPulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+
+  70% {
+    transform: scale(2);
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+/* Mobile */
+@media (max-width: 768px) {
+  .ama-popup .leaflet-popup-content {
+    width: 180px !important;
+    margin: 8px;
+  }
+
+  .ama-popup .leaflet-popup-content-wrapper {
+    border-radius: 16px;
+  }
+
+  .ama-popup .leaflet-popup-tip {
+    width: 12px;
+    height: 12px;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
