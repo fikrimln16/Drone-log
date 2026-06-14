@@ -56,7 +56,8 @@ export default function PilotAnalyticsModal({
   return (
     <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
       {/* MODAL */}
-      <div className="relative flex max-h-[92vh] w-full max-w-[1100px] flex-col overflow-hidden rounded-[32px] bg-white shadow-2xl">
+      <div className="relative flex h-[95vh] w-full max-w-[1100px] flex-col overflow-hidden rounded-[32px] bg-white shadow-2xl">
+        {" "}
         {/* CLOSE BUTTON */}
         <button
           onClick={onClose}
@@ -64,40 +65,74 @@ export default function PilotAnalyticsModal({
         >
           <X className="h-5 w-5" />
         </button>
-
         {/* HEADER */}
-        <div className="border-b px-8 py-7">
-          <div className="flex items-center gap-5">
+        <div className="border-b bg-gradient-to-r from-slate-50 to-white px-8 py-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
             {/* PHOTO */}
-            <div className="h-24 w-24 overflow-hidden rounded-[28px] border-2 border-cyan-100 bg-white shadow-sm">
-              <Image
-                src={summary?.photo_url || "/uploads/pilots/default-avatar.png"}
-                alt={summary?.pilot || "Pilot"}
-                width={96}
-                height={96}
-                className="h-full w-full object-cover"
-              />
+            {/* <div className="shrink-0">
+              <div className="overflow-hidden rounded-[32px] border-4 border-cyan-100 shadow-lg">
+                <Image
+                  src={summary?.photo_url || "/images/default-avatar.png"}
+                  alt={summary?.pilot}
+                  width={160}
+                  height={160}
+                  className="h-40 w-40 object-cover"
+                />
+              </div>
+            </div> */}
+
+            <div className="relative mx-auto sm:mx-0">
+              <div className="overflow-hidden rounded-[28px] border-4 border-cyan-100 shadow-xl">
+                {summary?.photo_url ? (
+                  <Image
+                    src={summary.photo_url}
+                    alt={summary?.pilot || "Pilot"}
+                    width={160}
+                    height={160}
+                    className="h-[120px] w-[120px] object-cover md:h-[160px] md:w-[160px]"
+                  />
+                ) : (
+                  <div className="flex h-[120px] w-[120px] items-center justify-center bg-gradient-to-br from-cyan-100 to-blue-100 md:h-[160px] md:w-[160px]">
+                    <span className="text-4xl font-black text-cyan-700 md:text-6xl">
+                      {summary?.pilot?.charAt(0)?.toUpperCase() || "P"}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="absolute -right-2 -bottom-2 rounded-2xl bg-cyan-500 p-2 shadow-lg">
+                <Plane className="h-4 w-4 text-white" />
+              </div>
             </div>
 
             {/* INFO */}
-            <div>
-              <p className="text-sm font-semibold tracking-[0.3em] text-gray-400 uppercase">
-                Pilot Analytics
-              </p>
+            <div className="flex-1">
+              <div className="inline-flex items-center gap-2 rounded-full bg-cyan-100 px-4 py-2">
+                <Plane className="h-4 w-4 text-cyan-600" />
 
-              <h1 className="mt-2 text-4xl font-bold">{summary?.pilot}</h1>
+                <span className="text-xs font-bold tracking-[0.2em] text-cyan-700 uppercase">
+                  Pilot Command Center
+                </span>
+              </div>
+              <h1 className="mt-2 text-5xl font-black">{summary?.pilot}</h1>
 
-              <p className="mt-1 text-gray-500">Drone Pilot</p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <div
+                  className={`rounded-full px-4 py-2 text-sm font-bold ${status.className}`}
+                >
+                  {status.label}
+                </div>
 
-              <div
-                className={`mt-3 inline-flex rounded-full px-4 py-1 text-sm font-semibold ${status.className}`}
-              >
-                {status.label}
+                {summary?.last_flight && (
+                  <div className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
+                    Last Flight •{" "}
+                    {new Date(summary.last_flight).toLocaleDateString("id-ID")}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
-
         {/* CONTENT */}
         <div className="flex-1 overflow-y-auto px-8 py-7">
           {loading ? (
@@ -107,7 +142,7 @@ export default function PilotAnalyticsModal({
           ) : (
             <div className="space-y-8">
               {/* STATS */}
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+              <div className="grid grid-cols-1 grid-cols-2 gap-5 md:grid-cols-2 xl:grid-cols-4">
                 <Card
                   title="Total Flights"
                   value={summary?.total_flights || 0}
@@ -139,13 +174,19 @@ export default function PilotAnalyticsModal({
 
               {/* MISSION ACTIVITY */}
               <div className="rounded-[28px] border bg-white p-6">
-                <h2 className="text-2xl font-bold">Mission Activity</h2>
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="text-2xl font-bold">Mission Activity</h2>
 
-                <div className="mt-6 space-y-4">
+                  <span className="rounded-full bg-cyan-100 px-4 py-2 text-sm font-semibold text-cyan-700">
+                    {data?.missions?.length || 0} Missions
+                  </span>
+                </div>
+
+                <div className="max-h-[320px] space-y-4 overflow-y-auto pr-2">
                   {data?.missions?.map((item: any) => (
                     <div
                       key={item.mission_name}
-                      className="flex items-center justify-between rounded-2xl border bg-gray-50 p-4"
+                      className="flex flex-col gap-4 rounded-2xl border bg-gray-50 p-4 md:flex-row md:items-center md:justify-between"
                     >
                       <div>
                         <p className="font-bold">{item.mission_name}</p>
@@ -155,7 +196,7 @@ export default function PilotAnalyticsModal({
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-2">
                         <div className="rounded-full bg-yellow-100 px-4 py-1 text-sm font-semibold text-yellow-700">
                           {item.duration} min
                         </div>
@@ -178,34 +219,35 @@ export default function PilotAnalyticsModal({
               <div className="rounded-[28px] border bg-white p-6">
                 <h2 className="text-2xl font-bold">Recent Flights</h2>
 
-                <div className="mt-6 overflow-x-auto">
-                  <table className="w-full min-w-[700px]">
+                <div className="-mx-5 overflow-x-auto md:mx-0">
+                  <table className="min-w-[900px]">
                     <thead>
-                      <tr className="border-b">
-                        <th className="px-4 py-3 text-left text-sm font-semibold">
-                          Flight ID
+                      <tr className="border-b bg-slate-50">
+                        <th className="px-5 py-4 text-left text-xs font-bold tracking-wider text-slate-500 uppercase">
+                          Flight
                         </th>
 
-                        <th className="px-4 py-3 text-left text-sm font-semibold">
-                          Mission
+                        <th className="px-5 py-4 text-left text-xs font-bold tracking-wider text-slate-500 uppercase">
+                          AMA
                         </th>
 
-                        <th>AMA</th>
-                        <th>UAV</th>
+                        <th className="px-5 py-4 text-left text-xs font-bold tracking-wider text-slate-500 uppercase">
+                          UAV
+                        </th>
 
-                        <th className="px-4 py-3 text-left text-sm font-semibold">
+                        <th className="px-5 py-4 text-left text-xs font-bold tracking-wider text-slate-500 uppercase">
                           Duration
                         </th>
 
-                        <th className="px-4 py-3 text-left text-sm font-semibold">
+                        <th className="px-5 py-4 text-left text-xs font-bold tracking-wider text-slate-500 uppercase">
                           Battery
                         </th>
 
-                        <th className="px-4 py-3 text-left text-sm font-semibold">
+                        <th className="px-5 py-4 text-left text-xs font-bold tracking-wider text-slate-500 uppercase">
                           Date
                         </th>
 
-                        <th className="px-4 py-3 text-left text-sm font-semibold">
+                        <th className="px-5 py-4 text-center text-xs font-bold tracking-wider text-slate-500 uppercase">
                           Action
                         </th>
                       </tr>
@@ -213,43 +255,97 @@ export default function PilotAnalyticsModal({
 
                     <tbody>
                       {data?.recent_flights?.map((flight: any) => (
-                        <tr key={flight.flight_id} className="border-b">
-                          <td className="px-4 py-4 font-semibold">
-                            {flight.flight_id}
+                        <tr
+                          key={flight.flight_id}
+                          className="border-b transition-all hover:bg-slate-50"
+                        >
+                          {/* FLIGHT */}
+                          <td className="px-5 py-4">
+                            <div>
+                              <h1 className="font-semibold text-slate-900">
+                                {flight.mission_name}
+                              </h1>
+
+                              <span className="mt-2 inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+                                {flight.flight_id}
+                              </span>
+                            </div>
                           </td>
 
-                          <td className="px-4 py-4">{flight.mission_name}</td>
+                          {/* AMA */}
+                          <td className="px-5 py-4">
+                            <span className="inline-flex rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700">
+                              {flight.ama || "No AMA"}
+                            </span>
+                          </td>
 
-                          <td className="px-4 py-4">{flight.ama}</td>
-
-                          <td className="px-4 py-4">
-                            <span className="rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-700">
+                          {/* UAV */}
+                          <td className="px-5 py-4">
+                            <span className="inline-flex rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-700">
                               {flight.uav_unit}
                             </span>
                           </td>
 
-                          <td className="px-4 py-4">
-                            {flight.duration_min} min
-                          </td>
-
-                          <td className="px-4 py-4">
-                            <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
-                              {flight.end_percent}%
+                          {/* DURATION */}
+                          <td className="px-5 py-4">
+                            <span className="inline-flex rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700">
+                              {flight.duration_min} min
                             </span>
                           </td>
 
-                          <td className="px-4 py-4">
-                            {new Date(flight.flight_date).toLocaleDateString(
-                              "id-ID"
-                            )}
+                          {/* BATTERY */}
+                          <td className="px-5 py-4">
+                            <div className="w-[120px]">
+                              <div className="mb-1 flex items-center justify-between">
+                                <span className="text-xs text-slate-500">
+                                  Remaining
+                                </span>
+
+                                <span className="text-xs font-semibold">
+                                  {flight.end_percent}%
+                                </span>
+                              </div>
+
+                              <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                                <div
+                                  className={`h-full rounded-full ${
+                                    flight.end_percent <= 20
+                                      ? "bg-red-500"
+                                      : flight.end_percent <= 40
+                                        ? "bg-yellow-500"
+                                        : "bg-green-500"
+                                  }`}
+                                  style={{
+                                    width: `${flight.end_percent}%`,
+                                  }}
+                                />
+                              </div>
+                            </div>
                           </td>
-                          <td className="px-4 py-4">
-                            <button
-                              onClick={() => setSelectedFlight(flight)}
-                              className="rounded-xl border bg-white px-4 py-2 text-sm font-medium transition hover:bg-gray-100"
+
+                          {/* DATE */}
+                          <td className="px-5 py-4">
+                            <div>
+                              <p className="font-medium text-slate-700">
+                                {new Date(
+                                  flight.flight_date
+                                ).toLocaleDateString("id-ID")}
+                              </p>
+
+                              <p className="text-xs text-slate-400">
+                                Flight Activity
+                              </p>
+                            </div>
+                          </td>
+
+                          {/* ACTION */}
+                          <td className="px-5 py-4 text-center">
+                            <Link
+                              href={`/flights/${flight.flight_id}`}
+                              className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
                             >
                               Detail
-                            </button>
+                            </Link>
                           </td>
                         </tr>
                       ))}

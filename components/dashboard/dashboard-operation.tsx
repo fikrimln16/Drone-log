@@ -22,33 +22,40 @@ export default function DashboardOperation({ stats, onOpenActive }: Props) {
   return (
     <div className="grid auto-rows-fr grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
       {/* ACTIVE */}
-      <div className="flex min-h-[220px] flex-col justify-between rounded-[28px] border bg-white p-6 shadow-sm">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-sm font-semibold text-gray-500">
-              Active Flights
-            </p>
+      <div className="flex h-full min-h-[220px] flex-col rounded-[28px] border bg-white p-6 shadow-sm">
+        {/* CONTENT */}
+        <div>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-semibold text-gray-500">
+                Active Flights
+              </p>
 
-            <h1 className="mt-3 text-4xl font-bold">{activeFlights}</h1>
+              <h1 className="mt-3 text-4xl font-bold">{activeFlights}</h1>
 
-            <p className="mt-2 text-sm text-gray-500">Flights today</p>
-          </div>
+              <p className="mt-2 text-sm text-gray-500">Flights today</p>
+            </div>
 
-          <div className="rounded-2xl bg-green-100 p-4">
-            <Plane className="h-6 w-6 text-green-600" />
+            <div className="rounded-2xl bg-green-100 p-4">
+              <Plane className="h-6 w-6 text-green-600" />
+            </div>
           </div>
         </div>
 
-        <button
-          onClick={onOpenActive}
-          className="mt-6 flex h-[48px] items-center justify-center rounded-2xl border bg-white text-sm font-semibold transition hover:bg-gray-100"
-        >
-          View Active Flights
-        </button>
+        {/* BUTTON */}
+        <div className="mt-auto pt-6">
+          <button
+            onClick={onOpenActive}
+            className="flex h-[48px] w-full items-center justify-center rounded-2xl border bg-white text-sm font-semibold transition hover:bg-gray-100"
+          >
+            View Active Flights
+          </button>
+        </div>
       </div>
 
       {/* LOW BATTERY */}
-      <div className="flex min-h-[220px] flex-col rounded-[28px] border bg-white p-6 shadow-sm">
+      <div className="flex flex-col rounded-[28px] border bg-white p-5 shadow-sm md:min-h-[220px]">
+        {" "}
         <div className="flex items-start justify-between">
           <div>
             <p className="text-sm font-semibold text-gray-500">
@@ -64,16 +71,19 @@ export default function DashboardOperation({ stats, onOpenActive }: Props) {
             <AlertTriangle className="h-6 w-6 text-red-600" />
           </div>
         </div>
-
-        <div className="mt-5 grid grid-cols-3 gap-3">
+        <div className="mt-5 flex flex-col gap-3 xl:grid xl:grid-cols-3">
+          {" "}
           {stats.low_battery_flights?.map((flight: any) => (
             <div
               key={flight.flight_id}
-              className="rounded-2xl border bg-gray-50 p-3"
+              className="min-w-0 rounded-2xl border bg-gray-50 p-3"
             >
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <p className="truncate text-xs font-semibold">
+                  <p
+                    className="text-xs font-semibold break-all"
+                    title={flight.flight_id}
+                  >
                     {flight.flight_id}
                   </p>
 
@@ -101,7 +111,7 @@ export default function DashboardOperation({ stats, onOpenActive }: Props) {
       </div>
 
       {/* LATEST */}
-      <div className="flex min-h-[220px] flex-col justify-between rounded-[28px] border bg-white p-6 shadow-sm">
+      <div className="flex flex-col rounded-[28px] border bg-white p-5 shadow-sm md:min-h-[220px]">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-sm font-semibold text-gray-500">Latest Upload</p>
@@ -132,7 +142,7 @@ export default function DashboardOperation({ stats, onOpenActive }: Props) {
       </div>
 
       {/* TOP PILOT */}
-      <div className="flex min-h-[220px] flex-col justify-between rounded-[28px] border bg-white p-6 shadow-sm">
+      <div className="flex flex-col rounded-[28px] border bg-white p-5 shadow-sm md:min-h-[220px]">
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center">
@@ -153,9 +163,9 @@ export default function DashboardOperation({ stats, onOpenActive }: Props) {
                     stats.top_pilot?.photo_url || "/images/default-avatar.png"
                   }
                   alt={stats.top_pilot?.pilot || "Pilot"}
-                  width={56}
-                  height={56}
-                  className="h-14 w-14 object-cover"
+                  width={64}
+                  height={64}
+                  className="h-16 w-16 object-cover"
                 />
               </div>
 
