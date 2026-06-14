@@ -12,6 +12,8 @@ import useEditFlight from "@/hooks/useEditFlight";
 
 import FlightForm from "../forms/flight-form";
 
+import Image from "next/image";
+
 // =====================================================
 // DYNAMIC MAP
 // =====================================================
@@ -65,7 +67,9 @@ export default function EditFlightModal({
 
       estate: data.estate || "",
 
-      pilot_ids: data.pilot_ids || [],
+      pilot_ids: Array.isArray(data.pilots)
+        ? data.pilots.map((p: any) => p.id)
+        : [],
 
       uav_unit: data.uav_unit || "",
 
@@ -272,18 +276,43 @@ export default function EditFlightModal({
                 </div>
 
                 {/* PILOTS */}
+                {/* PILOTS */}
                 <div className="mt-5">
                   <p className="mb-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">
                     ASSIGNED PILOTS
                   </p>
 
-                  <div className="flex flex-wrap gap-2">
-                    {(data.pilots || []).map((pilot: string) => (
+                  <div className="space-y-3">
+                    {(data.pilots || []).map((pilot: any) => (
                       <div
-                        key={pilot}
-                        className="rounded-full bg-cyan-100 px-4 py-2 text-sm font-semibold text-cyan-700"
+                        key={pilot.id}
+                        className="flex items-center gap-3 rounded-2xl border bg-slate-50 p-3"
                       >
-                        {pilot}
+                        {/* PHOTO */}
+                        <div className="h-12 w-12 overflow-hidden rounded-xl border border-cyan-100">
+                          {pilot.photo_url ? (
+                            <Image
+                              src={pilot.photo_url}
+                              alt={pilot.name}
+                              width={48}
+                              height={48}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-cyan-100 font-bold text-cyan-700">
+                              {pilot.name?.charAt(0)}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* INFO */}
+                        <div>
+                          <h1 className="font-semibold text-slate-900">
+                            {pilot.name}
+                          </h1>
+
+                          <p className="text-xs text-slate-500">Flight Crew</p>
+                        </div>
                       </div>
                     ))}
                   </div>

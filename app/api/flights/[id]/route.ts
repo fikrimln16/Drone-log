@@ -22,6 +22,7 @@ export async function GET(
       `
       SELECT
         f.*,
+
         a.ama_name,
         a.latitude,
         a.longitude,
@@ -29,59 +30,97 @@ export async function GET(
 
         GROUP_CONCAT(
           DISTINCT p.id
+          ORDER BY p.id
           SEPARATOR ','
         ) AS pilot_ids,
 
         GROUP_CONCAT(
-          p.pilot_name
-          SEPARATOR ','
-        ) AS pilots
+          DISTINCT p.pilot_name
+          ORDER BY p.id
+          SEPARATOR '|'
+        ) AS pilot_names,
+
+        GROUP_CONCAT(
+          DISTINCT COALESCE(
+            p.photo_url,
+            ''
+          )
+          ORDER BY p.id
+          SEPARATOR '|'
+        ) AS pilot_photos
 
       FROM drone_flight_history f
 
       LEFT JOIN amas a
-      ON a.id = f.ama_id
+        ON a.id = f.ama_id
 
       LEFT JOIN flight_pilots fp
-      ON fp.flight_id = f.id
+        ON fp.flight_id = f.id
 
       LEFT JOIN pilots p
-      ON p.id = fp.pilot_id
+        ON p.id = fp.pilot_id
 
       WHERE f.flight_id = ?
 
-      GROUP BY f.id
+      GROUP BY
+        f.id,
+        a.ama_name,
+        a.latitude,
+        a.longitude,
+        a.status
       `,
       [id]
     );
 
     if (!rows.length) {
       return NextResponse.json(
-        { message: "Flight not found" },
-        { status: 404 }
+        {
+          message: "Flight not found",
+        },
+        {
+          status: 404,
+        }
       );
     }
 
+    const row = rows[0];
+
+    const pilotIds = row.pilot_ids ? row.pilot_ids.split(",") : [];
+
+    const pilotNames = row.pilot_names ? row.pilot_names.split("|") : [];
+
+    const pilotPhotos = row.pilot_photos ? row.pilot_photos.split("|") : [];
+
+    const pilots = pilotNames.map((name: string, index: number) => ({
+      id: Number(pilotIds[index]),
+
+      name,
+
+      photo_url: pilotPhotos[index] || null,
+    }));
+
     const flight = {
-      ...rows[0],
+      ...row,
 
-      pilots: rows[0].pilots
-        ? rows[0].pilots
-            .split(",")
-            .map((pilot: string) => pilot.trim())
-            .filter(Boolean)
-        : [],
-
-      pilot_ids: rows[0].pilot_ids
-        ? rows[0].pilot_ids.split(",").map((id: string) => Number(id))
-        : [],
+      pilots,
     };
+
+    delete flight.pilot_ids;
+    delete flight.pilot_names;
+    delete flight.pilot_photos;
 
     return NextResponse.json(flight);
   } catch (error) {
     console.error(error);
 
-    return NextResponse.json({ message: "Error" }, { status: 500 });
+    return NextResponse.json(
+      {
+        message: "Error",
+      },
+      {
+        status: 500,
+      }
+    );
   }
 }
 
