@@ -163,13 +163,13 @@ export default function PilotTable({ pilots, loading }: Props) {
                 className="w-[320px]"
               />
 
-              <PilotSortHeader
+              {/* <PilotSortHeader
                 label="AMA COVERAGE"
                 field="total_amas"
                 sortBy={sortBy}
                 sortDirection={sortDirection}
                 onSort={handleSort}
-              />
+              /> */}
 
               <PilotSortHeader
                 label="FLIGHT HOURS"
@@ -195,13 +195,13 @@ export default function PilotTable({ pilots, loading }: Props) {
                 onSort={handleSort}
               />
 
-              {/* <PilotSortHeader
+              <PilotSortHeader
                 label="STATUS"
                 field="status"
                 sortBy={sortBy}
                 sortDirection={sortDirection}
                 onSort={handleSort}
-              /> */}
+              />
 
               <th className="px-6 py-5 text-center text-xs font-bold tracking-wider text-slate-500 uppercase">
                 Action
@@ -267,7 +267,7 @@ export default function PilotTable({ pilots, loading }: Props) {
                     </td>
 
                     {/* AMA COVERAGE */}
-                    <td className="px-6 py-5">
+                    {/* <td className="px-6 py-5">
                       <div>
                         <div className="inline-flex rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-purple-700">
                           {pilot.ama_coverage}
@@ -282,7 +282,7 @@ export default function PilotTable({ pilots, loading }: Props) {
                           </p>
                         )}
                       </div>
-                    </td>
+                    </td> */}
 
                     {/* TOTAL HOURS */}
                     <td className="px-6 py-5">
@@ -336,8 +336,8 @@ export default function PilotTable({ pilots, loading }: Props) {
                     </td>
 
                     {/* STATUS */}
-                    {/* <td className="px-6 py-5">
-                      <div className="flex justify-center">
+                    <td className="px-6 py-5">
+                      <div className="flex justify-center align-middle">
                         <div
                           className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold ${status.className}`}
                         >
@@ -353,7 +353,7 @@ export default function PilotTable({ pilots, loading }: Props) {
                           {status.label}
                         </div>
                       </div>
-                    </td> */}
+                    </td>
 
                     {/* ACTION */}
                     <td className="px-6 py-5 text-center">

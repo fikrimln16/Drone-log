@@ -49,15 +49,15 @@ export default function HeroSection() {
 
             {/* TITLE */}
             <h1 className="mt-8 text-5xl font-black text-white md:text-7xl">
-              Monitor Every
-              <span className="block text-cyan-400">Drone Operation</span>
+              Aerial Survey
+              <span className="mt-2 block text-cyan-400">
+                Monitoring Platform
+              </span>
             </h1>
 
-            {/* SUBTITLE */}
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-200">
-              Centralized platform for monitoring drone operations, pilot
-              performance, mission activity, and AMA deployment across
-              Indonesia.
+              Application Performance & Monitoring for drone operations, aerial
+              surveys, mission tracking, and pilot analytics.
             </p>
 
             {/* BUTTON */}
@@ -70,11 +70,19 @@ export default function HeroSection() {
               </Link>
 
               <Link
-                href="/flights"
+                href="/ama"
                 className="rounded-2xl border border-white/20 bg-white/10 px-8 py-4 font-semibold text-white backdrop-blur transition hover:bg-white/20"
               >
-                View Flights
+                View Map
               </Link>
+
+              {/* COMING SOON */}
+              <button
+                disabled
+                className="cursor-not-allowed rounded-2xl border border-white/10 bg-white/5 px-8 py-4 font-semibold text-white/50 backdrop-blur"
+              >
+                Flight Gallery
+              </button>
             </div>
 
             {/* STATS */}
