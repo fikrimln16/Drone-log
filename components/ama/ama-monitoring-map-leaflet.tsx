@@ -66,20 +66,19 @@ export default function AmaMonitorMapLeaflet({ amas, onSelectAma }: Props) {
         <CircleMarker
           key={ama.id}
           center={[ama.latitude, ama.longitude]}
-          radius={8}
+          radius={ama.status === "ONGOING" ? 14 : 8}
+          className={ama.status === "ONGOING" ? "ama-ongoing" : ""}
           pathOptions={{
             color: "#ffffff",
-            weight: 3,
+            weight: ama.status === "ONGOING" ? 4 : 3,
             fillColor: getColor(ama.status),
             fillOpacity: 1,
-            opacity: 1,
           }}
           eventHandlers={{
             click: () => {
               onSelectAma?.(ama);
             },
           }}
-          className="animate-pulse"
         >
           <Popup>
             <div className="min-w-[220px]">

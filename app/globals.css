@@ -159,6 +159,91 @@ body {
   animation: amaPulse 1.8s infinite;
 }
 
+/* globals.css */
+
+.ongoing-marker {
+  animation: pulseMarker 1.5s infinite;
+}
+
+.pulse-dot {
+  position: relative;
+}
+
+.pulse-dot::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 9999px;
+  background: rgba(14, 165, 233, 0.4);
+  animation: pulse 1.5s infinite;
+}
+
+path.ama-ongoing {
+  animation: amaPulse 1.5s ease-in-out infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+@keyframes amaPulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.5);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes amaPulse {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(14, 165, 233, 0.8));
+  }
+
+  50% {
+    transform: scale(1.4);
+    filter: drop-shadow(0 0 12px rgba(14, 165, 233, 1));
+  }
+
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(14, 165, 233, 0.8));
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes pulseMarker {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.4);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 @keyframes amaPulse {
   0% {
     transform: scale(0.8);
@@ -200,5 +285,34 @@ body {
   }
   html {
     @apply font-sans;
+  }
+}
+
+.ama-pulse-marker {
+  position: relative;
+}
+
+.ama-pulse-marker::before {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: 9999px;
+  background: rgba(14, 165, 233, 0.35);
+  animation: amaPulse 1.6s infinite;
+}
+
+@keyframes amaPulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+
+  70% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 0;
   }
 }

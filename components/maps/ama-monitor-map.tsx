@@ -90,28 +90,27 @@ function getMarkerColor(status: string) {
 // CUSTOM MARKER
 // =====================================================
 
-function createCustomMarker(color: string) {
-  return L.divIcon({
+const createCustomMarker = (color: string, status: string) =>
+  L.divIcon({
     className: "",
-
     html: `
-      <div class="ama-marker">
-        <span
-          class="ama-marker-pulse"
-          style="background:${color}"
-        ></span>
-
-        <span
-          class="ama-marker-dot"
-          style="background:${color}"
-        ></span>
+      <div class="${status === "ONGOING" ? "ama-pulse-marker" : ""}">
+        <div
+          style="
+            width:${status === "ONGOING" ? "24px" : "16px"};
+            height:${status === "ONGOING" ? "24px" : "16px"};
+            background:${color};
+            border:3px solid white;
+            border-radius:9999px;
+            box-shadow:0 4px 12px rgba(0,0,0,.25);
+          "
+        ></div>
       </div>
     `,
+    iconSize: status === "ONGOING" ? [24, 24] : [16, 16],
 
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
+    iconAnchor: status === "ONGOING" ? [12, 12] : [8, 8],
   });
-}
 
 function formatDateOnly(date: string | null) {
   if (!date) return null;
@@ -446,7 +445,10 @@ export default function AmaMonitorMap() {
                 <Marker
                   key={item.id}
                   position={[item.lat, item.lng]}
-                  icon={createCustomMarker(getMarkerColor(item.status))}
+                  icon={createCustomMarker(
+                    getMarkerColor(item.status),
+                    item.status
+                  )}
                 >
                   <Popup className="ama-popup">
                     <div className="w-[180px] space-y-2 md:w-[260px] md:space-y-4">
