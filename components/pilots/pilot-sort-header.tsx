@@ -10,15 +10,10 @@ type SortKey =
 
 type Props = {
   label: string;
-
   field: SortKey;
-
   sortBy: SortKey;
-
   sortDirection: "asc" | "desc";
-
   onSort: (key: SortKey) => void;
-
   className?: string;
 };
 
@@ -34,11 +29,11 @@ export default function PilotSortHeader({
 
   return (
     <th
-      className={`px-6 py-5 text-left text-xs font-bold tracking-wider uppercase ${className}`}
+      className={`px-6 py-5 text-center text-xs font-bold tracking-wider uppercase ${className}`}
     >
       <button
         onClick={() => onSort(field)}
-        className="flex items-center gap-2 text-slate-500 transition hover:text-cyan-600"
+        className="mx-auto flex items-center justify-center gap-2 text-slate-500 transition hover:text-cyan-600"
       >
         {label}
 

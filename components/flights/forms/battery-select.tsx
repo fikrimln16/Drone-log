@@ -38,6 +38,12 @@ export default function BatterySelect({
         <option value="Blue">Blue</option>
 
         <option value="Green">Green</option>
+
+        <option value="Purple">Purple</option>
+
+        <option value="Gray">Gray</option>
+
+        <option value="No Color">No Color</option>
       </select>
 
       {error && <p className="mt-2 text-sm text-red-500">{error}</p>}

@@ -285,8 +285,8 @@ export default function PilotTable({ pilots, loading }: Props) {
                     </td> */}
 
                     {/* TOTAL HOURS */}
-                    <td className="px-6 py-5">
-                      <div>
+                    <td className="px-6 py-5 text-center">
+                      <div className="flex flex-col items-center">
                         <h1 className="font-bold text-slate-900">
                           {pilot.total_hours} hr
                         </h1>
@@ -306,7 +306,7 @@ export default function PilotTable({ pilots, loading }: Props) {
                     </td>
 
                     {/* THIS MONTH */}
-                    <td className="px-6 py-5">
+                    <td className="px-6 py-5 text-center">
                       <div className="inline-flex flex-col rounded-2xl bg-sky-50 px-4 py-3">
                         <span className="font-bold text-sky-700">
                           {pilot.total_hours_this_month} hr
@@ -319,7 +319,7 @@ export default function PilotTable({ pilots, loading }: Props) {
                     </td>
 
                     {/* LAST ACTIVITY */}
-                    <td className="px-6 py-5">
+                    <td className="px-6 py-5 text-center">
                       {pilot.last_flight ? (
                         <div>
                           <p className="font-medium text-slate-800">
