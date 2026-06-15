@@ -206,10 +206,17 @@ export default function AddAmaModal({ open, onClose, onSuccess }: Props) {
                 </label>
 
                 <input
-                  readOnly
+                  type="number"
+                  step="0.000001"
                   value={form.latitude}
                   placeholder="-2.123456"
-                  className="h-[58px] w-full rounded-2xl border border-gray-200 bg-gray-100 px-4 text-sm"
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      latitude: e.target.value,
+                    })
+                  }
+                  className="h-[58px] w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm transition outline-none focus:border-cyan-500"
                 />
               </div>
 
@@ -219,12 +226,50 @@ export default function AddAmaModal({ open, onClose, onSuccess }: Props) {
                 </label>
 
                 <input
-                  readOnly
+                  type="number"
+                  step="0.000001"
                   value={form.longitude}
                   placeholder="120.123456"
-                  className="h-[58px] w-full rounded-2xl border border-gray-200 bg-gray-100 px-4 text-sm"
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      longitude: e.target.value,
+                    })
+                  }
+                  className="h-[58px] w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm transition outline-none focus:border-cyan-500"
                 />
               </div>
+              <div className="rounded-2xl border border-cyan-100 bg-cyan-50 p-4">
+                <div className="flex items-start gap-3">
+                  <MapPin className="mt-0.5 h-5 w-5 text-cyan-600" />
+
+                  <div>
+                    <h3 className="font-semibold text-cyan-700">
+                      Coordinate Input
+                    </h3>
+
+                    <p className="mt-1 text-sm text-cyan-600">
+                      You can manually enter latitude and longitude, or click
+                      directly on the map to automatically fill the coordinates.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.geolocation.getCurrentPosition((position) => {
+                    setForm({
+                      ...form,
+                      latitude: position.coords.latitude.toFixed(6),
+                      longitude: position.coords.longitude.toFixed(6),
+                    });
+                  });
+                }}
+                className="rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-700 hover:bg-cyan-100"
+              >
+                📍 Use Current Location
+              </button>
             </div>
 
             {/* INFO */}

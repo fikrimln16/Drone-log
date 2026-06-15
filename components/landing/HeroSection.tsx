@@ -44,7 +44,7 @@ export default function HeroSection() {
             {/* BADGE */}
             <div className="inline-flex items-center gap-2 rounded-full bg-cyan-500/20 px-4 py-2 text-sm font-semibold text-cyan-200 backdrop-blur">
               <Plane className="h-4 w-4" />
-              AMA Drone Monitoring Platform
+              Drone Monitoring Platform
             </div>
 
             {/* TITLE */}
