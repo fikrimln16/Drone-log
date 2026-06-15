@@ -90,25 +90,27 @@ export async function initDatabase() {
 
   // SEED PILOTS
   await connection.query(`
-      INSERT IGNORE INTO pilots (
+    INSERT IGNORE INTO pilots (
       pilot_code,
       pilot_name,
       license_number,
       phone,
       status,
       photo_url
-      ) VALUES
-      ('PLT001', 'Maza Yudhistira', 'LIC-2026-001', '081234567001', 'ACTIVE', '/uploads/pilots/Maza Yudhistira.jpeg'),
-      ('PLT002', 'Annisa Putri Graciella', 'LIC-2026-002', '081234567002', 'ACTIVE', '/uploads/pilots/Annisa Putri Graciella.jpeg'),
-      ('PLT003', 'Rizki Ikhwansyah Purba', 'LIC-2026-003', '081234567003', 'ACTIVE', '/uploads/pilots/Rizki Ikhwansyah Purba.jpeg'),
-      ('PLT004', 'Theo Ivan Imanuel', 'LIC-2026-004', '081234567004', 'ACTIVE', '/uploads/pilots/Theo Ivan Imanuel.jpeg'),
-      ('PLT005', 'Muhammad Fatahillah Putra Joni', 'LIC-2026-005', '081234567005', 'ACTIVE', '/uploads/pilots/Muhammad Fatahillah Putra Joni.jpeg'),
-      ('PLT006', 'Kristiawan Kristanto', 'LIC-2026-006', '081234567006', 'ACTIVE', '/uploads/pilots/Kristiawan Kristanto.jpeg'),
-      ('PLT007', 'Bagas Andhika Aryo T', 'LIC-2026-007', '081234567007', 'ACTIVE', '/uploads/pilots/Bagas Andhika Aryo T.jpeg'),
-      ('PLT008', 'M. Pandu Prabowo', 'LIC-2026-008', '081234567008', 'ACTIVE', '/uploads/pilots/M. Pandu Prabowo.jpeg'),
-      ('PLT009', 'Afifah Faizah', 'LIC-2026-009', '081234567009', 'ACTIVE', '/uploads/pilots/Afifah Faizah.jpeg'),
-      ('PLT010', 'Rizki Subekti', 'LIC-2026-010', '081234567010', 'ACTIVE', '/uploads/pilots/Rizki Subekti.jpeg');
-      `);
+    ) VALUES
+    ('PLT001', 'Maza Yudhistira', 'LIC-2026-001', '081234567001', 'ACTIVE', '/uploads/pilots/Maza Yudhistira.jpeg'),
+    ('PLT002', 'Annisa Putri Graciella', 'LIC-2026-002', '081234567002', 'ACTIVE', '/uploads/pilots/Annisa Putri Graciella.jpeg'),
+    ('PLT003', 'Rizki Ikhwansyah Purba', 'LIC-2026-003', '081234567003', 'ACTIVE', '/uploads/pilots/Rizki Ikhwansyah Purba.jpeg'),
+    ('PLT004', 'Theo Ivan Imanuel', 'LIC-2026-004', '081234567004', 'ACTIVE', '/uploads/pilots/Theo Ivan Imanuel.jpeg'),
+    ('PLT005', 'Muhammad Fatahillah Putra Joni', 'LIC-2026-005', '081234567005', 'ACTIVE', '/uploads/pilots/Muhammad Fatahillah Putra Joni.jpeg'),
+    ('PLT006', 'Kristiawan Kristanto', 'LIC-2026-006', '081234567006', 'ACTIVE', '/uploads/pilots/Kristiawan Kristanto.jpeg'),
+    ('PLT007', 'Bagas Andhika Aryo T', 'LIC-2026-007', '081234567007', 'ACTIVE', '/uploads/pilots/Bagas Andhika Aryo T.jpeg'),
+    ('PLT008', 'M. Pandu Prabowo', 'LIC-2026-008', '081234567008', 'ACTIVE', '/uploads/pilots/M. Pandu Prabowo.jpeg'),
+    ('PLT009', 'Afifah Faizah', 'LIC-2026-009', '081234567009', 'ACTIVE', '/uploads/pilots/Afifah Faizah.jpeg'),
+    ('PLT010', 'Rizki Subekti', 'LIC-2026-010', '081234567010', 'ACTIVE', '/uploads/pilots/Rizki Subekti.jpeg'),
+    ('PLT011', 'M Yovi Perdana', 'LIC-2026-011', '081234567011', 'ACTIVE', NULL),
+    ('PLT012', 'Deven Fernanda', 'LIC-2026-012', '081234567012', 'ACTIVE', NULL);
+  `);
 
   // FLIGHT HISTORY
   await connection.query(`
