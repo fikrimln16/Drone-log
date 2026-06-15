@@ -13,22 +13,26 @@ export default function UploadCSV() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex h-[56px] items-center gap-4 rounded-2xl border bg-white px-5 shadow-sm transition hover:border-blue-500 hover:bg-blue-50"
+        className="flex h-[64px] w-full flex-col items-center justify-center gap-1 rounded-2xl border bg-white px-3 shadow-sm transition hover:border-green-300 hover:bg-green-50 md:h-[54px] md:w-auto md:flex-row md:gap-3 md:px-5"
       >
         {/* ICON */}
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100">
-          <FileSpreadsheet className="h-5 w-5 text-green-600" />
+        <div className="rounded-lg bg-green-100 p-2">
+          <FileSpreadsheet className="h-4 w-4 text-green-600" />
         </div>
 
-        {/* TEXT */}
-        <div className="text-left">
-          <p className="text-sm font-semibold">Upload CSV</p>
+        {/* DESKTOP */}
+        <div className="hidden text-left md:block">
+          <p className="text-sm font-semibold text-black">Upload CSV</p>
 
           <p className="text-xs text-gray-500">Import drone flight logs</p>
         </div>
+
+        {/* MOBILE */}
+        <span className="text-center text-xs font-semibold md:hidden">
+          Upload CSV
+        </span>
       </button>
 
-      {/* MODAL */}
       <UploadCSVModal open={open} onClose={() => setOpen(false)} />
     </>
   );

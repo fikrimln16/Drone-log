@@ -123,35 +123,37 @@ export default function AllFlightsPage() {
         />
 
         {/* ACTION */}
-        <div className="flex items-center justify-end gap-3">
+        <div className="grid grid-cols-3 gap-3 md:flex md:justify-end">
           {/* EXPORT */}
           <button
             onClick={() => setOpenExport(true)}
-            className="rounded-2xl border bg-white px-5 py-3 text-sm font-semibold shadow-sm transition hover:bg-gray-100"
+            className="flex h-[64px] flex-col items-center justify-center rounded-2xl border bg-white px-3 shadow-sm transition hover:bg-gray-100 md:h-auto md:flex-row md:px-5 md:py-3"
           >
-            Export CSV
+            <span className="text-sm font-semibold">Export CSV</span>
           </button>
 
           {/* ADD FLIGHT */}
           <button
             onClick={() => setOpenAddFlight(true)}
-            className="flex h-[54px] items-center gap-3 rounded-2xl border bg-white px-5 shadow-sm transition hover:bg-gray-100"
+            className="flex h-[64px] flex-col items-center justify-center gap-1 rounded-2xl border bg-white px-3 shadow-sm transition hover:bg-gray-100 md:h-[54px] md:flex-row md:gap-3 md:px-5"
           >
-            {/* ICON */}
-            <div className="rounded-xl bg-purple-100 p-2">
+            <div className="rounded-lg bg-purple-100 p-2">
               <Plus className="h-4 w-4 text-purple-600" />
             </div>
 
-            {/* TEXT */}
-            <div className="text-left">
+            <div className="hidden text-left md:block">
               <p className="text-sm font-semibold text-black">Add Flight</p>
 
               <p className="text-xs text-gray-500">Create new flight log</p>
             </div>
+
+            <span className="text-xs font-semibold md:hidden">Add Flight</span>
           </button>
 
           {/* UPLOAD */}
-          <UploadCSV />
+          <div className="h-[64px] md:h-auto">
+            <UploadCSV />
+          </div>
         </div>
 
         {/* TABLE */}

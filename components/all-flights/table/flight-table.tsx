@@ -29,12 +29,12 @@ const columns = [
   {
     label: "AMA",
     key: "ama",
-    width: "140px",
+    width: "220px",
   },
   {
     label: "ESTATE",
     key: "estate",
-    width: "120px",
+    width: "180px",
   },
   {
     label: "FLIGHT ID",
@@ -52,9 +52,9 @@ const columns = [
     width: "260px",
   },
   {
-    label: "BATTERY",
-    key: "battery_id",
-    width: "120px",
+    label: "UAV UNIT",
+    key: "uav_unit",
+    width: "160px",
   },
   {
     label: "DURATION",
@@ -92,16 +92,14 @@ export default function FlightsTable({
                     width: column.width,
                     minWidth: column.width,
                   }}
-                  className={`p-5 text-sm font-bold tracking-wide text-gray-700 ${
-                    column.key === "action" ? "text-center" : "text-left"
-                  }`}
+                  className="p-5 text-center text-sm font-bold tracking-wide text-gray-700"
                 >
                   {column.key === "action" ? (
                     column.label
                   ) : (
                     <div
                       onClick={() => onSort(column.key)}
-                      className="flex cursor-pointer items-center gap-2"
+                      className="flex cursor-pointer items-center justify-center gap-2"
                     >
                       {column.label}
 
