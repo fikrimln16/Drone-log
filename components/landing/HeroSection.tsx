@@ -40,31 +40,35 @@ export default function HeroSection() {
       {/* CONTENT */}
       <div className="relative z-10 flex h-full items-center">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="max-w-4xl">
+          <div className="mx-auto max-w-6xl text-center">
             {/* BADGE */}
-            <div className="inline-flex items-center gap-2 rounded-full bg-cyan-500/20 px-4 py-2 text-sm font-semibold text-cyan-200 backdrop-blur">
+            {/* BADGE */}
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-500/10 px-5 py-2 text-sm font-semibold text-cyan-200 backdrop-blur">
               <Plane className="h-4 w-4" />
               Drone Monitoring Platform
             </div>
 
             {/* TITLE */}
-            <h1 className="mt-8 text-5xl font-black text-white md:text-7xl">
+            <h1 className="mt-8 text-5xl font-black tracking-tight text-white md:text-7xl xl:text-8xl">
               Aerial Survey
-              <span className="mt-2 block text-cyan-400">
-                Monitoring Platform
-              </span>
             </h1>
 
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-200">
-              Application Performance & Monitoring for drone operations, aerial
-              surveys, mission tracking, and pilot analytics.
+            <h2 className="mt-4 text-2xl font-bold text-cyan-400 md:text-4xl xl:text-5xl">
+              Application Performance & Monitoring Platform
+            </h2>
+
+            {/* DESCRIPTION */}
+            <p className="mx-auto mt-8 max-w-3xl text-lg leading-relaxed text-slate-200 md:text-xl">
+              Centralized platform for monitoring drone operations, aerial
+              surveys, mission activities, pilot performance, and AMA coverage
+              across operational areas.
             </p>
 
-            {/* BUTTON */}
-            <div className="mt-10 flex flex-wrap gap-4">
+            {/* BUTTONS */}
+            <div className="mt-12 flex flex-wrap justify-center gap-4">
               <Link
                 href="/"
-                className="rounded-2xl bg-cyan-600 px-8 py-4 font-semibold text-white transition hover:bg-cyan-700"
+                className="rounded-2xl bg-cyan-600 px-8 py-4 font-semibold text-white shadow-lg transition hover:bg-cyan-700"
               >
                 Open Dashboard
               </Link>
@@ -73,10 +77,9 @@ export default function HeroSection() {
                 href="/ama"
                 className="rounded-2xl border border-white/20 bg-white/10 px-8 py-4 font-semibold text-white backdrop-blur transition hover:bg-white/20"
               >
-                View Map
+                View AMA Map
               </Link>
 
-              {/* COMING SOON */}
               <button
                 disabled
                 className="cursor-not-allowed rounded-2xl border border-white/10 bg-white/5 px-8 py-4 font-semibold text-white/50 backdrop-blur"
@@ -88,44 +91,52 @@ export default function HeroSection() {
             {/* STATS */}
             {/* STATS */}
             <div className="mt-16 grid max-w-5xl grid-cols-2 gap-5 lg:grid-cols-4">
-              <div className="rounded-[28px] border border-white/10 bg-white/10 p-5 backdrop-blur">
-                <Plane className="mb-3 h-6 w-6 text-cyan-300" />
+              <div className="rounded-[28px] border border-white/10 bg-white/10 p-6 text-center backdrop-blur">
+                <Plane className="mx-auto mb-4 h-7 w-7 text-cyan-300" />
 
-                <h1 className="text-4xl font-bold text-white">
+                <h1 className="text-5xl font-black text-white">
                   {stats?.total_flights ?? "-"}
                 </h1>
 
-                <p className="mt-1 text-sm text-slate-300">Flights</p>
+                <p className="mt-2 text-sm font-medium text-slate-300">
+                  Total Flights
+                </p>
               </div>
 
-              <div className="rounded-[28px] border border-white/10 bg-white/10 p-5 backdrop-blur">
-                <Users className="mb-3 h-6 w-6 text-cyan-300" />
+              <div className="rounded-[28px] border border-white/10 bg-white/10 p-6 text-center backdrop-blur">
+                <Plane className="mx-auto mb-4 h-7 w-7 text-cyan-300" />
 
-                <h1 className="text-4xl font-bold text-white">
+                <h1 className="text-5xl font-black text-white">
                   {stats?.total_pilots ?? "-"}
                 </h1>
 
-                <p className="mt-1 text-sm text-slate-300">Pilots</p>
+                <p className="mt-2 text-sm font-medium text-slate-300">
+                  Total Pilots
+                </p>
               </div>
 
-              <div className="rounded-[28px] border border-white/10 bg-white/10 p-5 backdrop-blur">
-                <MapPinned className="mb-3 h-6 w-6 text-cyan-300" />
+              <div className="rounded-[28px] border border-white/10 bg-white/10 p-6 text-center backdrop-blur">
+                <Plane className="mx-auto mb-4 h-7 w-7 text-cyan-300" />
 
-                <h1 className="text-4xl font-bold text-white">
+                <h1 className="text-5xl font-black text-white">
                   {stats?.total_amas ?? "-"}
                 </h1>
 
-                <p className="mt-1 text-sm text-slate-300">AMA Coverage</p>
+                <p className="mt-2 text-sm font-medium text-slate-300">
+                  Ama Coverage
+                </p>
               </div>
 
-              <div className="rounded-[28px] border border-white/10 bg-white/10 p-5 backdrop-blur">
-                <Plane className="mb-3 h-6 w-6 text-cyan-300" />
+              <div className="rounded-[28px] border border-white/10 bg-white/10 p-6 text-center backdrop-blur">
+                <Plane className="mx-auto mb-4 h-7 w-7 text-cyan-300" />
 
-                <h1 className="text-4xl font-bold text-white">
+                <h1 className="text-5xl font-black text-white">
                   {stats?.total_missions ?? "-"}
                 </h1>
 
-                <p className="mt-1 text-sm text-slate-300">Missions</p>
+                <p className="mt-2 text-sm font-medium text-slate-300">
+                  Missions
+                </p>
               </div>
             </div>
           </div>
