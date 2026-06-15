@@ -449,22 +449,30 @@ export default function PilotSummaryTable() {
                 >
                   {/* PILOT */}
                   <td className="px-6 py-5">
-                    <div className="flex items-center gap-4">
+                    <div className="flex min-w-[260px] items-center gap-4">
                       {/* PHOTO */}
-                      <div className="overflow-hidden rounded-2xl border-2 border-cyan-100 shadow-sm">
-                        <Image
-                          src={item.photo_url || "/images/default-avatar.png"}
-                          alt={item.pilot}
-                          width={56}
-                          height={56}
-                          className="h-14 w-14 object-cover"
-                        />
+                      <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-2xl border-2 border-cyan-100 bg-white shadow-sm">
+                        {item.photo_url &&
+                        item.photo_url !== "null" &&
+                        item.photo_url.trim() !== "" ? (
+                          <Image
+                            src={item.photo_url}
+                            alt={item.pilot}
+                            width={56}
+                            height={56}
+                            className="h-14 w-14 object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-14 w-14 items-center justify-center bg-cyan-100 text-lg font-black text-cyan-700">
+                            {item.pilot.charAt(0)?.toUpperCase()}
+                          </div>
+                        )}
                       </div>
 
                       {/* INFO */}
                       <div className="min-w-0">
                         <h1
-                          className="truncate font-bold text-slate-900"
+                          className="line-clamp-2 text-base font-bold text-slate-900"
                           title={item.pilot}
                         >
                           {item.pilot}
@@ -474,7 +482,7 @@ export default function PilotSummaryTable() {
                           Drone Pilot
                         </p>
 
-                        <div className="mt-2 flex items-center gap-2">
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
                           <span className="rounded-full bg-cyan-50 px-2 py-1 text-[11px] font-semibold text-cyan-700">
                             {item.total_flights} Flights
                           </span>
