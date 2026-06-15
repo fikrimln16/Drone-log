@@ -2,9 +2,11 @@ import { ArrowDown, ArrowUp } from "lucide-react";
 
 type SortKey =
   | "pilot"
-  | "total_amas"
+  | "performance"
+  | "total_missions"
+  | "total_flights"
   | "total_duration"
-  | "duration_this_month"
+  | "avg_duration"
   | "last_flight"
   | "status";
 

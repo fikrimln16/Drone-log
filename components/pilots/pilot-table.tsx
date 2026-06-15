@@ -17,9 +17,11 @@ type Props = {
 
 type SortKey =
   | "pilot"
-  | "total_amas"
+  | "performance"
+  | "total_missions"
+  | "total_flights"
   | "total_duration"
-  | "duration_this_month"
+  | "avg_duration"
   | "last_flight"
   | "status";
 
@@ -64,6 +66,22 @@ export default function PilotTable({ pilots, loading }: Props) {
     const aValue = a[sortBy];
     const bValue = b[sortBy];
 
+    // =====================================
+    // PERFORMANCE
+    // =====================================
+
+    if (sortBy === "performance") {
+      const monthA = Number(a.total_hours_this_month || 0);
+
+      const monthB = Number(b.total_hours_this_month || 0);
+
+      return sortDirection === "asc" ? monthA - monthB : monthB - monthA;
+    }
+
+    // =====================================
+    // LAST FLIGHT
+    // =====================================
+
     if (sortBy === "last_flight") {
       const aDate = aValue ? new Date(aValue).getTime() : 0;
 
@@ -72,39 +90,45 @@ export default function PilotTable({ pilots, loading }: Props) {
       return sortDirection === "asc" ? aDate - bDate : bDate - aDate;
     }
 
-    if (typeof aValue === "number" && typeof bValue === "number") {
-      return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
+    // =====================================
+    // STATUS
+    // =====================================
+
+    if (sortBy === "status") {
+      const hoursA = Number(a.total_hours || 0);
+
+      const hoursB = Number(b.total_hours || 0);
+
+      return sortDirection === "asc" ? hoursA - hoursB : hoursB - hoursA;
     }
 
+    // =====================================
+    // NUMBER
+    // =====================================
+
+    if (
+      sortBy === "total_missions" ||
+      sortBy === "total_flights" ||
+      sortBy === "total_duration" ||
+      sortBy === "avg_duration"
+    ) {
+      return sortDirection === "asc"
+        ? Number(aValue) - Number(bValue)
+        : Number(bValue) - Number(aValue);
+    }
+
+    // =====================================
+    // STRING
+    // =====================================
+
     return sortDirection === "asc"
-      ? String(aValue).localeCompare(String(bValue))
-      : String(bValue).localeCompare(String(aValue));
+      ? String(aValue || "").localeCompare(String(bValue || ""))
+      : String(bValue || "").localeCompare(String(aValue || ""));
   });
 
   // =====================================================
   // STATUS
   // =====================================================
-
-  function getStatus(duration: number) {
-    if (duration >= 600) {
-      return {
-        label: "High Load",
-        className: "bg-red-100 text-red-700",
-      };
-    }
-
-    if (duration >= 300) {
-      return {
-        label: "Medium",
-        className: "bg-yellow-100 text-yellow-700",
-      };
-    }
-
-    return {
-      label: "Safe",
-      className: "bg-green-100 text-green-700",
-    };
-  }
 
   // =====================================================
   // SORT ICON
@@ -120,6 +144,44 @@ export default function PilotTable({ pilots, loading }: Props) {
     ) : (
       <ArrowDown className="h-4 w-4 text-blue-600" />
     );
+  }
+
+  function getPerformance(monthHours: number) {
+    const target = 21;
+
+    if (monthHours >= target) {
+      return {
+        label: "Target Achieved",
+        subtitle: `${monthHours.toFixed(1)} hr logged`,
+        className: "bg-green-100 text-green-700",
+        dot: "bg-green-500",
+      };
+    }
+
+    return {
+      label: "Under Target",
+      subtitle: `Need ${(target - monthHours).toFixed(1)} hr more`,
+      className: "bg-yellow-100 text-yellow-700",
+      dot: "bg-yellow-500",
+    };
+  }
+
+  function getStatus(totalHours: number) {
+    if (totalHours > 21) {
+      return {
+        label: "High Load",
+        subtitle: `${totalHours.toFixed(1)} hr logged`,
+        className: "bg-red-100 text-red-700",
+        dot: "bg-red-500",
+      };
+    }
+
+    return {
+      label: "Normal",
+      subtitle: `${totalHours.toFixed(1)} hr logged`,
+      className: "bg-green-100 text-green-700",
+      dot: "bg-green-500",
+    };
   }
 
   // =====================================================
@@ -163,16 +225,32 @@ export default function PilotTable({ pilots, loading }: Props) {
                 className="w-[320px]"
               />
 
-              {/* <PilotSortHeader
-                label="AMA COVERAGE"
-                field="total_amas"
+              <PilotSortHeader
+                label="PERFORMANCE"
+                field="performance"
                 sortBy={sortBy}
                 sortDirection={sortDirection}
                 onSort={handleSort}
-              /> */}
+              />
 
               <PilotSortHeader
-                label="FLIGHT HOURS"
+                label="MISSIONS"
+                field="total_missions"
+                sortBy={sortBy}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+
+              <PilotSortHeader
+                label="FLIGHTS"
+                field="total_flights"
+                sortBy={sortBy}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+
+              <PilotSortHeader
+                label="HOURS"
                 field="total_duration"
                 sortBy={sortBy}
                 sortDirection={sortDirection}
@@ -180,8 +258,8 @@ export default function PilotTable({ pilots, loading }: Props) {
               />
 
               <PilotSortHeader
-                label="THIS MONTH"
-                field="duration_this_month"
+                label="AVG"
+                field="avg_duration"
                 sortBy={sortBy}
                 sortDirection={sortDirection}
                 onSort={handleSort}
@@ -222,9 +300,13 @@ export default function PilotTable({ pilots, loading }: Props) {
               </tr>
             ) : (
               sortedPilots.map((pilot: any) => {
-                const duration = Number(pilot.total_duration || 0);
+                const totalHours = Number(pilot.total_duration || 0) / 60;
 
-                const status = getStatus(duration);
+                const monthHours = Number(pilot.total_hours_this_month || 0);
+
+                const performance = getPerformance(monthHours);
+
+                const status = getStatus(totalHours);
 
                 return (
                   <tr
@@ -266,6 +348,36 @@ export default function PilotTable({ pilots, loading }: Props) {
                       </div>
                     </td>
 
+                    <td className="px-6 py-5 text-center">
+                      <div className="flex flex-col items-center">
+                        <div
+                          className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold ${performance.className}`}
+                        >
+                          <div
+                            className={`h-2 w-2 rounded-full ${performance.dot}`}
+                          />
+
+                          {performance.label}
+                        </div>
+
+                        <span className="mt-2 text-xs text-slate-500">
+                          {performance.subtitle}
+                        </span>
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-5 text-center">
+                      <span className="inline-flex rounded-full bg-purple-100 px-4 py-2 text-xs font-bold text-purple-700">
+                        {pilot.total_missions} missions
+                      </span>
+                    </td>
+
+                    <td className="px-6 py-5 text-center">
+                      <span className="inline-flex rounded-full bg-cyan-100 px-4 py-2 text-xs font-bold text-cyan-700">
+                        {pilot.total_flights} flights
+                      </span>
+                    </td>
+
                     {/* AMA COVERAGE */}
                     {/* <td className="px-6 py-5">
                       <div>
@@ -305,51 +417,42 @@ export default function PilotTable({ pilots, loading }: Props) {
                       </div>
                     </td>
 
-                    {/* THIS MONTH */}
                     <td className="px-6 py-5 text-center">
-                      <div className="inline-flex flex-col rounded-2xl bg-sky-50 px-4 py-3">
-                        <span className="font-bold text-sky-700">
-                          {pilot.total_hours_this_month} hr
-                        </span>
-
-                        <span className="text-xs text-sky-500">
-                          Current Month
-                        </span>
-                      </div>
+                      <span className="font-semibold text-slate-800">
+                        {Number(pilot.avg_duration).toFixed(1)} min
+                      </span>
                     </td>
 
                     {/* LAST ACTIVITY */}
                     <td className="px-6 py-5 text-center">
                       {pilot.last_flight ? (
-                        <div>
-                          <p className="font-medium text-slate-800">
+                        <div className="flex flex-col items-center">
+                          <span className="font-semibold text-slate-800">
                             {new Date(pilot.last_flight).toLocaleDateString(
                               "id-ID"
                             )}
-                          </p>
+                          </span>
 
-                          <p className="text-xs text-slate-500">Last Flight</p>
+                          <span className="mt-1 text-xs text-slate-500">
+                            Last Flight
+                          </span>
                         </div>
                       ) : (
-                        <span className="text-slate-400">No Activity</span>
+                        <span className="text-sm text-slate-400">
+                          No Activity
+                        </span>
                       )}
                     </td>
 
-                    {/* STATUS */}
-                    <td className="px-6 py-5">
-                      <div className="flex justify-center align-middle">
+                    <td className="px-6 py-5 text-center">
+                      <div className="flex flex-col items-center">
                         <div
                           className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold ${status.className}`}
                         >
                           <div
-                            className={`h-2 w-2 rounded-full ${
-                              status.label === "Safe"
-                                ? "bg-green-500"
-                                : status.label === "High Load"
-                                  ? "bg-red-500"
-                                  : "bg-yellow-500"
-                            }`}
+                            className={`h-2 w-2 rounded-full ${status.dot}`}
                           />
+
                           {status.label}
                         </div>
                       </div>
