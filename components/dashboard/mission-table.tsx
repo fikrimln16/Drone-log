@@ -169,7 +169,7 @@ export default function MissionTable() {
               {/* ACTION */}
               {/* ================================================= */}
 
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="mt-2 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 {/* SEARCH */}
                 <div className="relative w-full md:w-[420px]">
                   <input
