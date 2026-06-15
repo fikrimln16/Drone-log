@@ -147,7 +147,7 @@ export default function AddAmaModal({ open, onClose, onSuccess }: Props) {
               >
                 <option value="WAITING">WAITING</option>
 
-                <option value="SUCCESS">NEXT</option>
+                <option value="NEXT">NEXT</option>
 
                 <option value="ONGOING">ONGOING</option>
 
