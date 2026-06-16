@@ -27,13 +27,11 @@ export default function StatsCard({
   const isPositive = !trend?.includes("-");
 
   return (
-    <div className="rounded-[24px] border border-[#dbe7ff] bg-white px-5 py-4 shadow-sm">
+    <div className="rounded-[28px] border bg-white p-5 shadow-sm">
       {/* HEADER */}
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[10px] font-bold tracking-[0.35em] text-[#1f4fff] uppercase">
-            {title}
-          </p>
+          <p className="text-sm font-semibold text-gray-500">{title}</p>
 
           <h1 className="mt-3 text-[34px] leading-none font-bold tracking-tight text-black xl:text-[42px]">
             {value}
@@ -41,11 +39,7 @@ export default function StatsCard({
         </div>
 
         {icon && (
-          <div
-            className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
-              iconBg || "bg-gray-100"
-            }`}
-          >
+          <div className={`rounded-2xl p-4 ${iconBg || "bg-gray-100"}`}>
             {icon}
           </div>
         )}

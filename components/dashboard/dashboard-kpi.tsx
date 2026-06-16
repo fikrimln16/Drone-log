@@ -12,7 +12,7 @@ export default function DashboardKPI({ stats }: Props) {
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <StatsCard
-        title="TOTAL MISSIONS"
+        title="Total Missions"
         value={stats.total_missions || 0}
         trend={`${stats.mission_growth || 0}%`}
         subtitle="vs last month"
@@ -21,7 +21,7 @@ export default function DashboardKPI({ stats }: Props) {
       />
 
       <StatsCard
-        title="TOTAL FLIGHTS"
+        title="Total Flights"
         value={stats.total_flights || 0}
         trend={`${stats.flight_growth || 0}%`}
         subtitle="vs last month"
@@ -30,7 +30,7 @@ export default function DashboardKPI({ stats }: Props) {
       />
 
       <StatsCard
-        title="TOTAL DURATION"
+        title="Total Duration"
         value={`${stats.total_duration || 0} min`}
         trend={`${stats.duration_growth || 0}%`}
         subtitle="vs last month"
@@ -39,7 +39,7 @@ export default function DashboardKPI({ stats }: Props) {
       />
 
       <StatsCard
-        title="AVG DURATION"
+        title="Avg Duration"
         value={`${stats.avg_duration || 0} min`}
         trend={`${stats.avg_growth || 0}%`}
         subtitle="vs last month"

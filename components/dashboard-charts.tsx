@@ -189,7 +189,7 @@ export default function DashboardCharts() {
 
 function ChartCard({ title, subtitle, children }: any) {
   return (
-    <div className="rounded-[24px] border bg-white p-4 shadow-sm">
+    <div className="rounded-[28px] border bg-white p-5 shadow-sm">
       {/* HEADER */}
       <div className="mb-4">
         <h2 className="text-lg font-bold">{title}</h2>

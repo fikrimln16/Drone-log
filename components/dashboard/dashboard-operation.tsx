@@ -22,7 +22,7 @@ export default function DashboardOperation({ stats, onOpenActive }: Props) {
   return (
     <div className="grid auto-rows-fr grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
       {/* ACTIVE */}
-      <div className="flex h-full min-h-[220px] flex-col rounded-[28px] border bg-white p-6 shadow-sm">
+      <div className="flex flex-col rounded-[28px] border bg-white p-5 shadow-sm md:min-h-[220px]">
         {/* CONTENT */}
         <div>
           <div className="flex items-start justify-between">
@@ -71,37 +71,42 @@ export default function DashboardOperation({ stats, onOpenActive }: Props) {
             <AlertTriangle className="h-6 w-6 text-red-600" />
           </div>
         </div>
-        <div className="mt-5 flex flex-col gap-3 xl:grid xl:grid-cols-3">
-          {" "}
+        <div className="mt-auto grid grid-cols-1 gap-3 pt-6 md:grid-cols-2 xl:grid-cols-3">
           {stats.low_battery_flights?.map((flight: any) => (
             <div
               key={flight.flight_id}
-              className="min-w-0 rounded-2xl border bg-gray-50 p-3"
+              className="overflow-hidden rounded-2xl border bg-gray-50 p-3"
             >
-              <div className="flex items-start justify-between gap-2">
-                <div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                {/* LEFT */}
+                <div className="min-w-0 flex-1">
                   <p
-                    className="text-xs font-semibold break-all"
+                    className="truncate text-xs font-semibold"
                     title={flight.flight_id}
                   >
                     {flight.flight_id}
                   </p>
 
-                  <p className="mt-1 truncate text-[11px] text-gray-500">
+                  <p
+                    className="mt-1 truncate text-[11px] text-gray-500"
+                    title={flight.battery_id}
+                  >
                     {flight.battery_id}
                   </p>
                 </div>
 
-                <div className="rounded-full bg-red-100 px-2 py-1 text-[10px] font-semibold text-red-700">
+                {/* RIGHT */}
+                <div className="self-start rounded-full bg-red-100 px-2 py-1 text-[10px] font-semibold whitespace-nowrap text-red-700">
                   {flight.end_percent}%
                 </div>
               </div>
 
-              <div className="mt-3 h-1.5 rounded-full bg-gray-200">
+              {/* PROGRESS */}
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-gray-200">
                 <div
-                  className="h-1.5 rounded-full bg-red-500"
+                  className="h-full rounded-full bg-red-500"
                   style={{
-                    width: `${flight.end_percent}%`,
+                    width: `${Math.min(flight.end_percent, 100)}%`,
                   }}
                 />
               </div>
@@ -128,7 +133,7 @@ export default function DashboardOperation({ stats, onOpenActive }: Props) {
           </div>
         </div>
 
-        <div className="mt-6 rounded-2xl border bg-gray-50 p-4">
+        <div className="mt-auto rounded-2xl border bg-gray-50 p-4 pt-6">
           <p className="text-xs text-gray-500">Upload Status</p>
 
           <div className="mt-2 flex items-center gap-2">
