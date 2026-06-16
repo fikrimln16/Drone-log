@@ -387,7 +387,7 @@ export default function PilotSummaryTable() {
               {/* MISSIONS */}
               <th
                 onClick={() => handleSort("total_missions")}
-                className="w-[160px] cursor-pointer px-6 py-5 text-center"
+                className="w-[180px] cursor-pointer px-6 py-5 text-center"
               >
                 <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-700">
                   MISSIONS
@@ -398,7 +398,7 @@ export default function PilotSummaryTable() {
               {/* FLIGHTS */}
               <th
                 onClick={() => handleSort("total_flights")}
-                className="w-[160px] cursor-pointer px-6 py-5 text-center"
+                className="w-[180px] cursor-pointer px-6 py-5 text-center"
               >
                 <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-700">
                   FLIGHTS
