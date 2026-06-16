@@ -610,12 +610,12 @@ export default function PilotSummaryTable() {
 
                   {/* ACTION */}
                   <td className="px-6 py-5 text-center">
-                    <button
-                      onClick={() => handleOpenPilot(pilot.pilot)}
-                      className="rounded-2xl border border-slate-200 bg-white px-5 py-2 text-sm font-semibold transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
+                    <Link
+                      href={`/pilots/${pilot.id}`}
+                      className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-2 text-sm font-semibold transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
                     >
                       View Analytics
-                    </button>
+                    </Link>
                   </td>
                 </tr>
               );

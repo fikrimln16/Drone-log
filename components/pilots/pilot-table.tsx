@@ -12,7 +12,7 @@ import Image from "next/image";
 type Props = {
   pilots: any[];
 
-  loading: boolean;
+  loading?: boolean;
 };
 
 type SortKey =

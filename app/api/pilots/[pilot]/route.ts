@@ -35,17 +35,46 @@ export async function GET(req: Request, { params }: Params) {
           DISTINCT f.mission_name
         ) AS total_missions,
 
+        COUNT(
+          DISTINCT f.ama_id
+        ) AS total_amas,
+
         COALESCE(
           SUM(f.duration_min),
           0
         ) AS total_duration,
 
         ROUND(
+          COALESCE(
+            SUM(f.duration_min),
+            0
+          ) / 60,
+          1
+        ) AS total_hours,
+
+        ROUND(
+          COALESCE(
+            SUM(
+              CASE
+                WHEN MONTH(f.flight_date) = MONTH(CURDATE())
+                 AND YEAR(f.flight_date) = YEAR(CURDATE())
+                THEN f.duration_min
+                ELSE 0
+              END
+            ),
+            0
+          ) / 60,
+          1
+        ) AS total_hours_this_month,
+
+        ROUND(
           AVG(f.duration_min),
           1
         ) AS avg_duration,
 
-        MAX(f.flight_date) AS last_flight
+        MAX(
+          f.flight_date
+        ) AS last_flight
 
       FROM pilots p
 
@@ -74,11 +103,21 @@ export async function GET(req: Request, { params }: Params) {
       SELECT
         f.mission_name,
 
-        COUNT(*) AS total,
+        COUNT(*) AS total_flights,
 
-        SUM(
-          f.duration_min
-        ) AS duration
+        ROUND(
+          SUM(f.duration_min) / 60,
+          1
+        ) AS total_hours,
+
+        ROUND(
+          AVG(f.duration_min),
+          1
+        ) AS avg_duration,
+
+        MAX(
+          f.flight_date
+        ) AS last_activity
 
       FROM flight_pilots fp
 
@@ -90,7 +129,8 @@ export async function GET(req: Request, { params }: Params) {
       GROUP BY
         f.mission_name
 
-      ORDER BY duration DESC
+      ORDER BY
+        total_hours DESC
       `,
       [pilotId]
     );
@@ -102,7 +142,21 @@ export async function GET(req: Request, { params }: Params) {
     const [recentRows]: any = await pool.query(
       `
       SELECT
-        f.*,
+        f.id,
+
+        f.flight_id,
+
+        f.flight_date,
+
+        f.mission_name,
+
+        f.duration_min,
+
+        f.uav_unit,
+
+        f.battery_id,
+
+        f.end_percent,
 
         a.ama_name AS ama,
 
@@ -136,6 +190,13 @@ export async function GET(req: Request, { params }: Params) {
 
       GROUP BY
         f.id,
+        f.flight_id,
+        f.flight_date,
+        f.mission_name,
+        f.duration_min,
+        f.uav_unit,
+        f.battery_id,
+        f.end_percent,
         a.ama_name,
         a.latitude,
         a.longitude,
@@ -144,6 +205,80 @@ export async function GET(req: Request, { params }: Params) {
       ORDER BY
         f.flight_date DESC,
         f.id DESC
+
+      LIMIT 10
+      `,
+      [pilotId]
+    );
+
+    // =====================================================
+    // FLIGHT TREND
+    // =====================================================
+
+    const [trendRows]: any = await pool.query(
+      `
+      SELECT
+        DATE(
+          f.flight_date
+        ) AS flight_date,
+
+        ROUND(
+          SUM(f.duration_min) / 60,
+          1
+        ) AS total_hours
+
+      FROM flight_pilots fp
+
+      INNER JOIN drone_flight_history f
+        ON f.id = fp.flight_id
+
+      WHERE fp.pilot_id = ?
+
+      GROUP BY
+        DATE(
+          f.flight_date
+        )
+
+      ORDER BY
+        flight_date ASC
+      `,
+      [pilotId]
+    );
+
+    // =====================================================
+    // TOP AMA
+    // =====================================================
+
+    const [amaRows]: any = await pool.query(
+      `
+      SELECT
+        a.id,
+
+        a.ama_name,
+
+        COUNT(*) AS total_flights,
+
+        ROUND(
+          SUM(f.duration_min) / 60,
+          1
+        ) AS total_hours
+
+      FROM flight_pilots fp
+
+      INNER JOIN drone_flight_history f
+        ON f.id = fp.flight_id
+
+      INNER JOIN amas a
+        ON a.id = f.ama_id
+
+      WHERE fp.pilot_id = ?
+
+      GROUP BY
+        a.id,
+        a.ama_name
+
+      ORDER BY
+        total_flights DESC
 
       LIMIT 5
       `,
@@ -170,12 +305,18 @@ export async function GET(req: Request, { params }: Params) {
       missions: missionRows || [],
 
       recent_flights: formattedRecentFlights || [],
+
+      flight_trend: trendRows || [],
+
+      top_amas: amaRows || [],
     });
   } catch (error) {
     console.error(error);
 
     return NextResponse.json(
       {
+        success: false,
+
         message: "Failed fetch pilot analytics",
       },
       {
