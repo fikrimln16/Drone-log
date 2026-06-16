@@ -188,10 +188,8 @@ export default function PilotSummaryTable() {
           break;
 
         case "total_hours":
-          valueA = Number(a.total_hours);
-
-          valueB = Number(b.total_hours);
-
+          valueA = Number(a.total_hours_this_month);
+          valueB = Number(b.total_hours_this_month);
           break;
 
         // case "total_hours_this_month":
@@ -440,7 +438,7 @@ export default function PilotSummaryTable() {
               </th>
 
               {/* STATUS */}
-              <th
+              {/* <th
                 onClick={() => handleSort("status")}
                 className="w-[180px] cursor-pointer px-6 py-5 text-center"
               >
@@ -448,7 +446,7 @@ export default function PilotSummaryTable() {
                   STATUS
                   {renderSortIcon("status")}
                 </div>
-              </th>
+              </th> */}
 
               {/* ACTION */}
               <th className="w-[160px] px-6 py-5 text-center">
@@ -542,7 +540,7 @@ export default function PilotSummaryTable() {
                   <td className="px-6 py-5">
                     <div className="flex flex-col items-center">
                       <h1 className="font-bold text-slate-900">
-                        {totalHours.toFixed(1)} hr
+                        {pilot.total_hours_this_month} hr
                       </h1>
 
                       <div className="mt-2 h-2 w-[120px] overflow-hidden rounded-full bg-slate-100">
@@ -551,7 +549,7 @@ export default function PilotSummaryTable() {
                             totalHours > 21 ? "bg-red-500" : "bg-cyan-500"
                           }`}
                           style={{
-                            width: `${Math.min((totalHours / 21) * 100, 100)}%`,
+                            width: `${Math.min((pilot.total_hours_this_month / 21) * 100, 100)}%`,
                           }}
                         />
                       </div>
@@ -588,7 +586,7 @@ export default function PilotSummaryTable() {
                   </td>
 
                   {/* STATUS */}
-                  <td className="px-6 py-5 text-center">
+                  {/* <td className="px-6 py-5 text-center">
                     <div className="flex flex-col items-center">
                       <div
                         className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold ${status.bg} ${status.text}`}
@@ -602,7 +600,7 @@ export default function PilotSummaryTable() {
                         {status.subtitle}
                       </span>
                     </div>
-                  </td>
+                  </td> */}
 
                   {/* ACTION */}
                   <td className="px-6 py-5 text-center">
