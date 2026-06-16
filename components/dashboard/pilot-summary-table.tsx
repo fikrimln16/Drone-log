@@ -44,26 +44,29 @@ type Pilot = {
 
   total_hours_this_month: string;
 
+  last_flight: string | null;
+
   status: string;
 
   ama_coverage: string;
 
   ama_list: string[];
+
+  photo_url?: string | null;
 };
 
 type SortField =
   | "pilot"
+  | "performance"
   | "total_missions"
   | "total_flights"
   | "total_hours"
-  | "total_hours_this_month"
   | "avg_duration"
+  | "last_flight"
   | "status";
 
 export default function PilotSummaryTable() {
   const [data, setData] = useState<Pilot[]>([]);
-
-  const [selectedPilot, setSelectedPilot] = useState<string | null>(null);
 
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
 
@@ -118,8 +121,6 @@ export default function PilotSummaryTable() {
 
       setAnalyticsData(result);
       // console.log(result);
-
-      setSelectedPilot(pilot);
     } catch (error) {
       console.error(error);
     } finally {
@@ -167,6 +168,11 @@ export default function PilotSummaryTable() {
 
           break;
 
+        case "performance":
+          valueA = Number(a.total_hours_this_month || 0);
+          valueB = Number(b.total_hours_this_month || 0);
+          break;
+
         case "total_missions":
           valueA = a.total_missions;
 
@@ -188,15 +194,22 @@ export default function PilotSummaryTable() {
 
           break;
 
-        case "total_hours_this_month":
-          valueA = Number(a.total_hours_this_month);
-          valueB = Number(b.total_hours_this_month);
-          break;
+        // case "total_hours_this_month":
+        //   valueA = Number(a.total_hours_this_month);
+        //   valueB = Number(b.total_hours_this_month);
+        //   break;
 
         case "avg_duration":
           valueA = a.avg_duration;
 
           valueB = b.avg_duration;
+
+          break;
+
+        case "last_flight":
+          valueA = a.last_flight ? new Date(a.last_flight).getTime() : 0;
+
+          valueB = b.last_flight ? new Date(b.last_flight).getTime() : 0;
 
           break;
 
@@ -260,35 +273,46 @@ export default function PilotSummaryTable() {
   // STATUS STYLE
   // =====================================================
 
-  function getStatusStyle(status: string) {
-    switch (status) {
-      case "NEED REST":
-        return {
-          bg: "bg-red-100",
+  function getPerformance(monthHours: number) {
+    const target = 21;
 
-          text: "text-red-700",
-
-          icon: <ShieldAlert className="h-4 w-4" />,
-        };
-
-      case "UNDER TARGET":
-        return {
-          bg: "bg-yellow-100",
-
-          text: "text-yellow-700",
-
-          icon: <TriangleAlert className="h-4 w-4" />,
-        };
-
-      default:
-        return {
-          bg: "bg-green-100",
-
-          text: "text-green-700",
-
-          icon: <ShieldCheck className="h-4 w-4" />,
-        };
+    if (monthHours >= target) {
+      return {
+        label: "Target Achieved",
+        subtitle: `${monthHours.toFixed(1)} hr this month`,
+        bg: "bg-green-100",
+        text: "text-green-700",
+        dot: "bg-green-500",
+      };
     }
+
+    return {
+      label: "Under Target",
+      subtitle: `${(target - monthHours).toFixed(1)} hr remaining`,
+      bg: "bg-yellow-100",
+      text: "text-yellow-700",
+      dot: "bg-yellow-500",
+    };
+  }
+
+  function getStatus(totalHours: number) {
+    if (totalHours > 21) {
+      return {
+        label: "High Load",
+        subtitle: `${totalHours.toFixed(1)} hr logged`,
+        bg: "bg-red-100",
+        text: "text-red-700",
+        dot: "bg-red-500",
+      };
+    }
+
+    return {
+      label: "Normal",
+      subtitle: `${totalHours.toFixed(1)} hr logged`,
+      bg: "bg-green-100",
+      text: "text-green-700",
+      dot: "bg-green-500",
+    };
   }
 
   return (
@@ -340,43 +364,47 @@ export default function PilotSummaryTable() {
 
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1600px] table-fixed">
-          <thead>
-            <tr className="border-b bg-gray-50/80 text-left">
+          <thead className="border-b bg-slate-50">
+            <tr>
               {/* PILOT */}
               <th
                 onClick={() => handleSort("pilot")}
-                className="w-[220px] cursor-pointer px-6 py-5"
+                className="w-[320px] cursor-pointer px-6 py-5"
               >
-                <div className="flex items-center gap-2 text-sm font-bold whitespace-nowrap">
+                <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
                   PILOT
                   {renderSortIcon("pilot")}
                 </div>
               </th>
 
-              {/* MISSION */}
+              {/* PERFORMANCE */}
               <th
-                onClick={() => handleSort("total_missions")}
-                className="w-[140px] cursor-pointer px-6 py-5"
+                onClick={() => handleSort("performance")}
+                className="w-[220px] cursor-pointer px-6 py-5 text-center"
               >
-                <div className="flex items-center gap-2 text-sm font-bold whitespace-nowrap">
-                  MISSION
-                  {renderSortIcon("total_missions")}
+                <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-700">
+                  PERFORMANCE
+                  {renderSortIcon("performance")}
                 </div>
               </th>
 
-              {/* AMA */}
-              <th className="w-[260px] px-6 py-5">
-                <div className="text-sm font-bold whitespace-nowrap">
-                  AMA COVERAGE
+              {/* MISSIONS */}
+              <th
+                onClick={() => handleSort("total_missions")}
+                className="w-[160px] cursor-pointer px-6 py-5 text-center"
+              >
+                <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-700">
+                  MISSIONS
+                  {renderSortIcon("total_missions")}
                 </div>
               </th>
 
               {/* FLIGHTS */}
               <th
                 onClick={() => handleSort("total_flights")}
-                className="w-[140px] cursor-pointer px-6 py-5"
+                className="w-[160px] cursor-pointer px-6 py-5 text-center"
               >
-                <div className="flex items-center gap-2 text-sm font-bold whitespace-nowrap">
+                <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-700">
                   FLIGHTS
                   {renderSortIcon("total_flights")}
                 </div>
@@ -385,239 +413,208 @@ export default function PilotSummaryTable() {
               {/* HOURS */}
               <th
                 onClick={() => handleSort("total_hours")}
-                className="w-[180px] cursor-pointer px-6 py-5"
+                className="w-[180px] cursor-pointer px-6 py-5 text-center"
               >
-                <div className="flex items-center gap-2 text-sm font-bold whitespace-nowrap">
+                <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-700">
                   HOURS
                   {renderSortIcon("total_hours")}
-                </div>
-              </th>
-
-              {/* THIS MONTH */}
-              <th
-                onClick={() => handleSort("total_hours_this_month")}
-                className="w-[180px] cursor-pointer px-6 py-5"
-              >
-                <div className="flex items-center gap-2 text-sm font-bold whitespace-nowrap">
-                  THIS MONTH
-                  {renderSortIcon("total_hours_this_month")}
                 </div>
               </th>
 
               {/* AVG */}
               <th
                 onClick={() => handleSort("avg_duration")}
-                className="w-[160px] cursor-pointer px-6 py-5"
+                className="w-[160px] cursor-pointer px-6 py-5 text-center"
               >
-                <div className="flex items-center gap-2 text-sm font-bold whitespace-nowrap">
+                <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-700">
                   AVG DURATION
                   {renderSortIcon("avg_duration")}
+                </div>
+              </th>
+
+              {/* LAST ACTIVITY */}
+              <th
+                onClick={() => handleSort("last_flight")}
+                className="w-[180px] cursor-pointer px-6 py-5 text-center"
+              >
+                <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-700">
+                  LAST ACTIVITY
+                  {renderSortIcon("last_flight")}
                 </div>
               </th>
 
               {/* STATUS */}
               <th
                 onClick={() => handleSort("status")}
-                className="w-[180px] cursor-pointer px-6 py-5"
+                className="w-[180px] cursor-pointer px-6 py-5 text-center"
               >
-                <div className="flex items-center gap-2 text-sm font-bold whitespace-nowrap">
+                <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-700">
                   STATUS
                   {renderSortIcon("status")}
                 </div>
               </th>
 
               {/* ACTION */}
-              <th className="w-[140px] px-6 py-5">
-                <div className="text-sm font-bold whitespace-nowrap">
-                  ACTION
-                </div>
+              <th className="w-[160px] px-6 py-5 text-center">
+                <div className="text-sm font-bold text-slate-700">ACTION</div>
               </th>
             </tr>
           </thead>
 
           <tbody>
-            {paginatedData.map((item, index) => {
-              const style = getStatusStyle(item.status);
+            {paginatedData.map((pilot: any) => {
+              const monthHours = Number(pilot.total_hours_this_month || 0);
+
+              const totalHours = Number(pilot.total_hours || 0);
+
+              const performance = getPerformance(monthHours);
+
+              const status = getStatus(totalHours);
 
               return (
                 <tr
-                  key={index}
-                  className="border-b transition hover:bg-gray-50"
-                  style={{
-                    height: 88,
-                  }}
+                  key={pilot.id}
+                  className="border-b transition hover:bg-slate-50"
                 >
                   {/* PILOT */}
                   <td className="px-6 py-5">
                     <div className="flex min-w-[260px] items-center gap-4">
-                      {/* PHOTO */}
                       <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-2xl border-2 border-cyan-100 bg-white shadow-sm">
-                        {item.photo_url &&
-                        item.photo_url !== "null" &&
-                        item.photo_url.trim() !== "" ? (
+                        {pilot.photo_url ? (
                           <Image
-                            src={item.photo_url}
-                            alt={item.pilot}
+                            src={pilot.photo_url}
+                            alt={pilot.pilot}
                             width={56}
                             height={56}
-                            className="h-14 w-14 object-cover"
+                            className="h-full w-full object-cover"
                           />
                         ) : (
-                          <div className="flex h-14 w-14 items-center justify-center bg-cyan-100 text-lg font-black text-cyan-700">
-                            {item.pilot.charAt(0)?.toUpperCase()}
+                          <div className="flex h-full w-full items-center justify-center bg-cyan-100 text-lg font-black text-cyan-700">
+                            {pilot.pilot?.charAt(0)}
                           </div>
                         )}
                       </div>
 
-                      {/* INFO */}
-                      <div className="min-w-0">
-                        <h1
-                          className="line-clamp-2 text-base font-bold text-slate-900"
-                          title={item.pilot}
-                        >
-                          {item.pilot}
+                      <div>
+                        <h1 className="font-bold text-slate-900">
+                          {pilot.pilot}
                         </h1>
 
                         <p className="mt-1 text-xs text-slate-500">
                           Drone Pilot
                         </p>
-
-                        <div className="mt-2 flex flex-wrap items-center gap-2">
-                          <span className="rounded-full bg-cyan-50 px-2 py-1 text-[11px] font-semibold text-cyan-700">
-                            {item.total_flights} Flights
-                          </span>
-
-                          <span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-600">
-                            {item.total_hours} hr
-                          </span>
-                        </div>
                       </div>
                     </div>
                   </td>
 
-                  {/* MISSION */}
-                  <td className="px-6 py-5 whitespace-nowrap">
-                    <div className="w-fit rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700">
-                      {item.total_missions} Missions
+                  {/* PERFORMANCE */}
+                  <td className="px-6 py-5 text-center">
+                    <div className="flex flex-col items-center">
+                      <div
+                        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold ${performance.bg} ${performance.text}`}
+                      >
+                        <div
+                          className={`h-2 w-2 rounded-full ${performance.dot}`}
+                        />
+
+                        {performance.label}
+                      </div>
+
+                      <span className="mt-2 text-xs text-slate-500">
+                        {performance.subtitle}
+                      </span>
                     </div>
                   </td>
 
-                  {/* AMA */}
-                  <td className="px-6 py-5 whitespace-nowrap">
-                    <div>
-                      <div className="w-fit rounded-full bg-purple-50 px-3 py-1 text-sm font-semibold text-purple-700">
-                        {item.ama_coverage}
-                      </div>
-
-                      {item.ama_list?.length ? (
-                        <p
-                          className="mt-2 max-w-[220px] truncate text-xs text-gray-500"
-                          title={item.ama_list.join(", ")}
-                        >
-                          {item.ama_list.join(", ")}
-                        </p>
-                      ) : (
-                        <span className="mt-2 inline-flex rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-500">
-                          No AMA Coverage
-                        </span>
-                      )}
+                  {/* MISSIONS */}
+                  <td className="px-6 py-5 text-center">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
+                      <div className="h-2 w-2 rounded-full bg-blue-500" />
+                      {pilot.total_missions} Missions
                     </div>
                   </td>
 
                   {/* FLIGHTS */}
-                  <td className="px-6 py-5 whitespace-nowrap">
-                    <div className="w-fit rounded-full bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700">
-                      {item.total_flights} Flights
+                  <td className="px-6 py-5 text-center">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700">
+                      <div className="h-2 w-2 rounded-full bg-indigo-500" />
+                      {pilot.total_flights} Flights
                     </div>
                   </td>
 
                   {/* HOURS */}
-                  <td className="px-6 py-5 whitespace-nowrap">
-                    <div>
-                      <h1 className="font-bold">{item.total_hours} hr</h1>
+                  <td className="px-6 py-5">
+                    <div className="flex flex-col items-center">
+                      <h1 className="font-bold text-slate-900">
+                        {totalHours.toFixed(1)} hr
+                      </h1>
 
-                      <div className="mt-2 h-2 w-[120px] overflow-hidden rounded-full bg-gray-100">
+                      <div className="mt-2 h-2 w-[120px] overflow-hidden rounded-full bg-slate-100">
                         <div
                           className={`h-full rounded-full ${
-                            Number(item.total_hours) > 160
-                              ? "bg-red-500"
-                              : Number(item.total_hours) < 120
-                                ? "bg-yellow-500"
-                                : "bg-green-500"
+                            totalHours > 21 ? "bg-red-500" : "bg-cyan-500"
                           }`}
                           style={{
-                            width: `${Math.min(
-                              (Number(item.total_hours) / 160) * 100,
-                              100
-                            )}%`,
+                            width: `${Math.min((totalHours / 21) * 100, 100)}%`,
                           }}
                         />
                       </div>
                     </div>
                   </td>
 
-                  {/* THIS MONTH */}
-                  <td className="px-6 py-5 whitespace-nowrap">
-                    {Number(item.total_hours_this_month) > 0 ? (
+                  {/* AVG */}
+                  <td className="px-6 py-5 text-center">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-orange-50 px-4 py-2 text-sm font-semibold text-orange-700">
+                      <div className="h-2 w-2 rounded-full bg-orange-500" />
+                      {Number(pilot.avg_duration).toFixed(1)} min
+                    </div>
+                  </td>
+
+                  {/* LAST ACTIVITY */}
+                  <td className="px-6 py-5 text-center">
+                    {pilot.last_flight ? (
                       <div>
-                        <h1 className="font-bold text-sky-700">
-                          {item.total_hours_this_month} hr
+                        <h1 className="font-semibold text-slate-800">
+                          {new Date(pilot.last_flight).toLocaleDateString(
+                            "id-ID"
+                          )}
                         </h1>
 
-                        <p className="mt-1 text-xs text-gray-500">
-                          Current month
+                        <p className="mt-1 text-xs text-slate-500">
+                          Last Flight
                         </p>
-
-                        <div className="mt-2 h-2 w-[120px] overflow-hidden rounded-full bg-gray-100">
-                          <div
-                            className="h-full rounded-full bg-sky-500"
-                            style={{
-                              width: `${Math.min(
-                                (Number(item.total_hours_this_month) / 40) *
-                                  100,
-                                100
-                              )}%`,
-                            }}
-                          />
-                        </div>
                       </div>
                     ) : (
-                      <div className="flex flex-col gap-2">
-                        <div className="inline-flex w-fit items-center gap-2 rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-600">
-                          ✈️ No Flight
-                        </div>
-
-                        <p className="text-xs text-gray-400">
-                          No activity this month
-                        </p>
-                      </div>
+                      <span className="text-sm text-slate-400">
+                        No Activity
+                      </span>
                     )}
                   </td>
 
-                  {/* AVG */}
-                  <td className="px-6 py-5 font-semibold">
-                    {Number(item.avg_duration).toFixed(1)} min
-                  </td>
-
                   {/* STATUS */}
-                  <td className="px-6 py-5 whitespace-nowrap">
-                    <div
-                      className={`flex w-[130px] items-center justify-center gap-2 rounded-full px-3 py-2 text-xs font-bold ${style.bg} ${style.text}`}
-                    >
-                      {style.icon}
+                  <td className="px-6 py-5 text-center">
+                    <div className="flex flex-col items-center">
+                      <div
+                        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold ${status.bg} ${status.text}`}
+                      >
+                        <div className={`h-2 w-2 rounded-full ${status.dot}`} />
 
-                      {item.status}
+                        {status.label}
+                      </div>
+
+                      <span className="mt-2 text-xs text-slate-500">
+                        {status.subtitle}
+                      </span>
                     </div>
                   </td>
 
                   {/* ACTION */}
-                  <td className="px-6 py-5 whitespace-nowrap">
+                  <td className="px-6 py-5 text-center">
                     <button
-                      onClick={() => handleOpenPilot(item.id)}
-                      className="flex w-fit items-center gap-2 rounded-2xl border border-gray-200 px-4 py-2 text-sm font-semibold transition hover:bg-gray-100"
+                      onClick={() => handleOpenPilot(pilot.pilot)}
+                      className="rounded-2xl border border-slate-200 bg-white px-5 py-2 text-sm font-semibold transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
                     >
-                      <Eye className="h-4 w-4" />
-                      Detail
+                      View Analytics
                     </button>
                   </td>
                 </tr>
@@ -706,8 +703,6 @@ export default function PilotSummaryTable() {
           setAnalyticsOpen(false);
 
           setAnalyticsData(null);
-
-          setSelectedPilot(null);
         }}
       />
     </div>
