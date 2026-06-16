@@ -27,7 +27,7 @@ export function generateCSV(filteredFlights: any[]) {
         item.flight_date,
         item.ama,
         item.estate,
-        `"${(item.pilots || []).join(", ")}"`,
+        `"${(item.pilots || []).join("_ ")}"`,
         item.flight_id,
         item.mission_name,
         item.battery_id,
