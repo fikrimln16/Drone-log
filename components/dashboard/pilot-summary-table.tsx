@@ -316,7 +316,7 @@ export default function PilotSummaryTable() {
   }
 
   return (
-    <div className="rounded-[32px] border border-gray-200 bg-white shadow-sm">
+    <div className="rounded-[28px] border border-gray-200 bg-white shadow-sm">
       {/* ===================================================== */}
       {/* HEADER */}
       {/* ===================================================== */}
@@ -325,11 +325,7 @@ export default function PilotSummaryTable() {
         <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
           {/* LEFT */}
           <div>
-            <p className="text-sm font-semibold tracking-[0.25em] text-blue-600 uppercase">
-              Pilot Analytics
-            </p>
-
-            <h1 className="mt-2 text-3xl font-bold">
+            <h1 className="text-2xl font-bold md:text-3xl">
               Pilot Performance Summary
             </h1>
 
