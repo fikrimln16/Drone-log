@@ -152,6 +152,16 @@ export default function EditAmaStatusModal({
     }
   }
 
+  function formatDate(date: string) {
+    const d = new Date(date);
+
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  }
+
   return (
     <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
       {/* MODAL */}
@@ -241,7 +251,11 @@ export default function EditAmaStatusModal({
 
                           <input
                             type="date"
-                            defaultValue={item.planning_date?.split("T")[0]}
+                            defaultValue={
+                              item.planning_date
+                                ? formatDate(item.planning_date)
+                                : ""
+                            }
                             onChange={(e) =>
                               handleChange(
                                 item.id,

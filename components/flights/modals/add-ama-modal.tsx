@@ -44,6 +44,7 @@ export default function AddAmaModal({ open, onClose, onSuccess }: Props) {
   async function handleSave() {
     try {
       setLoading(true);
+      console.log(form);
 
       const response = await fetch("/api/amas", {
         method: "POST",
