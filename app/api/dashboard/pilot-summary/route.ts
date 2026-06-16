@@ -20,72 +20,95 @@ export async function GET() {
     // ============================================
 
     const [rows]: any = await pool.query(`
-        SELECT
-      p.id,
+      SELECT
+        p.id,
 
-      p.pilot_name AS pilot,
+        p.pilot_name AS pilot,
 
-      p.photo_url,
+        p.photo_url,
 
-      COUNT(DISTINCT f.id)
-        AS total_flights,
-
-      COUNT(DISTINCT f.mission_name)
-        AS total_missions,
-
-      COUNT(DISTINCT f.ama_id)
-        AS total_amas,
-
-      GROUP_CONCAT(
-        DISTINCT a.ama_name
-        ORDER BY a.ama_name
-        SEPARATOR ','
-      ) AS ama_list,
-
-      COALESCE(
-        SUM(f.duration_min),
-        0
-      ) AS total_duration,
-
-      COALESCE(
-        SUM(
-          CASE
+        -- TOTAL FLIGHTS BULAN INI
+        COUNT(
+          DISTINCT CASE
             WHEN YEAR(f.flight_date) = YEAR(CURDATE())
             AND MONTH(f.flight_date) = MONTH(CURDATE())
-            THEN f.duration_min
-            ELSE 0
+            THEN f.id
           END
-        ),
-        0
-      ) AS duration_this_month,
+        ) AS total_flights_this_month,
 
-      ROUND(
-        AVG(f.duration_min),
-        1
-      ) AS avg_duration,
+        -- TOTAL MISSIONS BULAN INI
+        COUNT(
+          DISTINCT CASE
+            WHEN YEAR(f.flight_date) = YEAR(CURDATE())
+            AND MONTH(f.flight_date) = MONTH(CURDATE())
+            THEN f.mission_name
+          END
+        ) AS total_missions_this_month,
 
-      MAX(f.flight_date)
-        AS last_flight
+        -- TOTAL AMA
+        COUNT(DISTINCT f.ama_id)
+          AS total_amas,
 
-  FROM pilots p
+        GROUP_CONCAT(
+          DISTINCT a.ama_name
+          ORDER BY a.ama_name
+          SEPARATOR ','
+        ) AS ama_list,
 
-  LEFT JOIN flight_pilots fp
-  ON fp.pilot_id = p.id
+        -- TOTAL DURASI SEMUA HISTORI
+        COALESCE(
+          SUM(f.duration_min),
+          0
+        ) AS total_duration,
 
-  LEFT JOIN drone_flight_history f
-  ON f.id = fp.flight_id
+        -- TOTAL DURASI BULAN INI
+        COALESCE(
+          SUM(
+            CASE
+              WHEN YEAR(f.flight_date) = YEAR(CURDATE())
+              AND MONTH(f.flight_date) = MONTH(CURDATE())
+              THEN f.duration_min
+              ELSE 0
+            END
+          ),
+          0
+        ) AS duration_this_month,
 
-  LEFT JOIN amas a
-  ON a.id = f.ama_id
+        -- AVG DURATION BULAN INI
+        ROUND(
+          AVG(
+            CASE
+              WHEN YEAR(f.flight_date) = YEAR(CURDATE())
+              AND MONTH(f.flight_date) = MONTH(CURDATE())
+              THEN f.duration_min
+              ELSE NULL
+            END
+          ),
+          1
+        ) AS avg_duration_this_month,
 
-  GROUP BY
-    p.id,
-    p.pilot_name,
-    p.photo_url
+        MAX(f.flight_date)
+          AS last_flight
 
-  ORDER BY
-    total_duration DESC,
-    p.pilot_name ASC
+      FROM pilots p
+
+      LEFT JOIN flight_pilots fp
+        ON fp.pilot_id = p.id
+
+      LEFT JOIN drone_flight_history f
+        ON f.id = fp.flight_id
+
+      LEFT JOIN amas a
+        ON a.id = f.ama_id
+
+      GROUP BY
+        p.id,
+        p.pilot_name,
+        p.photo_url
+
+      ORDER BY
+        duration_this_month DESC,
+        p.pilot_name ASC
     `);
 
     // ============================================
@@ -93,16 +116,19 @@ export async function GET() {
     // ============================================
 
     const formatted = rows.map((item: any) => {
-      const totalHours = Number(item.total_duration || 0) / 60;
+      const totalDuration = Number(item.total_duration || 0);
+
       const durationThisMonth = Number(item.duration_this_month || 0);
+
+      const totalHours = totalDuration / 60;
 
       const hoursThisMonth = durationThisMonth / 60;
 
       let status = "OPTIMAL";
 
-      if (durationThisMonth > 160) {
+      if (hoursThisMonth > 160) {
         status = "NEED REST";
-      } else if (durationThisMonth < 120) {
+      } else if (hoursThisMonth < 120) {
         status = "UNDER TARGET";
       }
 
@@ -113,17 +139,17 @@ export async function GET() {
 
         photo_url: item.photo_url,
 
-        total_flights: Number(item.total_flights || 0),
+        total_flights_this_month: Number(item.total_flights_this_month || 0),
 
-        total_missions: Number(item.total_missions || 0),
+        total_missions_this_month: Number(item.total_missions_this_month || 0),
 
         total_amas: Number(item.total_amas || 0),
 
-        total_duration: Number(item.total_duration || 0),
+        total_duration: totalDuration,
 
         duration_this_month: durationThisMonth,
 
-        avg_duration: Number(item.avg_duration || 0),
+        avg_duration_this_month: Number(item.avg_duration_this_month || 0),
 
         total_hours: totalHours.toFixed(1),
 

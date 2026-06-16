@@ -28,9 +28,9 @@ type Pilot = {
 
   pilot: string;
 
-  total_flights: number;
+  total_flights_this_month: number;
 
-  total_missions: number;
+  total_missions_this_month: number;
 
   total_amas: number;
 
@@ -38,7 +38,7 @@ type Pilot = {
 
   total_duration_this_month: number;
 
-  avg_duration: number;
+  avg_duration_this_month: number;
 
   total_hours: string;
 
@@ -58,10 +58,10 @@ type Pilot = {
 type SortField =
   | "pilot"
   | "performance"
-  | "total_missions"
-  | "total_flights"
+  | "total_missions_this_month"
+  | "total_flights_this_month"
   | "total_hours"
-  | "avg_duration"
+  | "avg_duration_this_month"
   | "last_flight"
   | "status";
 
@@ -173,17 +173,17 @@ export default function PilotSummaryTable() {
           valueB = Number(b.total_hours_this_month || 0);
           break;
 
-        case "total_missions":
-          valueA = a.total_missions;
+        case "total_missions_this_month":
+          valueA = a.total_missions_this_month;
 
-          valueB = b.total_missions;
+          valueB = b.total_missions_this_month;
 
           break;
 
-        case "total_flights":
-          valueA = a.total_flights;
+        case "total_flights_this_month":
+          valueA = a.total_flights_this_month;
 
-          valueB = b.total_flights;
+          valueB = b.total_flights_this_month;
 
           break;
 
@@ -197,10 +197,10 @@ export default function PilotSummaryTable() {
         //   valueB = Number(b.total_hours_this_month);
         //   break;
 
-        case "avg_duration":
-          valueA = a.avg_duration;
+        case "avg_duration_this_month":
+          valueA = a.avg_duration_this_month;
 
-          valueB = b.avg_duration;
+          valueB = b.avg_duration_this_month;
 
           break;
 
@@ -323,30 +323,48 @@ export default function PilotSummaryTable() {
         <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
           {/* LEFT */}
           <div>
+            <div className="mb-3 inline-flex items-center rounded-full bg-cyan-50 px-4 py-2 text-xs font-semibold text-cyan-700">
+              CURRENT PERIOD •{" "}
+              {new Date().toLocaleDateString("en-US", {
+                month: "long",
+                year: "numeric",
+              })}
+            </div>
+
             <h1 className="text-2xl font-bold md:text-3xl">
               Pilot Performance Summary
             </h1>
 
-            <p className="mt-2 text-sm text-gray-500">
-              Flight activity, fatigue monitoring, and operational coverage
+            <p className="mt-2 max-w-3xl text-sm text-gray-500">
+              Monthly operational performance overview including completed
+              missions, total flights, flight hours, average flight duration,
+              and pilot activity for{" "}
+              {new Date().toLocaleDateString("en-US", {
+                month: "long",
+                year: "numeric",
+              })}
+              .
             </p>
           </div>
 
-          {/* SEARCH */}
+          {/* RIGHT */}
           <Link
             href="/pilots"
-            className="flex min-w-[200px] items-center gap-3 rounded-[20px] border border-gray-200 bg-white px-4 py-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            className="flex min-w-[280px] items-center gap-3 rounded-[20px] border border-gray-200 bg-white px-4 py-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
           >
-            {/* ICON */}
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-100">
               <ChartColumn className="h-5 w-5 text-cyan-600" />
             </div>
 
-            {/* TEXT */}
             <div>
-              <h1 className="text-base leading-none font-bold">All Pilots</h1>
+              <h1 className="text-base leading-none font-bold">
+                Pilot Analytics
+              </h1>
 
-              <p className="mt-1 text-xs text-gray-500">View analytics</p>
+              <p className="mt-1 text-xs text-gray-500">
+                Explore all-time flights, missions, flight hours, and pilot
+                statistics
+              </p>
             </div>
           </Link>
         </div>
@@ -384,23 +402,23 @@ export default function PilotSummaryTable() {
 
               {/* MISSIONS */}
               <th
-                onClick={() => handleSort("total_missions")}
+                onClick={() => handleSort("total_missions_this_month")}
                 className="w-[180px] cursor-pointer px-6 py-5 text-center"
               >
                 <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-700">
                   MISSIONS
-                  {renderSortIcon("total_missions")}
+                  {renderSortIcon("total_missions_this_month")}
                 </div>
               </th>
 
               {/* FLIGHTS */}
               <th
-                onClick={() => handleSort("total_flights")}
+                onClick={() => handleSort("total_flights_this_month")}
                 className="w-[180px] cursor-pointer px-6 py-5 text-center"
               >
                 <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-700">
                   FLIGHTS
-                  {renderSortIcon("total_flights")}
+                  {renderSortIcon("total_flights_this_month")}
                 </div>
               </th>
 
@@ -417,12 +435,12 @@ export default function PilotSummaryTable() {
 
               {/* AVG */}
               <th
-                onClick={() => handleSort("avg_duration")}
+                onClick={() => handleSort("avg_duration_this_month")}
                 className="w-[160px] cursor-pointer px-6 py-5 text-center"
               >
                 <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-700">
                   AVG DURATION
-                  {renderSortIcon("avg_duration")}
+                  {renderSortIcon("avg_duration_this_month")}
                 </div>
               </th>
 
@@ -513,27 +531,37 @@ export default function PilotSummaryTable() {
 
                         {performance.label}
                       </div>
-
-                      <span className="mt-2 text-xs text-slate-500">
-                        {performance.subtitle}
-                      </span>
                     </div>
                   </td>
 
                   {/* MISSIONS */}
                   <td className="px-6 py-5 text-center">
-                    <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
-                      <div className="h-2 w-2 rounded-full bg-blue-500" />
-                      {pilot.total_missions} Missions
-                    </div>
+                    {Number(pilot.total_missions_this_month) > 0 ? (
+                      <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
+                        <div className="h-2 w-2 rounded-full bg-blue-500" />
+                        {pilot.total_missions_this_month} Missions
+                      </div>
+                    ) : (
+                      <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-500">
+                        <div className="h-2 w-2 rounded-full bg-slate-400" />
+                        No Missions
+                      </div>
+                    )}
                   </td>
 
                   {/* FLIGHTS */}
                   <td className="px-6 py-5 text-center">
-                    <div className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700">
-                      <div className="h-2 w-2 rounded-full bg-indigo-500" />
-                      {pilot.total_flights} Flights
-                    </div>
+                    {Number(pilot.total_flights_this_month) > 0 ? (
+                      <div className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700">
+                        <div className="h-2 w-2 rounded-full bg-indigo-500" />
+                        {pilot.total_flights_this_month} Flights
+                      </div>
+                    ) : (
+                      <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-500">
+                        <div className="h-2 w-2 rounded-full bg-slate-400" />
+                        No Flights
+                      </div>
+                    )}
                   </td>
 
                   {/* HOURS */}
@@ -543,25 +571,43 @@ export default function PilotSummaryTable() {
                         {pilot.total_hours_this_month} hr
                       </h1>
 
-                      <div className="mt-2 h-2 w-[120px] overflow-hidden rounded-full bg-slate-100">
-                        <div
-                          className={`h-full rounded-full ${
-                            totalHours > 21 ? "bg-red-500" : "bg-cyan-500"
-                          }`}
-                          style={{
-                            width: `${Math.min((pilot.total_hours_this_month / 21) * 100, 100)}%`,
-                          }}
-                        />
+                      <div className="mt-2 w-[120px]">
+                        <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                          <div
+                            className={`h-full rounded-full ${
+                              totalHours > 21 ? "bg-red-500" : "bg-cyan-500"
+                            }`}
+                            style={{
+                              width: `${Math.min(
+                                (pilot.total_hours_this_month / 21) * 100,
+                                100
+                              )}%`,
+                            }}
+                          />
+                        </div>
+
+                        {/* SCALE */}
+                        <div className="mt-1 flex justify-between text-[10px] font-medium text-slate-400">
+                          <span>0 hr</span>
+                          <span>21 hr</span>
+                        </div>
                       </div>
                     </div>
                   </td>
 
                   {/* AVG */}
                   <td className="px-6 py-5 text-center">
-                    <div className="inline-flex items-center gap-2 rounded-full bg-orange-50 px-4 py-2 text-sm font-semibold text-orange-700">
-                      <div className="h-2 w-2 rounded-full bg-orange-500" />
-                      {Number(pilot.avg_duration).toFixed(1)} min
-                    </div>
+                    {Number(pilot.avg_duration_this_month || 0) > 0 ? (
+                      <div className="inline-flex items-center gap-2 rounded-full bg-orange-50 px-4 py-2 text-sm font-semibold text-orange-700">
+                        <div className="h-2 w-2 rounded-full bg-orange-500" />
+                        {Number(pilot.avg_duration_this_month).toFixed(1)} min
+                      </div>
+                    ) : (
+                      <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-500">
+                        <div className="h-2 w-2 rounded-full bg-slate-400" />
+                        No Data
+                      </div>
+                    )}
                   </td>
 
                   {/* LAST ACTIVITY */}

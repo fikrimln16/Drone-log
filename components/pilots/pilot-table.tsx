@@ -406,16 +406,23 @@ export default function PilotTable({ pilots, loading }: Props) {
                           {pilot.total_hours} hr
                         </h1>
 
-                        <div className="mt-2 h-2 w-[120px] overflow-hidden rounded-full bg-slate-100">
-                          <div
-                            className="h-full rounded-full bg-cyan-500"
-                            style={{
-                              width: `${Math.min(
-                                Number(pilot.total_hours),
-                                100
-                              )}%`,
-                            }}
-                          />
+                        <div className="mt-2 w-[120px]">
+                          <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                            <div
+                              className="h-full rounded-full bg-cyan-500 transition-all"
+                              style={{
+                                width: `${Math.min(
+                                  (Number(pilot.total_hours) / 210) * 100,
+                                  100
+                                )}%`,
+                              }}
+                            />
+                          </div>
+
+                          <div className="mt-1 flex justify-between text-[10px] text-slate-400">
+                            <span>{Number(pilot.total_hours)}</span>
+                            <span>210 hr</span>
+                          </div>
                         </div>
                       </div>
                     </td>
