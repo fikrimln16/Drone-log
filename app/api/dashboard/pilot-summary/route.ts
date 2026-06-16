@@ -20,72 +20,85 @@ export async function GET() {
     // ============================================
 
     const [rows]: any = await pool.query(`
-        SELECT
-      p.id,
+      SELECT
+        p.id,
 
-      p.pilot_name AS pilot,
+        p.pilot_name AS pilot,
 
-      p.photo_url,
+        p.photo_url,
 
-      COUNT(DISTINCT f.id)
-        AS total_flights,
+        COUNT(DISTINCT f.id)
+          AS total_flights,
 
-      COUNT(DISTINCT f.mission_name)
-        AS total_missions,
+        COUNT(DISTINCT f.mission_name)
+          AS total_missions,
 
-      COUNT(DISTINCT f.ama_id)
-        AS total_amas,
+        COUNT(DISTINCT f.ama_id)
+          AS total_amas,
 
-      GROUP_CONCAT(
-        DISTINCT a.ama_name
-        ORDER BY a.ama_name
-        SEPARATOR ','
-      ) AS ama_list,
+        GROUP_CONCAT(
+          DISTINCT a.ama_name
+          ORDER BY a.ama_name
+          SEPARATOR ','
+        ) AS ama_list,
 
-      COALESCE(
-        SUM(f.duration_min),
-        0
-      ) AS total_duration,
+        COALESCE(
+          SUM(
+            CASE
+              WHEN DATE_FORMAT(f.flight_date, '%Y-%m')
+                   = DATE_FORMAT(
+                       DATE_SUB(CURDATE(), INTERVAL 1 MONTH),
+                       '%Y-%m'
+                     )
+              THEN f.duration_min
+              ELSE 0
+            END
+          ),
+          0
+        ) AS total_duration,
 
-      COALESCE(
-        SUM(
-          CASE
-            WHEN YEAR(f.flight_date) = YEAR(CURDATE())
-            AND MONTH(f.flight_date) = MONTH(CURDATE())
-            THEN f.duration_min
-            ELSE 0
-          END
-        ),
-        0
-      ) AS duration_this_month,
+        COALESCE(
+          SUM(
+            CASE
+              WHEN DATE_FORMAT(f.flight_date, '%Y-%m')
+                   = DATE_FORMAT(
+                       DATE_SUB(CURDATE(), INTERVAL 1 MONTH),
+                       '%Y-%m'
+                     )
+              THEN f.duration_min
+              ELSE 0
+            END
+          ),
+          0
+        ) AS duration_this_month,
 
-      ROUND(
-        AVG(f.duration_min),
-        1
-      ) AS avg_duration,
+        ROUND(
+          AVG(f.duration_min),
+          1
+        ) AS avg_duration,
 
-      MAX(f.flight_date)
-        AS last_flight
+        MAX(f.flight_date)
+          AS last_flight
 
-  FROM pilots p
+      FROM pilots p
 
-  LEFT JOIN flight_pilots fp
-  ON fp.pilot_id = p.id
+      LEFT JOIN flight_pilots fp
+        ON fp.pilot_id = p.id
 
-  LEFT JOIN drone_flight_history f
-  ON f.id = fp.flight_id
+      LEFT JOIN drone_flight_history f
+        ON f.id = fp.flight_id
 
-  LEFT JOIN amas a
-  ON a.id = f.ama_id
+      LEFT JOIN amas a
+        ON a.id = f.ama_id
 
-  GROUP BY
-    p.id,
-    p.pilot_name,
-    p.photo_url
+      GROUP BY
+        p.id,
+        p.pilot_name,
+        p.photo_url
 
-  ORDER BY
-    total_duration DESC,
-    p.pilot_name ASC
+      ORDER BY
+        total_duration DESC,
+        p.pilot_name ASC
     `);
 
     // ============================================
@@ -93,8 +106,11 @@ export async function GET() {
     // ============================================
 
     const formatted = rows.map((item: any) => {
-      const totalHours = Number(item.total_duration || 0) / 60;
+      const totalDuration = Number(item.total_duration || 0);
+
       const durationThisMonth = Number(item.duration_this_month || 0);
+
+      const totalHours = totalDuration / 60;
 
       const hoursThisMonth = durationThisMonth / 60;
 
@@ -119,8 +135,10 @@ export async function GET() {
 
         total_amas: Number(item.total_amas || 0),
 
-        total_duration: Number(item.total_duration || 0),
+        // bulan sebelumnya
+        total_duration: totalDuration,
 
+        // bulan sebelumnya
         duration_this_month: durationThisMonth,
 
         avg_duration: Number(item.avg_duration || 0),
