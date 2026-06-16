@@ -43,6 +43,8 @@ export default function BatterySelect({
 
         <option value="Gray">Gray</option>
 
+        <option value="Yellow">Yellow</option>
+
         <option value="No Color">No Color</option>
       </select>
 

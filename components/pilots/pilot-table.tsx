@@ -4,11 +4,14 @@ import { useMemo, useState } from "react";
 
 import PilotAnalyticsModal from "./pilot-analytics-modal";
 
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowUp, Eye } from "lucide-react";
 
 import PilotSortHeader from "./pilot-sort-header";
 
 import Image from "next/image";
+
+import Link from "next/link";
+
 type Props = {
   pilots: any[];
 
@@ -460,12 +463,13 @@ export default function PilotTable({ pilots, loading }: Props) {
 
                     {/* ACTION */}
                     <td className="px-6 py-5 text-center">
-                      <button
-                        onClick={() => handleViewAnalytics(pilot.id)}
-                        className="rounded-2xl border border-slate-200 bg-white px-5 py-2 text-sm font-semibold transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
+                      <Link
+                        href={`/pilots/${pilot.id}`}
+                        className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-2 text-sm font-semibold transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
                       >
+                        <Eye className="h-4 w-4" />
                         View Analytics
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 );
