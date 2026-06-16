@@ -123,24 +123,6 @@ function formatDateOnly(date: string | null) {
 }
 
 // =====================================================
-// MAP PICKER
-// =====================================================
-
-function MapClickHandler({
-  onPick,
-}: {
-  onPick: (lat: number, lng: number) => void;
-}) {
-  useMapEvents({
-    click(e) {
-      onPick(e.latlng.lat, e.latlng.lng);
-    },
-  });
-
-  return null;
-}
-
-// =====================================================
 // COMPONENT
 // =====================================================
 
@@ -170,10 +152,6 @@ export default function AmaMonitorMap() {
 
     longitude: "",
   });
-
-  // =====================================================
-  // FETCH MAP DATA
-  // =====================================================
 
   // =====================================================
   // FETCH MAP DATA
@@ -248,7 +226,7 @@ export default function AmaMonitorMap() {
 
   if (loading) {
     return (
-      <div className="rounded-[32px] border bg-white p-10 shadow-sm">
+      <div className="rounded-[28px] border bg-white p-10 shadow-sm">
         Loading map...
       </div>
     );
@@ -265,7 +243,7 @@ export default function AmaMonitorMap() {
         {/* LEFT PANEL */}
         {/* ================================================= */}
         <div className="xl:col-span-1">
-          <div className="flex h-full flex-col rounded-[32px] border bg-white p-6 shadow-sm">
+          <div className="flex h-full flex-col rounded-[28px] border bg-white p-4 shadow-sm">
             {/* HEADER */}
             <div className="flex items-start justify-between">
               <div>
@@ -276,7 +254,7 @@ export default function AmaMonitorMap() {
                 </p>
               </div>
 
-              <div className="rounded-2xl bg-purple-100 p-4">
+              <div className="rounded-[28px] bg-purple-100 p-4">
                 <RadioTower className="h-6 w-6 text-purple-600" />
               </div>
             </div>
@@ -284,7 +262,7 @@ export default function AmaMonitorMap() {
             {/* CONTENT */}
             <div className="mt-6 flex flex-1 flex-col gap-3">
               {/* TOTAL */}
-              <div className="rounded-2xl border bg-slate-50 p-5">
+              <div className="rounded-[20px] border bg-slate-50 p-5">
                 <p className="text-sm text-slate-500">Total AMA Point</p>
 
                 <div className="mt-3 flex items-center justify-between">
@@ -302,7 +280,7 @@ export default function AmaMonitorMap() {
                   setSelectedStatus("SUCCESS");
                   setOpenStatusModal(true);
                 }}
-                className="group flex items-center justify-between rounded-2xl border border-green-200 bg-green-50 px-5 py-4 text-left transition hover:-translate-y-1 hover:shadow-lg"
+                className="group flex items-center justify-between rounded-[20px] border border-green-200 bg-green-50 px-5 py-4 text-left transition hover:-translate-y-1 hover:shadow-lg"
               >
                 <div>
                   <p className="font-semibold text-green-700">Success</p>
@@ -323,7 +301,7 @@ export default function AmaMonitorMap() {
                   setSelectedStatus("ONGOING");
                   setOpenStatusModal(true);
                 }}
-                className="group flex items-center justify-between rounded-2xl border border-sky-200 bg-sky-50 px-5 py-4 text-left transition hover:-translate-y-1 hover:shadow-lg"
+                className="group flex items-center justify-between rounded-[20px] border border-sky-200 bg-sky-50 px-5 py-4 text-left transition hover:-translate-y-1 hover:shadow-lg"
               >
                 <div>
                   <p className="font-semibold text-sky-700">On Progress</p>
@@ -342,7 +320,7 @@ export default function AmaMonitorMap() {
                   setSelectedStatus("NEXT");
                   setOpenStatusModal(true);
                 }}
-                className="group flex items-center justify-between rounded-2xl border border-orange-200 bg-orange-50 px-5 py-4 text-left transition hover:-translate-y-1 hover:shadow-lg"
+                className="group flex items-center justify-between rounded-[20px] border border-orange-200 bg-orange-50 px-5 py-4 text-left transition hover:-translate-y-1 hover:shadow-lg"
               >
                 <div>
                   <p className="font-semibold text-orange-700">Next</p>
@@ -363,7 +341,7 @@ export default function AmaMonitorMap() {
                   setSelectedStatus("WAITING");
                   setOpenStatusModal(true);
                 }}
-                className="group flex items-center justify-between rounded-2xl border border-yellow-200 bg-yellow-50 px-5 py-4 text-left transition hover:-translate-y-1 hover:shadow-lg"
+                className="group flex items-center justify-between rounded-[20px] border border-yellow-200 bg-yellow-50 px-5 py-4 text-left transition hover:-translate-y-1 hover:shadow-lg"
               >
                 <div>
                   <p className="font-semibold text-yellow-700">Waiting</p>
@@ -383,7 +361,7 @@ export default function AmaMonitorMap() {
                 {/* ADD AMA */}
                 <button
                   onClick={() => setOpenAddAma(true)}
-                  className="group flex flex-col items-center justify-center gap-2 rounded-2xl border bg-white p-4 text-center transition hover:border-blue-300 hover:bg-blue-50 hover:shadow-md md:flex-row md:justify-start md:text-left"
+                  className="group flex flex-col items-center justify-center gap-2 rounded-[20px] border bg-white p-4 text-center transition hover:border-blue-300 hover:bg-blue-50 hover:shadow-md md:flex-row md:justify-start md:text-left"
                 >
                   <div className="rounded-xl bg-blue-100 p-2 md:p-3">
                     {" "}
@@ -400,7 +378,7 @@ export default function AmaMonitorMap() {
                 {/* EDIT STATUS */}
                 <button
                   onClick={() => setOpenEditStatus(true)}
-                  className="group flex flex-col items-center justify-center gap-2 rounded-2xl border bg-white p-4 text-center transition hover:border-purple-300 hover:bg-purple-50 hover:shadow-md md:flex-row md:justify-start md:text-left"
+                  className="group flex flex-col items-center justify-center gap-2 rounded-[20px] border bg-white p-4 text-center transition hover:border-purple-300 hover:bg-purple-50 hover:shadow-md md:flex-row md:justify-start md:text-left"
                 >
                   <div className="rounded-xl bg-purple-100 p-2 md:p-3">
                     {" "}
@@ -426,7 +404,7 @@ export default function AmaMonitorMap() {
         {/* MAP */}
         {/* ================================================= */}
 
-        <div className="overflow-hidden rounded-[32px] border bg-white shadow-sm xl:col-span-3">
+        <div className="overflow-hidden rounded-[28px] border bg-white shadow-sm xl:col-span-3">
           <div className="h-[420px] md:h-[550px] xl:h-[calc(100vh-220px)]">
             <MapContainer
               center={[-2.5, 118]}
@@ -612,7 +590,7 @@ export default function AmaMonitorMap() {
 
       {openStatusModal && (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-[700px] rounded-[32px] bg-white shadow-2xl">
+          <div className="w-full max-w-[700px] rounded-[28px] bg-white shadow-2xl">
             {/* HEADER */}
             <div className="flex items-center justify-between border-b px-8 py-6">
               <div>
@@ -637,7 +615,7 @@ export default function AmaMonitorMap() {
                 {filteredStatusData.map((item) => (
                   <div
                     key={item.id}
-                    className="rounded-2xl border bg-gray-50 p-5"
+                    className="rounded-[28px] border bg-gray-50 p-5"
                   >
                     <div className="flex items-start justify-between">
                       <div>

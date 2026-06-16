@@ -108,7 +108,7 @@ export default function MissionTable() {
 
           <section className="min-h-screen snap-start px-5 pt-[110px] pb-8 md:px-6 xl:px-7">
             <div className="flex min-h-[calc(100vh-130px)] flex-col">
-              <div className="overflow-hidden rounded-[32px] border border-gray-200 bg-white shadow-sm">
+              <div className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
                 {/* HEADER */}
                 <div className="flex flex-col gap-4 px-5 py-5 md:flex-row md:items-center md:justify-between md:px-7 md:py-6">
                   {/* TITLE */}
