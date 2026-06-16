@@ -1,9 +1,18 @@
-import MissionTable from "@/components/dashboard/mission-table";
+import HeroSection from "@/components/landing/HeroSection";
+import StatsSection from "@/components/landing/StatsSection";
+import FeatureSection from "@/components/landing/FeatureSection";
+import Footer from "@/components/landing/Footer";
 
-export default function HomePage() {
+export default function WelcomePage() {
   return (
-    <main className="bg-muted/30 min-h-screen">
-      <MissionTable />
-    </main>
+    <>
+      <HeroSection />
+
+      <StatsSection />
+
+      <FeatureSection />
+
+      <Footer />
+    </>
   );
 }

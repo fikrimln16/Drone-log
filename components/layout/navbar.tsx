@@ -24,7 +24,7 @@ type Props = {
 const menus = [
   {
     name: "Dashboard",
-    href: "/",
+    href: "/dashboard",
     icon: LayoutDashboard,
   },
 

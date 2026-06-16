@@ -34,7 +34,7 @@ export default function MissionHeader({
     <div className="mb-8">
       {/* BACK */}
       <Link
-        href="/"
+        href="/dashboard"
         className="mb-6 inline-flex items-center gap-2 rounded-2xl border bg-white px-5 py-3 text-sm font-semibold shadow-sm transition hover:border-blue-500 hover:bg-blue-50"
       >
         <ArrowLeft className="h-4 w-4" />

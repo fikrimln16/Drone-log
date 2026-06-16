@@ -83,7 +83,7 @@ export default function AmaPage() {
 
       <div className="space-y-6 px-4 pt-[110px] pb-10">
         <Link
-          href="/"
+          href="/dashboard"
           className="inline-flex items-center gap-2 rounded-2xl border bg-white px-5 py-3 text-sm font-semibold shadow-sm transition hover:bg-gray-100"
         >
           ← Back to Dashboard

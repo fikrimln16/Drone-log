@@ -62,7 +62,7 @@ export default function HeroSection() {
             {/* BUTTONS */}
             <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
               <Link
-                href="/"
+                href="/dashboard"
                 className="w-full rounded-2xl bg-cyan-600 px-8 py-4 text-center font-semibold text-white shadow-lg transition hover:bg-cyan-700 sm:w-auto"
               >
                 Open Dashboard

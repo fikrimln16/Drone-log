@@ -90,7 +90,7 @@ export default function AllFlightsPage() {
       <div className="space-y-5 px-4 pt-[120px] pb-8">
         {/* BACK */}
         <Link
-          href="/"
+          href="/dashboard"
           className="inline-flex items-center gap-2 rounded-2xl border bg-white px-5 py-3 text-sm font-semibold shadow-sm transition hover:bg-gray-100"
         >
           ← Back to Dashboard
