@@ -180,7 +180,7 @@ export default function MissionTable() {
                       setCurrentPage(1);
                     }}
                     placeholder="Search mission..."
-                    className="h-[54px] w-full rounded-2xl border border-gray-200 bg-white px-5 text-sm transition outline-none focus:border-blue-500 md:text-base"
+                    className="h-[54px] w-full rounded-[20px] border border-gray-200 bg-white px-5 text-sm transition outline-none focus:border-blue-500 md:text-base"
                   />
                 </div>
 
@@ -189,7 +189,7 @@ export default function MissionTable() {
                   {/* ALL FLIGHTS */}
                   <Link
                     href="/flights"
-                    className="flex h-[54px] items-center gap-3 rounded-2xl border border-gray-200 bg-white px-5 shadow-sm transition hover:bg-gray-100"
+                    className="flex h-[54px] items-center gap-3 rounded-[20px] border border-gray-200 bg-white px-5 shadow-sm transition hover:bg-gray-100"
                   >
                     <div className="rounded-xl bg-blue-100 p-2">
                       <List className="h-4 w-4 text-blue-600" />
@@ -207,7 +207,7 @@ export default function MissionTable() {
                   {/* ADD FLIGHT */}
                   <button
                     onClick={() => setOpenAddFlight(true)}
-                    className="flex h-[54px] items-center gap-3 rounded-2xl border border-gray-200 bg-white px-5 shadow-sm transition hover:bg-gray-100"
+                    className="flex h-[54px] items-center gap-3 rounded-[20px] border border-gray-200 bg-white px-5 shadow-sm transition hover:bg-gray-100"
                   >
                     <div className="rounded-xl bg-purple-100 p-2">
                       <Plus className="h-4 w-4 text-purple-600" />

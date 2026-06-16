@@ -91,7 +91,7 @@ export default function DashboardTable({ missions }: Props) {
   }
 
   return (
-    <div className="mt-4 overflow-hidden rounded-[32px] border bg-white shadow-sm">
+    <div className="mt-4 overflow-hidden rounded-[28px] border bg-white shadow-sm">
       {/* HEADER */}
       <div className="flex items-center justify-between border-b border-slate-100 bg-white px-6 py-5">
         <div className="flex items-center justify-between">
