@@ -18,16 +18,28 @@ export const EXPORT_HEADERS = [
   "notes",
 ];
 
+function formatDate(dateValue: string | Date) {
+  if (!dateValue) return "";
+
+  const date = new Date(dateValue);
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+
+  return `${day}/${month}/${year}`;
+}
+
 export function generateCSV(filteredFlights: any[]) {
   const csvRows = [
     EXPORT_HEADERS.join(","),
 
     ...filteredFlights.map((item) =>
       [
-        item.flight_date,
+        formatDate(item.flight_date),
         item.ama,
         item.estate,
-        `"${(item.pilots || []).join("_ ")}"`,
+        `"${(item.pilots || []).join("_")}"`,
         item.flight_id,
         item.mission_name,
         item.battery_id,
