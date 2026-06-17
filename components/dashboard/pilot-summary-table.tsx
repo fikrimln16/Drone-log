@@ -318,6 +318,14 @@ export default function PilotSummaryTable() {
     };
   }
 
+  const periodLabel = new Date(`${selectedMonth}-01`).toLocaleDateString(
+    "en-US",
+    {
+      month: "long",
+      year: "numeric",
+    }
+  );
+
   return (
     <div className="rounded-[28px] border border-gray-200 bg-white shadow-sm">
       {/* ===================================================== */}
@@ -329,11 +337,7 @@ export default function PilotSummaryTable() {
           {/* LEFT */}
           <div>
             <div className="mb-3 inline-flex items-center rounded-full bg-cyan-50 px-4 py-2 text-xs font-semibold text-cyan-700">
-              CURRENT PERIOD •{" "}
-              {new Date().toLocaleDateString("en-US", {
-                month: "long",
-                year: "numeric",
-              })}
+              SELECTED PERIOD • {periodLabel}
             </div>
 
             <h1 className="text-2xl font-bold md:text-3xl">
@@ -341,14 +345,9 @@ export default function PilotSummaryTable() {
             </h1>
 
             <p className="mt-2 max-w-3xl text-sm text-gray-500">
-              Monthly operational performance overview including completed
-              missions, total flights, flight hours, average flight duration,
-              and pilot activity for{" "}
-              {new Date().toLocaleDateString("en-US", {
-                month: "long",
-                year: "numeric",
-              })}
-              .
+              Operational performance overview including completed missions,
+              total flights, flight hours, average flight duration, and pilot
+              activity for {periodLabel}.
             </p>
           </div>
 
