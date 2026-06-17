@@ -98,9 +98,9 @@ export default function PilotTable({ pilots, loading }: Props) {
     // =====================================
 
     if (sortBy === "status") {
-      const hoursA = Number(a.total_hours || 0);
+      const hoursA = Number(a.total_hours_this_month || 0);
 
-      const hoursB = Number(b.total_hours || 0);
+      const hoursB = Number(b.total_hours_this_month || 0);
 
       return sortDirection === "asc" ? hoursA - hoursB : hoursB - hoursA;
     }
@@ -169,11 +169,11 @@ export default function PilotTable({ pilots, loading }: Props) {
     };
   }
 
-  function getStatus(totalHours: number) {
-    if (totalHours > 21) {
+  function getStatus(monthHours: number) {
+    if (monthHours >= 21) {
       return {
-        label: "High Load",
-        subtitle: `${totalHours.toFixed(1)} hr logged`,
+        label: "Need Rest",
+        subtitle: `${monthHours.toFixed(1)} hr this month`,
         className: "bg-red-100 text-red-700",
         dot: "bg-red-500",
       };
@@ -181,7 +181,7 @@ export default function PilotTable({ pilots, loading }: Props) {
 
     return {
       label: "Normal",
-      subtitle: `${totalHours.toFixed(1)} hr logged`,
+      subtitle: `${monthHours.toFixed(1)} hr this month`,
       className: "bg-green-100 text-green-700",
       dot: "bg-green-500",
     };
@@ -212,6 +212,25 @@ export default function PilotTable({ pilots, loading }: Props) {
   return (
     <div className="overflow-hidden rounded-[32px] border bg-white shadow-sm">
       <div className="overflow-x-auto">
+        <div className="flex flex-wrap items-center gap-3 border-b bg-slate-50 px-6 py-4">
+          <div className="inline-flex items-center gap-2 rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-700">
+            <div className="h-2 w-2 rounded-full bg-cyan-500" />
+            Lifetime Metrics
+          </div>
+
+          <span className="text-xs text-slate-500">
+            Missions, Flights, Hours, Avg Duration & Last Activity use all
+            flight history
+          </span>
+
+          <div className="ml-auto inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+            Monthly Metrics
+          </div>
+
+          <span className="text-xs text-slate-500">
+            Performance & Status are calculated from the selected month only
+          </span>
+        </div>
         <table className="w-full min-w-[1200px]">
           {/* ================================================= */}
           {/* HEAD */}
@@ -226,14 +245,6 @@ export default function PilotTable({ pilots, loading }: Props) {
                 sortDirection={sortDirection}
                 onSort={handleSort}
                 className="w-[320px]"
-              />
-
-              <PilotSortHeader
-                label="PERFORMANCE"
-                field="performance"
-                sortBy={sortBy}
-                sortDirection={sortDirection}
-                onSort={handleSort}
               />
 
               <PilotSortHeader
@@ -277,6 +288,14 @@ export default function PilotTable({ pilots, loading }: Props) {
               />
 
               <PilotSortHeader
+                label="PERFORMANCE"
+                field="performance"
+                sortBy={sortBy}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+
+              <PilotSortHeader
                 label="STATUS"
                 field="status"
                 sortBy={sortBy}
@@ -309,7 +328,7 @@ export default function PilotTable({ pilots, loading }: Props) {
 
                 const performance = getPerformance(monthHours);
 
-                const status = getStatus(totalHours);
+                const status = getStatus(monthHours);
 
                 return (
                   <tr
@@ -348,24 +367,6 @@ export default function PilotTable({ pilots, loading }: Props) {
                             {pilot.total_missions} Missions
                           </p>
                         </div>
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-5 text-center">
-                      <div className="flex flex-col items-center">
-                        <div
-                          className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold ${performance.className}`}
-                        >
-                          <div
-                            className={`h-2 w-2 rounded-full ${performance.dot}`}
-                          />
-
-                          {performance.label}
-                        </div>
-
-                        <span className="mt-2 text-xs text-slate-500">
-                          {performance.subtitle}
-                        </span>
                       </div>
                     </td>
 
@@ -433,6 +434,24 @@ export default function PilotTable({ pilots, loading }: Props) {
                           No Activity
                         </span>
                       )}
+                    </td>
+
+                    <td className="px-6 py-5 text-center">
+                      <div className="flex flex-col items-center">
+                        <div
+                          className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold ${performance.className}`}
+                        >
+                          <div
+                            className={`h-2 w-2 rounded-full ${performance.dot}`}
+                          />
+
+                          {performance.label}
+                        </div>
+
+                        <span className="mt-2 text-xs text-slate-500">
+                          {performance.subtitle}
+                        </span>
+                      </div>
                     </td>
 
                     <td className="px-6 py-5 text-center">

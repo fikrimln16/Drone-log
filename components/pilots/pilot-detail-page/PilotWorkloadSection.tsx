@@ -5,7 +5,7 @@ type Props = {
 };
 
 export default function PilotWorkloadSection({ summary }: Props) {
-  const hours = Number(summary.total_hours) || 0;
+  const hours = Number(summary.total_hours_this_month) || 0;
 
   const highLoad = hours > 21;
 
@@ -14,7 +14,7 @@ export default function PilotWorkloadSection({ summary }: Props) {
       <div className="flex items-center gap-3">
         <ShieldCheck className="h-5 w-5 text-green-600" />
 
-        <h1 className="text-2xl font-bold">Workload Status</h1>
+        <h1 className="text-2xl font-bold">Workload Status This Month</h1>
       </div>
 
       <div className="mt-8 flex items-center justify-between">
