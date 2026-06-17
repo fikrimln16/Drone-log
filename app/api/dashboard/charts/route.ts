@@ -11,7 +11,7 @@ export async function GET() {
         COUNT(*) as flights
       FROM drone_flight_history
       GROUP BY flight_date
-      ORDER BY flight_date ASC
+      ORDER BY flight_date DESC
       LIMIT 7
     `);
 
