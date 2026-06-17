@@ -4,7 +4,14 @@ import { useMemo, useState } from "react";
 
 import Link from "next/link";
 
-import { Plane, X, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Plane,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  ArrowRight,
+  Eye,
+} from "lucide-react";
 
 import FlightDetailModal from "../flights/flight-detail-modal";
 
@@ -32,6 +39,8 @@ type ActiveFlight = {
   duration_min: number;
 
   end_percent: number;
+
+  uav_unit: string;
 };
 
 type Props = {
@@ -130,13 +139,13 @@ export default function ActiveFlightsModal({ open, onClose, flights }: Props) {
           {/* TABLE */}
           {/* ===================================================== */}
 
-          <div className="flex-1 overflow-auto">
-            <table className="w-full min-w-[1650px] table-fixed">
+          <div className="flex-1 overflow-x-auto overflow-y-visible">
+            <table className="w-full min-w-[1700px]">
               {/* ===================================================== */}
               {/* HEAD */}
               {/* ===================================================== */}
 
-              <thead className="sticky top-0 z-10 border-b bg-gray-50">
+              <thead className="sticky top-0 z-20 border-b bg-white shadow-sm">
                 <tr>
                   <th className="min-w-[160px] p-5 text-left text-xs font-bold tracking-wide whitespace-nowrap">
                     FLIGHT ID
@@ -144,6 +153,10 @@ export default function ActiveFlightsModal({ open, onClose, flights }: Props) {
 
                   <th className="min-w-[180px] p-5 text-left text-xs font-bold tracking-wide whitespace-nowrap">
                     MISSION
+                  </th>
+
+                  <th className="min-w-[140px] p-5 text-left text-xs font-bold tracking-wide whitespace-nowrap">
+                    UAV UNIT
                   </th>
 
                   <th className="min-w-[180px] p-5 text-left text-xs font-bold tracking-wide whitespace-nowrap">
@@ -197,9 +210,15 @@ export default function ActiveFlightsModal({ open, onClose, flights }: Props) {
                           <Plane className="h-5 w-5 text-green-600" />
                         </div>
 
-                        <span className="inline-flex items-center rounded-full bg-blue-100 px-4 py-1 text-xs font-semibold text-blue-700">
-                          {flight.flight_id}
-                        </span>
+                        <div>
+                          <p className="font-semibold text-slate-900">
+                            {flight.flight_id}
+                          </p>
+
+                          <p className="mt-1 text-xs text-slate-500">
+                            Flight Record
+                          </p>
+                        </div>
                       </div>
                     </td>
 
@@ -207,24 +226,55 @@ export default function ActiveFlightsModal({ open, onClose, flights }: Props) {
                     <td className="p-5 whitespace-nowrap">
                       <Link
                         href={`/missions/${flight.mission_name}`}
-                        className="inline-flex items-center rounded-full bg-purple-100 px-4 py-1 text-xs font-medium text-purple-700 transition hover:bg-purple-200"
+                        className="group"
                       >
-                        {flight.mission_name}
+                        <div className="max-w-[250px]">
+                          <p className="truncate font-semibold text-slate-900 group-hover:text-blue-600">
+                            {flight.mission_name}
+                          </p>
+
+                          <p className="mt-1 text-xs text-slate-500">Mission</p>
+                        </div>
                       </Link>
                     </td>
 
-                    {/* AMA */}
+                    {/* UAV UNIT */}
                     <td className="p-5 whitespace-nowrap">
-                      <span className="inline-flex items-center rounded-full bg-cyan-100 px-4 py-1 text-xs font-medium text-cyan-700">
-                        {flight.ama}
-                      </span>
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100">
+                          <Plane className="h-4 w-4 text-indigo-600" />
+                        </div>
+
+                        <div>
+                          <p className="font-semibold text-slate-900">
+                            {flight.uav_unit || "-"}
+                          </p>
+
+                          <p className="text-xs text-slate-500">UAV Unit</p>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* AMA */}
+                    <td className="p-5">
+                      <div>
+                        <p className="font-medium text-slate-800">
+                          {flight.ama}
+                        </p>
+
+                        <p className="text-xs text-slate-500">AMA Area</p>
+                      </div>
                     </td>
 
                     {/* ESTATE */}
-                    <td className="p-5 whitespace-nowrap">
-                      <span className="inline-flex items-center rounded-full bg-orange-100 px-4 py-1 text-xs font-medium text-orange-700">
-                        {flight.estate}
-                      </span>
+                    <td className="p-5">
+                      <div>
+                        <p className="font-medium text-slate-800">
+                          {flight.estate || "-"}
+                        </p>
+
+                        <p className="text-xs text-slate-500">Estate</p>
+                      </div>
                     </td>
 
                     {/* BATTERY */}
@@ -245,31 +295,50 @@ export default function ActiveFlightsModal({ open, onClose, flights }: Props) {
                     </td>
 
                     {/* DURATION */}
-                    <td className="p-5 whitespace-nowrap">
-                      <span className="inline-flex items-center rounded-full bg-yellow-100 px-4 py-1 text-xs font-medium text-yellow-700">
-                        {flight.duration_min} min
-                      </span>
+                    <td className="p-5">
+                      <div className="inline-flex items-center rounded-xl bg-yellow-50 px-3 py-2">
+                        <span className="font-semibold text-yellow-700">
+                          {flight.duration_min} min
+                        </span>
+                      </div>
                     </td>
 
                     {/* END BATTERY */}
-                    <td className="p-5 whitespace-nowrap">
-                      <span
-                        className={`inline-flex items-center rounded-full px-4 py-1 text-xs font-semibold ${getBatteryColor(
-                          flight.end_percent
-                        )}`}
-                      >
-                        {flight.end_percent}%
-                      </span>
+                    <td className="p-5">
+                      <div className="w-[90px]">
+                        <div className="mb-1 flex justify-between text-xs">
+                          <span>Battery</span>
+
+                          <span>{flight.end_percent}%</span>
+                        </div>
+
+                        <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                          <div
+                            className={`h-full ${
+                              flight.end_percent < 20
+                                ? "bg-red-500"
+                                : flight.end_percent < 40
+                                  ? "bg-yellow-500"
+                                  : "bg-green-500"
+                            }`}
+                            style={{
+                              width: `${flight.end_percent}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
                     </td>
 
                     {/* ACTION */}
                     <td className="p-5 whitespace-nowrap">
-                      <button
-                        onClick={() => setSelectedFlight(flight)}
-                        className="inline-flex h-[38px] items-center justify-center rounded-xl bg-blue-600 px-5 text-xs font-semibold text-white transition hover:bg-blue-700"
+                      <Link
+                        href={`/flights/${flight.flight_id}`}
+                        className="group inline-flex items-center gap-2 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-xs font-semibold text-blue-700 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-100 hover:shadow-md"
                       >
+                        <Eye className="h-4 w-4" />
                         View Detail
-                      </button>
+                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      </Link>
                     </td>
                   </tr>
                 ))}
