@@ -1,9 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import pool from "@/lib/db";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // ============================================
+    // SELECTED MONTH
+    // ============================================
+
+    const monthParam =
+      request.nextUrl.searchParams.get("month") ||
+      new Date().toISOString().slice(0, 7);
+
     // ============================================
     // TOTAL AMA
     // ============================================
@@ -19,7 +27,8 @@ export async function GET() {
     // PILOT SUMMARY
     // ============================================
 
-    const [rows]: any = await pool.query(`
+    const [rows]: any = await pool.query(
+      `
       SELECT
         p.id,
 
@@ -27,20 +36,18 @@ export async function GET() {
 
         p.photo_url,
 
-        -- TOTAL FLIGHTS BULAN INI
+        -- TOTAL FLIGHTS BULAN TERPILIH
         COUNT(
           DISTINCT CASE
-            WHEN YEAR(f.flight_date) = YEAR(CURDATE())
-            AND MONTH(f.flight_date) = MONTH(CURDATE())
+            WHEN DATE_FORMAT(f.flight_date, '%Y-%m') = ?
             THEN f.id
           END
         ) AS total_flights_this_month,
 
-        -- TOTAL MISSIONS BULAN INI
+        -- TOTAL MISSIONS BULAN TERPILIH
         COUNT(
           DISTINCT CASE
-            WHEN YEAR(f.flight_date) = YEAR(CURDATE())
-            AND MONTH(f.flight_date) = MONTH(CURDATE())
+            WHEN DATE_FORMAT(f.flight_date, '%Y-%m') = ?
             THEN f.mission_name
           END
         ) AS total_missions_this_month,
@@ -61,12 +68,11 @@ export async function GET() {
           0
         ) AS total_duration,
 
-        -- TOTAL DURASI BULAN INI
+        -- TOTAL DURASI BULAN TERPILIH
         COALESCE(
           SUM(
             CASE
-              WHEN YEAR(f.flight_date) = YEAR(CURDATE())
-              AND MONTH(f.flight_date) = MONTH(CURDATE())
+              WHEN DATE_FORMAT(f.flight_date, '%Y-%m') = ?
               THEN f.duration_min
               ELSE 0
             END
@@ -74,12 +80,11 @@ export async function GET() {
           0
         ) AS duration_this_month,
 
-        -- AVG DURATION BULAN INI
+        -- AVG DURATION BULAN TERPILIH
         ROUND(
           AVG(
             CASE
-              WHEN YEAR(f.flight_date) = YEAR(CURDATE())
-              AND MONTH(f.flight_date) = MONTH(CURDATE())
+              WHEN DATE_FORMAT(f.flight_date, '%Y-%m') = ?
               THEN f.duration_min
               ELSE NULL
             END
@@ -109,7 +114,9 @@ export async function GET() {
       ORDER BY
         duration_this_month DESC,
         p.pilot_name ASC
-    `);
+      `,
+      [monthParam, monthParam, monthParam, monthParam]
+    );
 
     // ============================================
     // FORMAT
@@ -124,11 +131,11 @@ export async function GET() {
 
       const hoursThisMonth = durationThisMonth / 60;
 
-      let status = "OPTIMAL";
+      let status = "NO ACTIVITY";
 
-      if (hoursThisMonth > 160) {
-        status = "NEED REST";
-      } else if (hoursThisMonth < 120) {
+      if (hoursThisMonth >= 21) {
+        status = "TARGET ACHIEVED";
+      } else if (hoursThisMonth > 0) {
         status = "UNDER TARGET";
       }
 
@@ -169,6 +176,12 @@ export async function GET() {
   } catch (error) {
     console.error(error);
 
-    return NextResponse.json([]);
+    return NextResponse.json(
+      {
+        period: null,
+        data: [],
+      },
+      { status: 500 }
+    );
   }
 }
