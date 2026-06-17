@@ -10,14 +10,70 @@ export async function POST(req: Request) {
 
     const flights = body.flights || [];
 
+    if (!Array.isArray(flights) || flights.length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "No flight data found in uploaded CSV.",
+        },
+        { status: 400 }
+      );
+    }
+
     await connection.beginTransaction();
 
-    for (const flight of flights) {
+    for (let index = 0; index < flights.length; index++) {
+      const flight = flights[index];
+
       // =====================================
-      // PILOT
+      // VALIDATION
       // =====================================
 
-      const [day, month, year] = flight.flight_date.split("/");
+      if (!flight.flight_id) {
+        throw new Error(`Row ${index + 1}: Flight ID is required.`);
+      }
+
+      if (!flight.flight_date) {
+        throw new Error(`Row ${index + 1}: Flight Date is required.`);
+      }
+
+      if (!flight.ama_id) {
+        throw new Error(`Row ${index + 1}: AMA has not been mapped.`);
+      }
+
+      if (!flight.mission_name) {
+        throw new Error(`Row ${index + 1}: Mission Name is required.`);
+      }
+
+      // =====================================
+      // DUPLICATE FLIGHT CHECK
+      // =====================================
+
+      const [existingFlight]: any = await connection.query(
+        `
+        SELECT id
+        FROM drone_flight_history
+        WHERE flight_id = ?
+        LIMIT 1
+        `,
+        [flight.flight_id]
+      );
+
+      if (existingFlight.length > 0) {
+        throw new Error(`Flight ID "${flight.flight_id}" already exists.`);
+      }
+
+      // =====================================
+      // DATE FORMAT
+      // =====================================
+
+      const [day, month, year] = String(flight.flight_date).split("/");
+
+      if (!day || !month || !year) {
+        throw new Error(
+          `Flight "${flight.flight_id}" has invalid date format. Expected DD/MM/YYYY.`
+        );
+      }
 
       const mysqlDate = `${year}-${month}-${day}`;
 
@@ -27,71 +83,55 @@ export async function POST(req: Request) {
 
       const [flightResult]: any = await connection.query(
         `
-          INSERT INTO drone_flight_history
-          (
-            flight_date,
-            ama_id,
-            estate,
-            flight_id,
-            mission_name,
-            uav_unit,
-            battery_id,
-            battery_id_2,
-            battery_color,
-            start_percent,
-            end_percent,
-            start_volt,
-            end_volt,
-            start_time,
-            end_time,
-            duration_min,
-            notes
-          )
-          VALUES
-          (
-            ?,?,?,?,?,?,?,?,?,?,
-            ?,?,?,?,?,?,?
-          )
-          `,
+        INSERT INTO drone_flight_history
+        (
+          flight_date,
+          ama_id,
+          estate,
+          flight_id,
+          mission_name,
+          uav_unit,
+          battery_id,
+          battery_id_2,
+          battery_color,
+          start_percent,
+          end_percent,
+          start_volt,
+          end_volt,
+          start_time,
+          end_time,
+          duration_min,
+          notes
+        )
+        VALUES
+        (
+          ?,?,?,?,?,?,?,?,?,?,
+          ?,?,?,?,?,?,?
+        )
+        `,
         [
           mysqlDate,
-
           flight.ama_id,
-
           flight.estate,
-
           flight.flight_id,
-
           flight.mission_name,
-
           flight.uav_unit,
-
           flight.battery_id,
-
           flight.battery_id_2,
-
           flight.battery_color,
-
           Number(flight.start_percent || 0),
-
           Number(flight.end_percent || 0),
-
           Number(flight.start_volt || 0),
-
           Number(flight.end_volt || 0),
-
           flight.start_time,
-
           flight.end_time,
-
           Number(flight.duration_min || 0),
-
           flight.notes || "",
         ]
       );
 
       // =====================================
-      // RELATION PILOT
+      // PILOT RELATION
       // =====================================
 
       const pilotNames = String(flight.pilot || "")
@@ -99,36 +139,47 @@ export async function POST(req: Request) {
         .map((pilot: string) => pilot.trim())
         .filter(Boolean);
 
+      if (pilotNames.length === 0) {
+        throw new Error(
+          `Flight "${flight.flight_id}" does not have any pilot assigned.`
+        );
+      }
+
       for (const pilotName of pilotNames) {
         let pilotId = flight.pilot_mapping?.[pilotName];
 
-        // create new pilot
+        // =====================================
+        // CREATE NEW PILOT
+        // =====================================
+
         if (!pilotId && flight.new_pilot_mapping?.[pilotName]) {
           const [newPilot]: any = await connection.query(
             `
-        INSERT INTO pilots
-        (
-          pilot_name
-        )
-        VALUES (?)
-        `,
+            INSERT INTO pilots
+            (
+              pilot_name
+            )
+            VALUES (?)
+            `,
             [flight.new_pilot_mapping[pilotName]]
           );
 
           pilotId = newPilot.insertId;
         }
 
-        if (!pilotId) continue;
+        if (!pilotId) {
+          throw new Error(`Pilot "${pilotName}" has not been mapped.`);
+        }
 
         await connection.query(
           `
-    INSERT INTO flight_pilots
-    (
-      flight_id,
-      pilot_id
-    )
-    VALUES (?, ?)
-    `,
+          INSERT INTO flight_pilots
+          (
+            flight_id,
+            pilot_id
+          )
+          VALUES (?, ?)
+          `,
           [flightResult.insertId, pilotId]
         );
       }
@@ -138,12 +189,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-
       total: flights.length,
-
-      message: "CSV uploaded successfully",
+      message: `${flights.length} flights uploaded successfully.`,
     });
-  } catch (error) {
+  } catch (error: any) {
     await connection.rollback();
 
     console.error(error);
@@ -152,10 +201,13 @@ export async function POST(req: Request) {
       {
         success: false,
 
-        message: "Failed upload CSV",
+        message:
+          error?.message ||
+          error?.sqlMessage ||
+          "Unexpected server error occurred.",
       },
       {
-        status: 500,
+        status: 400,
       }
     );
   } finally {

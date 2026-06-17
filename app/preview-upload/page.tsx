@@ -107,6 +107,14 @@ export default function PreviewUploadPage() {
   const [amaMapping, setAmaMapping] = useState<Record<string, any>>({});
   const [expandedAma, setExpandedAma] = useState<string | null>(null);
 
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const [modalType, setModalType] = useState<"success" | "error">("success");
+
+  const [modalTitle, setModalTitle] = useState("");
+
+  const [modalMessage, setModalMessage] = useState("");
+
   // =====================================================
   // LOAD CSV
   // =====================================================
@@ -220,15 +228,27 @@ export default function PreviewUploadPage() {
         throw new Error(result.message);
       }
 
-      alert(result.message || "Upload Success");
+      setModalType("success");
+
+      setModalTitle("Upload Successful");
+
+      setModalMessage(result.message || "CSV uploaded successfully.");
+
+      setModalOpen(true);
 
       localStorage.removeItem("csv-preview");
-
-      router.push("/");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
 
-      alert("Upload Failed");
+      setModalType("error");
+
+      setModalTitle("Upload Failed");
+
+      setModalMessage(
+        error?.message || "Unexpected error occurred while uploading."
+      );
+
+      setModalOpen(true);
     } finally {
       setLoading(false);
     }
@@ -741,6 +761,50 @@ export default function PreviewUploadPage() {
           </div>
         </div>
       </div>
+      {modalOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl">
+            <div className="flex items-start gap-4">
+              <div
+                className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
+                  modalType === "success" ? "bg-green-100" : "bg-red-100"
+                }`}
+              >
+                <AlertCircle
+                  className={`h-6 w-6 ${
+                    modalType === "success" ? "text-green-600" : "text-red-600"
+                  }`}
+                />
+              </div>
+
+              <div className="flex-1">
+                <h2 className="text-xl font-bold">{modalTitle}</h2>
+
+                <p className="mt-2 text-sm text-gray-500">{modalMessage}</p>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setModalOpen(false);
+
+                  if (modalType === "success") {
+                    router.push("/");
+                  }
+                }}
+                className={`rounded-2xl px-5 py-3 font-semibold text-white ${
+                  modalType === "success"
+                    ? "bg-green-600 hover:bg-green-700"
+                    : "bg-red-600 hover:bg-red-700"
+                }`}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
