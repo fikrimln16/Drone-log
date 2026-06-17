@@ -10,11 +10,15 @@ import { Download, FileSpreadsheet, Upload, X } from "lucide-react";
 type CSVRow = {
   flight_date: string;
 
+  ama: string;
+
+  mission_name: string;
+
   estate: string;
 
   pilot: string;
 
-  flight_id: string;
+  uav_unit: string;
 
   battery_id: string;
 
@@ -60,9 +64,11 @@ export default function UploadCSVModal({ open, onClose }: Props) {
     // HEADERS
     const headers = [
       "flight_date",
+      "ama",
+      "mission_name",
       "estate",
       "pilot",
-      "flight_id",
+      "uav_unit",
       "battery_id",
       "battery_id_2",
       "battery_color",
@@ -79,57 +85,43 @@ export default function UploadCSVModal({ open, onClose }: Props) {
     // SAMPLE ROWS
     const rows = [
       [
-        "2026-07-01",
-        "Estate Sierra",
-        "ICAPY",
-        "FLY101",
-        "BAT101",
-        "BAT102",
-        "Blue",
+        "07/02/2026",
+        "CENGAL",
+        "MISI6_CENGAL_SPLIT2",
+        "-",
+        "Theo_Rizki_Afifah",
+        "W1",
+        "4525A",
+        "4525B",
+        "UNGU",
         "100",
-        "42",
-        "25.40",
-        "22.20",
-        "07:15",
-        "07:58",
-        "43",
-        "Morning thermal inspection",
+        "25",
+        "32.44",
+        "28.54",
+        "10:17",
+        "10:48",
+        "31",
+        "",
       ],
 
       [
-        "2026-07-01",
-        "Estate Tango",
-        "NANDA",
-        "FLY102",
-        "BAT103",
-        "BAT104",
-        "Black",
-        "98",
+        "07/02/2026",
+        "CENGAL",
+        "MISI6_CENGAL_SPLIT2",
+        "-",
+        "Theo_Rizki_Afifah",
+        "W1",
+        "6981A",
+        "6981B",
+        "KUNING",
+        "100",
+        "32",
+        "32.53",
+        "28.54",
+        "10:51",
+        "11:28",
         "37",
-        "25.20",
-        "21.90",
-        "08:10",
-        "08:49",
-        "39",
-        "Boundary area monitoring",
-      ],
-
-      [
-        "2026-07-02",
-        "Estate Victor",
-        "RAHMAN",
-        "FLY103",
-        "BAT105",
-        "BAT106",
-        "Green",
-        "100",
-        "35",
-        "25.50",
-        "21.80",
-        "09:00",
-        "09:44",
-        "44",
-        "Tree density mapping",
+        "",
       ],
     ];
 
@@ -294,7 +286,7 @@ export default function UploadCSVModal({ open, onClose }: Props) {
             </div>
 
             <div className="rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700">
-              18 Columns
+              17 Columns
             </div>
           </div>
 
@@ -305,7 +297,6 @@ export default function UploadCSVModal({ open, onClose }: Props) {
               "ama",
               "mission_name",
               "estate",
-              "flight_id",
               "pilot",
               "uav_unit",
               "battery_id",
@@ -334,7 +325,12 @@ export default function UploadCSVModal({ open, onClose }: Props) {
           <h3 className="font-bold text-yellow-800">Important Notes</h3>
 
           <ul className="mt-3 space-y-2 text-sm text-yellow-700">
-            <li>• Flight ID must be unique (example: FLT-A101, UAV-D405).</li>
+            <li>
+              • Flight ID is generated automatically by the system during
+              upload.
+            </li>
+
+            <li>• Generated Flight ID example: C-MISI6_C_S2-20260207-001</li>
 
             <li>• Mission Name will be imported exactly as written in CSV.</li>
 
