@@ -584,25 +584,35 @@ export default function PilotSummaryTable() {
                         {pilot.total_hours_this_month} hr
                       </h1>
 
-                      <div className="mt-2 w-[120px]">
+                      <div className="mt-2 w-[140px]">
                         <div className="h-2 overflow-hidden rounded-full bg-slate-100">
                           <div
-                            className={`h-full rounded-full ${
-                              totalHours > 21 ? "bg-red-500" : "bg-cyan-500"
+                            className={`h-full rounded-full transition-all ${
+                              monthHours >= 21
+                                ? "bg-green-500"
+                                : monthHours >= 15
+                                  ? "bg-cyan-500"
+                                  : monthHours > 0
+                                    ? "bg-amber-500"
+                                    : "bg-slate-300"
                             }`}
                             style={{
                               width: `${Math.min(
-                                (pilot.total_hours_this_month / 21) * 100,
+                                (monthHours / 21) * 100,
                                 100
                               )}%`,
                             }}
                           />
                         </div>
 
-                        {/* SCALE */}
                         <div className="mt-1 flex justify-between text-[10px] font-medium text-slate-400">
                           <span>0 hr</span>
                           <span>21 hr</span>
+                        </div>
+
+                        <div className="mt-1 text-center text-[10px] text-slate-500">
+                          {Math.min(Math.round((monthHours / 21) * 100), 100)}%
+                          of monthly target
                         </div>
                       </div>
                     </div>
