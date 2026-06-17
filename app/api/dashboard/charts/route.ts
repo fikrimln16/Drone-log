@@ -6,13 +6,18 @@ export async function GET() {
   try {
     // ACTIVITY CHART
     const [activityRows]: any = await pool.query(`
-      SELECT
-        DATE_FORMAT(flight_date, '%d %b') as day,
-        COUNT(*) as flights
-      FROM drone_flight_history
-      GROUP BY flight_date
-      ORDER BY flight_date DESC
-      LIMIT 7
+      SELECT *
+      FROM (
+        SELECT
+          DATE_FORMAT(flight_date, '%d %b') AS day,
+          COUNT(*) AS flights,
+          flight_date
+        FROM drone_flight_history
+        GROUP BY flight_date
+        ORDER BY flight_date DESC
+        LIMIT 7
+      ) latest
+      ORDER BY latest.flight_date ASC
     `);
 
     // DURATION CHART
