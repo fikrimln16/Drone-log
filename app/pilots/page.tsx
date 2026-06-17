@@ -101,7 +101,9 @@ export default function PilotsPage() {
           <PilotCard
             title="Top Pilot"
             value={summary?.top_pilot?.pilot_name || "-"}
-            subtitle={`${summary?.top_pilot?.total_flights || 0} Flights`}
+            subtitle={`${summary?.top_pilot?.total_hours || 0} hr • ${
+              summary?.top_pilot?.total_flights || 0
+            } flights`}
             image={summary?.top_pilot?.photo_url}
             color="cyan"
           />

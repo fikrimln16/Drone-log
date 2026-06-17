@@ -47,23 +47,35 @@ export async function GET() {
     const [topPilotRows]: any = await pool.query(`
       SELECT
         p.id,
+
         p.pilot_name,
+
         p.photo_url,
 
-        COUNT(DISTINCT fp.flight_id)
-          AS total_flights
+        COUNT(
+          DISTINCT fp.flight_id
+        ) AS total_flights,
+
+        COALESCE(
+          SUM(f.duration_min),
+          0
+        ) AS total_duration
 
       FROM pilots p
 
       LEFT JOIN flight_pilots fp
         ON fp.pilot_id = p.id
 
+      LEFT JOIN drone_flight_history f
+        ON f.id = fp.flight_id
+
       GROUP BY
         p.id,
         p.pilot_name,
         p.photo_url
 
-      ORDER BY total_flights DESC
+      ORDER BY
+        total_duration DESC
 
       LIMIT 1
     `);
@@ -135,7 +147,15 @@ export async function GET() {
         1
       ),
 
-      top_pilot: topPilotRows[0] || null,
+      top_pilot: topPilotRows[0]
+        ? {
+            ...topPilotRows[0],
+
+            total_hours: (
+              Number(topPilotRows[0].total_duration || 0) / 60
+            ).toFixed(1),
+          }
+        : null,
 
       flight_hours_leader: flightHoursLeaderRows[0] || null,
 

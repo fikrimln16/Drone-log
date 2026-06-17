@@ -55,7 +55,6 @@ type CSVRow = {
   ama: string;
   mission_name: string;
   estate: string;
-  flight_id: string;
   pilot: string;
   uav_unit: string;
   battery_id: string;
@@ -163,7 +162,7 @@ export default function PreviewUploadPage() {
 
   const invalidRows = useMemo(() => {
     return rows.filter(
-      (row) => !row.flight_date || !row.flight_id || !row.battery_id
+      (row) => !row.flight_date || !row.battery_id || !row.mission_name
     );
   }, [rows]);
 
@@ -189,19 +188,16 @@ export default function PreviewUploadPage() {
       setLoading(true);
 
       const payload = rows.map((item) => {
-        groupedAma.some((group: any) => !amaMapping[group.ama]);
         const selectedAma = amaMapping[item.ama];
-
-        const amaId = selectedAma?.id;
 
         return {
           ...item,
 
           ama_id: selectedAma?.id,
 
-          latitude: selectedAma?.latitude,
+          latitude: selectedAma?.lat,
 
-          longitude: selectedAma?.longitude,
+          longitude: selectedAma?.lng,
 
           pilot_mapping: pilotMapping,
 
@@ -237,6 +233,8 @@ export default function PreviewUploadPage() {
       setModalOpen(true);
 
       localStorage.removeItem("csv-preview");
+
+      setRows([]);
     } catch (error: any) {
       console.error(error);
 
@@ -326,7 +324,11 @@ export default function PreviewUploadPage() {
   );
 
   const disableUpload =
-    invalidRows.length > 0 || loading || hasUnmappedPilot || hasUnmappedAma;
+    rows.length === 0 ||
+    invalidRows.length > 0 ||
+    loading ||
+    hasUnmappedPilot ||
+    hasUnmappedAma;
 
   return (
     <div className="min-h-screen bg-[#f5f7fb]">
@@ -649,8 +651,7 @@ export default function PreviewUploadPage() {
                           <tr className="border-b bg-gray-50">
                             <th className="px-4 py-3 text-left">Mission</th>
 
-                            <th className="px-4 py-3 text-left">Flight</th>
-
+                            <th className="px-4 py-3 text-left">Sequence</th>
                             <th className="px-4 py-3 text-left">Pilot</th>
 
                             <th className="px-4 py-3 text-left">UAV</th>
@@ -664,7 +665,9 @@ export default function PreviewUploadPage() {
                             <tr key={index} className="border-b">
                               <td className="px-4 py-3">{row.mission_name}</td>
 
-                              <td className="px-4 py-3">{row.flight_id}</td>
+                              <td className="px-4 py-3 font-medium">
+                                #{index + 1}
+                              </td>
 
                               <td className="px-4 py-3">{row.pilot}</td>
 
@@ -749,6 +752,32 @@ export default function PreviewUploadPage() {
             </div>
           </div>
           <div className="sticky bottom-6 z-50 flex justify-end">
+            <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
+              <h3 className="font-semibold text-blue-800">
+                Auto Generated Flight ID
+              </h3>
+
+              <p className="mt-1 text-sm text-blue-700">
+                Flight IDs are generated automatically by the system during
+                upload. You do not need to include a flight_id column in the CSV
+                file.
+              </p>
+            </div>
+            {hasUnmappedAma && (
+              <div className="rounded-2xl border border-orange-200 bg-orange-50 p-4">
+                <p className="font-medium text-orange-700">
+                  Some AMA locations have not been mapped.
+                </p>
+              </div>
+            )}
+
+            {hasUnmappedPilot && (
+              <div className="rounded-2xl border border-orange-200 bg-orange-50 p-4">
+                <p className="font-medium text-orange-700">
+                  Some pilots have not been mapped.
+                </p>
+              </div>
+            )}
             <button
               // disabled={disableUpload}
               onClick={handleUpload}
@@ -790,7 +819,9 @@ export default function PreviewUploadPage() {
                   setModalOpen(false);
 
                   if (modalType === "success") {
-                    router.push("/");
+                    localStorage.removeItem("csv-preview");
+
+                    router.replace("/");
                   }
                 }}
                 className={`rounded-2xl px-5 py-3 font-semibold text-white ${

@@ -2,6 +2,70 @@ import pool from "@/lib/db";
 
 import { NextResponse } from "next/server";
 
+function generateAmaCode(amaName: string) {
+  return amaName
+    .trim()
+    .split(/\s+/)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase()
+    .substring(0, 3);
+}
+
+function generateMissionCode(missionName: string) {
+  const parts = missionName.trim().toUpperCase().split("_").filter(Boolean);
+
+  if (parts.length === 0) {
+    return "MISSION";
+  }
+
+  const firstPart = parts[0];
+
+  const rest = parts
+    .slice(1)
+    .map((part) => {
+      const match = part.match(/^([A-Z])(?:.*?)(\d+)?$/);
+
+      if (!match) {
+        return part[0];
+      }
+
+      return `${match[1]}${match[2] || ""}`;
+    })
+    .join("_");
+
+  return rest ? `${firstPart}_${rest}` : firstPart;
+}
+
+async function generateFlightId(
+  connection: any,
+  missionName: string,
+  amaName: string,
+  mysqlDate: string
+) {
+  const amaCode = generateAmaCode(amaName);
+
+  const missionCode = generateMissionCode(missionName);
+
+  const datePart = mysqlDate.replaceAll("-", "");
+
+  const [rows]: any = await connection.query(
+    `
+    SELECT COUNT(*) AS total
+    FROM drone_flight_history
+    WHERE flight_date = ?
+    `,
+    [mysqlDate]
+  );
+
+  const sequence = Number(rows[0]?.total || 0) + 1;
+
+  return `${amaCode}-${missionCode}-${datePart}-${String(sequence).padStart(
+    3,
+    "0"
+  )}`;
+}
+
 export async function POST(req: Request) {
   const connection = await pool.getConnection();
 
@@ -29,10 +93,6 @@ export async function POST(req: Request) {
       // VALIDATION
       // =====================================
 
-      if (!flight.flight_id) {
-        throw new Error(`Row ${index + 1}: Flight ID is required.`);
-      }
-
       if (!flight.flight_date) {
         throw new Error(`Row ${index + 1}: Flight Date is required.`);
       }
@@ -46,24 +106,6 @@ export async function POST(req: Request) {
       }
 
       // =====================================
-      // DUPLICATE FLIGHT CHECK
-      // =====================================
-
-      const [existingFlight]: any = await connection.query(
-        `
-        SELECT id
-        FROM drone_flight_history
-        WHERE flight_id = ?
-        LIMIT 1
-        `,
-        [flight.flight_id]
-      );
-
-      if (existingFlight.length > 0) {
-        throw new Error(`Flight ID "${flight.flight_id}" already exists.`);
-      }
-
-      // =====================================
       // DATE FORMAT
       // =====================================
 
@@ -71,11 +113,22 @@ export async function POST(req: Request) {
 
       if (!day || !month || !year) {
         throw new Error(
-          `Flight "${flight.flight_id}" has invalid date format. Expected DD/MM/YYYY.`
+          `Row ${index + 1}: Invalid date format. Expected DD/MM/YYYY.`
         );
       }
 
       const mysqlDate = `${year}-${month}-${day}`;
+
+      // =====================================
+      // AUTO GENERATE FLIGHT ID
+      // =====================================
+
+      const generatedFlightId = await generateFlightId(
+        connection,
+        flight.mission_name,
+        flight.ama || "UNKNOWN",
+        mysqlDate
+      );
 
       // =====================================
       // INSERT FLIGHT
@@ -111,21 +164,37 @@ export async function POST(req: Request) {
         `,
         [
           mysqlDate,
+
           flight.ama_id,
+
           flight.estate,
-          flight.flight_id,
+
+          generatedFlightId,
+
           flight.mission_name,
+
           flight.uav_unit,
+
           flight.battery_id,
+
           flight.battery_id_2,
+
           flight.battery_color,
+
           Number(flight.start_percent || 0),
+
           Number(flight.end_percent || 0),
+
           Number(flight.start_volt || 0),
+
           Number(flight.end_volt || 0),
+
           flight.start_time,
+
           flight.end_time,
+
           Number(flight.duration_min || 0),
+
           flight.notes || "",
         ]
       );
@@ -140,9 +209,7 @@ export async function POST(req: Request) {
         .filter(Boolean);
 
       if (pilotNames.length === 0) {
-        throw new Error(
-          `Flight "${flight.flight_id}" does not have any pilot assigned.`
-        );
+        throw new Error(`Row ${index + 1}: No pilot assigned.`);
       }
 
       for (const pilotName of pilotNames) {
@@ -189,7 +256,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
+
       total: flights.length,
+
       message: `${flights.length} flights uploaded successfully.`,
     });
   } catch (error: any) {
