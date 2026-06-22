@@ -10,6 +10,8 @@ import MapClickHandler from "../../maps/map-click-handler";
 
 import { toast } from "sonner";
 
+import FlyToLocation from "../../maps/fly-to-location";
+
 type Props = {
   open: boolean;
 
@@ -33,6 +35,42 @@ export default function AddAmaModal({ open, onClose, onSuccess }: Props) {
     actual_date: "",
   });
 
+  const [gettingLocation, setGettingLocation] = useState(false);
+
+  async function getCurrentLocation() {
+    setGettingLocation(true);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setForm((prev) => ({
+          ...prev,
+          latitude: position.coords.latitude.toFixed(6),
+          longitude: position.coords.longitude.toFixed(6),
+        }));
+
+        toast.success("Location detected");
+
+        setGettingLocation(false);
+      },
+
+      (error) => {
+        console.error({
+          code: error.code,
+          message: error.message,
+        });
+
+        toast.error(error.message);
+
+        setGettingLocation(false);
+      },
+
+      {
+        enableHighAccuracy: true,
+        timeout: 30000,
+        maximumAge: 60000,
+      }
+    );
+  }
   const [loading, setLoading] = useState(false);
 
   if (!open) return null;
@@ -220,7 +258,6 @@ export default function AddAmaModal({ open, onClose, onSuccess }: Props) {
                   className="h-[58px] w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm transition outline-none focus:border-cyan-500"
                 />
               </div>
-
               <div>
                 <label className="mb-2 block text-xs font-bold tracking-wide text-gray-500 uppercase">
                   Longitude
@@ -259,13 +296,25 @@ export default function AddAmaModal({ open, onClose, onSuccess }: Props) {
               <button
                 type="button"
                 onClick={() => {
-                  navigator.geolocation.getCurrentPosition((position) => {
-                    setForm({
-                      ...form,
-                      latitude: position.coords.latitude.toFixed(6),
-                      longitude: position.coords.longitude.toFixed(6),
-                    });
-                  });
+                  navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                      setForm((prev) => ({
+                        ...prev,
+
+                        latitude: position.coords.latitude.toFixed(6),
+
+                        longitude: position.coords.longitude.toFixed(6),
+                      }));
+                    },
+                    (error) => {
+                      console.error(error);
+                    },
+                    {
+                      enableHighAccuracy: true,
+                      timeout: 30000,
+                      maximumAge: 0,
+                    }
+                  );
                 }}
                 className="rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-700 hover:bg-cyan-100"
               >
@@ -332,9 +381,16 @@ export default function AddAmaModal({ open, onClose, onSuccess }: Props) {
               />
 
               {form.latitude && form.longitude && (
-                <Marker
-                  position={[Number(form.latitude), Number(form.longitude)]}
-                />
+                <>
+                  <Marker
+                    position={[Number(form.latitude), Number(form.longitude)]}
+                  />
+
+                  <FlyToLocation
+                    lat={Number(form.latitude)}
+                    lng={Number(form.longitude)}
+                  />
+                </>
               )}
             </MapContainer>
           </div>
