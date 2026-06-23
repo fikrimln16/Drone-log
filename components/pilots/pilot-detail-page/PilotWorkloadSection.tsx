@@ -7,7 +7,7 @@ type Props = {
 export default function PilotWorkloadSection({ summary }: Props) {
   const hours = Number(summary.total_hours_this_month) || 0;
 
-  const highLoad = hours >= 21;
+  const highLoad = hours >= 25;
 
   return (
     <div className="rounded-[32px] border bg-white p-6 shadow-sm">

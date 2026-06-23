@@ -28,7 +28,7 @@ export default function PilotAnalyticsModal({
   const [selectedFlight, setSelectedFlight] = useState<any>(null);
 
   function getStatus(duration: number) {
-    if (duration >= 21) {
+    if (duration >= 25) {
       return {
         label: "High Load",
 

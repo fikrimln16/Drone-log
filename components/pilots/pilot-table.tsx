@@ -150,7 +150,7 @@ export default function PilotTable({ pilots, loading }: Props) {
   }
 
   function getPerformance(monthHours: number) {
-    const target = 15;
+    const target = 21;
 
     if (monthHours >= target) {
       return {
@@ -170,7 +170,7 @@ export default function PilotTable({ pilots, loading }: Props) {
   }
 
   function getStatus(monthHours: number) {
-    if (monthHours >= 21) {
+    if (monthHours >= 25) {
       return {
         label: "Need Rest",
         subtitle: `${monthHours.toFixed(1)} hr this month`,

@@ -7,7 +7,7 @@ type Props = {
 export default function PilotPerformanceSection({ summary }: Props) {
   const current = Number(summary.total_hours_this_month) || 0;
 
-  const target = 15;
+  const target = 21;
 
   const percentage = Math.min((current / target) * 100, 100);
 
@@ -32,9 +32,9 @@ export default function PilotPerformanceSection({ summary }: Props) {
           {achieved ? "TARGET ACHIEVED" : "UNDER TARGET"}
         </div>
 
-        <h1 className="mt-5 text-3xl font-black">{current} / 15 hr</h1>
+        <h1 className="mt-5 text-3xl font-black">{current} / 21 hr</h1>
 
-        <p className="mt-1 text-slate-500">Target 15 hours per month</p>
+        <p className="mt-1 text-slate-500">Target 21 hours per month</p>
 
         <div className="mt-6 h-4 overflow-hidden rounded-full bg-slate-100">
           <div
