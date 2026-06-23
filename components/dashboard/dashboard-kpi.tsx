@@ -9,6 +9,11 @@ type Props = {
 };
 
 export default function DashboardKPI({ stats }: Props) {
+  const totalMinutes = Number(stats.total_duration || 0);
+
+  const hours = Math.floor(totalMinutes / 60);
+
+  const minutes = totalMinutes % 60;
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <StatsCard
@@ -31,9 +36,9 @@ export default function DashboardKPI({ stats }: Props) {
 
       <StatsCard
         title="Total Duration"
-        value={`${stats.total_duration || 0} min`}
+        value={`${hours} hr ${minutes} min`}
         trend={`${stats.duration_growth || 0}%`}
-        subtitle="vs last month"
+        subtitle={`${totalMinutes.toLocaleString()} total minutes`}
         icon={<Clock3 className="h-6 w-6 text-yellow-600" />}
         iconBg="bg-yellow-100"
       />

@@ -158,10 +158,7 @@ export default function DashboardCharts() {
       {/* UAV UTILIZATION */}
       {/* ===================================================== */}
 
-      <ChartCard
-        title="UAV Utilization"
-        subtitle="Total flight hours per UAV unit"
-      >
+      <ChartCard title="UAV Activity" subtitle="Total flights per UAV unit">
         <ResponsiveContainer width="100%" height={220}>
           <BarChart
             data={chartData.units}
@@ -200,10 +197,12 @@ export default function DashboardCharts() {
               }}
             />
 
-            <Tooltip formatter={(value) => [`${value} hr`, "Flight Hours"]} />
+            <Tooltip
+              formatter={(value) => [`${value} flights`, "Total Flights"]}
+            />
 
             <Bar
-              dataKey="hours"
+              dataKey="total_flights"
               radius={[0, 8, 8, 0]}
               fill="#22c55e"
               barSize={14}

@@ -63,10 +63,7 @@ export async function GET() {
       SELECT
         uav_unit AS unit,
 
-        ROUND(
-          SUM(duration_min) / 60,
-          1
-        ) AS hours
+        COUNT(*) AS total_flights
 
       FROM drone_flight_history
 
@@ -76,9 +73,9 @@ export async function GET() {
 
       GROUP BY uav_unit
 
-      ORDER BY hours DESC
+      ORDER BY total_flights DESC
 
-      LIMIT 10
+      LIMIT 10;
     `);
 
     // =====================================================
