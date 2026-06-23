@@ -14,32 +14,49 @@ import {
   YAxis,
 } from "recharts";
 
+type ChartData = {
+  activity: any[];
+  duration: any[];
+  units: any[];
+};
+
 export default function DashboardCharts() {
-  const [chartData, setChartData] = useState<any>({
+  const [chartData, setChartData] = useState<ChartData>({
     activity: [],
     duration: [],
-    totalFlight: [],
+    units: [],
   });
 
   useEffect(() => {
-    fetch("/api/dashboard/charts")
-      .then((res) => res.json())
-      .then((res) => {
-        setChartData(res);
-      });
+    fetchCharts();
   }, []);
+
+  async function fetchCharts() {
+    try {
+      const res = await fetch("/api/dashboard/charts");
+
+      const data = await res.json();
+
+      setChartData(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   return (
     <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
-      {/* CHART 1 */}
-      <ChartCard title="Flight Activity" subtitle="Weekly flight trends">
-        <ResponsiveContainer width="100%" height={180}>
+      {/* ===================================================== */}
+      {/* MONTHLY FLIGHT ACTIVITY */}
+      {/* ===================================================== */}
+
+      <ChartCard title="Flight Activity" subtitle="Monthly flight trends">
+        <ResponsiveContainer width="100%" height={220}>
           <AreaChart data={chartData.activity}>
             <defs>
               <linearGradient id="flightGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#2563eb" stopOpacity={0.25} />
+                <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.35} />
 
-                <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
               </linearGradient>
             </defs>
 
@@ -50,7 +67,7 @@ export default function DashboardCharts() {
             />
 
             <XAxis
-              dataKey="day"
+              dataKey="month"
               tickLine={false}
               axisLine={false}
               tick={{
@@ -68,13 +85,13 @@ export default function DashboardCharts() {
               }}
             />
 
-            <Tooltip />
+            <Tooltip formatter={(value) => [`${value} Flights`, "Activity"]} />
 
             <Area
               type="monotone"
               dataKey="flights"
-              stroke="#2563eb"
-              strokeWidth={2}
+              stroke="#06b6d4"
+              strokeWidth={3}
               fillOpacity={1}
               fill="url(#flightGradient)"
             />
@@ -82,14 +99,18 @@ export default function DashboardCharts() {
         </ResponsiveContainer>
       </ChartCard>
 
-      {/* CHART 2 */}
-      <ChartCard title="Mission Duration" subtitle="Duration per mission">
-        <ResponsiveContainer width="100%" height={180}>
+      {/* ===================================================== */}
+      {/* TOP MISSION DURATION */}
+      {/* ===================================================== */}
+
+      <ChartCard title="Mission Duration" subtitle="Top mission flight hours">
+        <ResponsiveContainer width="100%" height={220}>
           <BarChart
             data={chartData.duration}
             layout="vertical"
             margin={{
-              left: 10,
+              left: 20,
+              right: 10,
             }}
           >
             <CartesianGrid
@@ -111,7 +132,7 @@ export default function DashboardCharts() {
             <YAxis
               type="category"
               dataKey="mission"
-              width={90}
+              width={110}
               tickLine={false}
               axisLine={false}
               tick={{
@@ -121,26 +142,33 @@ export default function DashboardCharts() {
               }}
             />
 
-            <Tooltip />
+            <Tooltip formatter={(value) => [`${value} hr`, "Duration"]} />
 
             <Bar
               dataKey="duration"
               radius={[0, 8, 8, 0]}
               fill="#8b5cf6"
-              barSize={12}
+              barSize={14}
             />
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>
 
-      {/* CHART 3 */}
-      <ChartCard title="Total Flight" subtitle="Flight count per mission">
-        <ResponsiveContainer width="100%" height={180}>
+      {/* ===================================================== */}
+      {/* UAV UTILIZATION */}
+      {/* ===================================================== */}
+
+      <ChartCard
+        title="UAV Utilization"
+        subtitle="Total flight hours per UAV unit"
+      >
+        <ResponsiveContainer width="100%" height={220}>
           <BarChart
-            data={chartData.totalFlight}
+            data={chartData.units}
             layout="vertical"
             margin={{
-              left: 10,
+              left: 20,
+              right: 10,
             }}
           >
             <CartesianGrid
@@ -161,8 +189,8 @@ export default function DashboardCharts() {
 
             <YAxis
               type="category"
-              dataKey="mission"
-              width={90}
+              dataKey="unit"
+              width={110}
               tickLine={false}
               axisLine={false}
               tick={{
@@ -172,13 +200,13 @@ export default function DashboardCharts() {
               }}
             />
 
-            <Tooltip />
+            <Tooltip formatter={(value) => [`${value} hr`, "Flight Hours"]} />
 
             <Bar
-              dataKey="total"
+              dataKey="hours"
               radius={[0, 8, 8, 0]}
               fill="#22c55e"
-              barSize={12}
+              barSize={14}
             />
           </BarChart>
         </ResponsiveContainer>
@@ -187,14 +215,21 @@ export default function DashboardCharts() {
   );
 }
 
-function ChartCard({ title, subtitle, children }: any) {
+function ChartCard({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="rounded-[28px] border bg-white p-5 shadow-sm">
-      {/* HEADER */}
-      <div className="mb-4">
-        <h2 className="text-lg font-bold">{title}</h2>
+    <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="mb-5">
+        <h2 className="text-lg font-bold text-slate-900">{title}</h2>
 
-        <p className="text-xs text-gray-500">{subtitle}</p>
+        <p className="mt-1 text-xs text-slate-500">{subtitle}</p>
       </div>
 
       {children}
