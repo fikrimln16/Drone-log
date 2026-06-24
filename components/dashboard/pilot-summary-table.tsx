@@ -277,7 +277,7 @@ export default function PilotSummaryTable() {
   // =====================================================
 
   function getPerformance(monthHours: number) {
-    const target = 15;
+    const target = 21;
 
     if (monthHours >= target) {
       return {
@@ -299,7 +299,7 @@ export default function PilotSummaryTable() {
   }
 
   function getStatus(totalHours: number) {
-    if (totalHours > 15) {
+    if (totalHours > 21) {
       return {
         label: "High Load",
         subtitle: `${totalHours.toFixed(1)} hr logged`,
@@ -588,7 +588,7 @@ export default function PilotSummaryTable() {
                         <div className="h-2 overflow-hidden rounded-full bg-slate-100">
                           <div
                             className={`h-full rounded-full transition-all ${
-                              monthHours >= 15
+                              monthHours >= 21
                                 ? "bg-green-500"
                                 : monthHours >= 8
                                   ? "bg-cyan-500"
@@ -598,7 +598,7 @@ export default function PilotSummaryTable() {
                             }`}
                             style={{
                               width: `${Math.min(
-                                (monthHours / 15) * 100,
+                                (monthHours / 21) * 100,
                                 100
                               )}%`,
                             }}
@@ -607,11 +607,11 @@ export default function PilotSummaryTable() {
 
                         <div className="mt-1 flex justify-between text-[10px] font-medium text-slate-400">
                           <span>0 hr</span>
-                          <span>15 hr</span>
+                          <span>21 hr</span>
                         </div>
 
                         <div className="mt-1 text-center text-[10px] text-slate-500">
-                          {Math.min(Math.round((monthHours / 15) * 100), 100)}%
+                          {Math.min(Math.round((monthHours / 21) * 100), 100)}%
                           of monthly target
                         </div>
                       </div>
